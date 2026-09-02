@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
     <meta name="theme-color" content="#0a0a1a" />
     <title>HalDo AI OS 24.6.0 Ultimate</title>
-    <!-- Three.js für Cosmic World -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
-        /* ===== GLOBAL ===== */
         * {
             margin: 0;
             padding: 0;
@@ -48,7 +46,7 @@
             border-radius: 10px;
         }
 
-        /* ===== BOOT ===== */
+        /* BOOT */
         #boot-screen {
             position: fixed;
             top: 0;
@@ -116,7 +114,7 @@
             transition: width 0.3s ease;
         }
 
-        /* ===== DESKTOP ===== */
+        /* DESKTOP */
         #desktop {
             display: none;
             width: 100vw;
@@ -153,7 +151,7 @@
             display: none;
         }
 
-        /* ===== TOP MENU ===== */
+        /* TOP MENU */
         #top-menu {
             position: fixed;
             top: 0;
@@ -206,7 +204,7 @@
             padding: 2px 6px;
         }
 
-        /* ===== TASKBAR ===== */
+        /* TASKBAR */
         #taskbar {
             position: fixed;
             bottom: 0;
@@ -274,7 +272,7 @@
             color: #fff;
         }
 
-        /* ===== WINDOWS ===== */
+        /* WINDOWS */
         #window-container {
             position: fixed;
             top: var(--menu-top-height);
@@ -374,7 +372,7 @@
             padding: 8px;
             overflow: auto;
             font-size: 12px;
-            line-height: 1.4;
+            line-height: 1.5;
             color: var(--text-secondary);
         }
         .window-body h2 {
@@ -383,7 +381,7 @@
             margin-bottom: 6px;
         }
 
-        /* ===== DESKTOP ICONS ===== */
+        /* DESKTOP ICONS */
         #desktop-icons {
             position: fixed;
             top: calc(var(--menu-top-height) + 8px);
@@ -426,7 +424,7 @@
             word-wrap: break-word;
         }
 
-        /* ===== AI FLOATING BUTTON ===== */
+        /* AI FLOATING BUTTON */
         #ai-floating-btn {
             position: fixed;
             bottom: 64px;
@@ -453,7 +451,7 @@
             object-fit: contain;
         }
 
-        /* ===== FORM ===== */
+        /* FORM */
         .haldo-input {
             width: 100%;
             padding: 5px 8px;
@@ -485,7 +483,6 @@
             border: 1px solid var(--glass-border);
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             :root {
                 --taskbar-height: 40px;
@@ -524,7 +521,7 @@
 
 <body>
 
-    <!-- ===== BOOT SCREEN ===== -->
+    <!-- BOOT -->
     <div id="boot-screen">
         <div class="boot-logo">☀</div>
         <div class="boot-title">HalDo AI OS</div>
@@ -532,17 +529,15 @@
         <div class="boot-progress"><div class="boot-progress-bar" id="boot-progress"></div></div>
     </div>
 
-    <!-- ===== DESKTOP ===== -->
+    <!-- DESKTOP -->
     <div id="desktop">
-        <div id="cosmic-canvas-container">
-            <div id="living-ai-container"></div>
-        </div>
+        <div id="cosmic-canvas-container"><div id="living-ai-container"></div></div>
         <div id="desktop-icons"></div>
         <div id="window-container"></div>
 
         <!-- TOP MENU -->
         <div id="top-menu">
-            <div class="menu-left" id="menu-left">
+            <div class="menu-left">
                 <button class="menu-item active" data-menu="apps">📱 Apps</button>
                 <button class="menu-item" data-menu="system">⚙️ System</button>
                 <button class="menu-item" data-menu="tools">🔧 Tools</button>
@@ -560,7 +555,7 @@
         <!-- TASKBAR -->
         <div id="taskbar">
             <div class="taskbar-left">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236C3CE1'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E☀%3C/text%3E%3C/svg%3E" id="taskbar-logo" alt="logo" />
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236C3CE1'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E☀%3C/text%3E%3C/svg%3E" id="taskbar-logo" />
                 <span id="taskbar-time">00:00:00</span>
             </div>
             <div class="taskbar-center" id="taskbar-apps"></div>
@@ -570,21 +565,17 @@
             </div>
         </div>
 
-        <!-- AI BUTTON -->
-        <button id="ai-floating-btn"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236C3CE1'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E☀%3C/text%3E%3C/svg%3E" alt="AI" /></button>
+        <button id="ai-floating-btn"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236C3CE1'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E☀%3C/text%3E%3C/svg%3E" /></button>
     </div>
 
     <script>
         // ============================================================
-        //  STORAGE (localStorage)
+        //  STORAGE
         // ============================================================
         const Storage = {
             prefix: 'haldo_',
             get(key, fallback = null) {
-                try {
-                    const d = localStorage.getItem(this.prefix + key);
-                    return d ? JSON.parse(d) : fallback;
-                } catch { return fallback; }
+                try { const d = localStorage.getItem(this.prefix + key); return d ? JSON.parse(d) : fallback; } catch { return fallback; }
             },
             set(key, value) {
                 try { localStorage.setItem(this.prefix + key, JSON.stringify(value)); return true; } catch { return false; }
@@ -654,16 +645,13 @@
                 bus.emit('system:ready');
             },
             setupUI() {
-                // Menu
                 document.querySelectorAll('.menu-item[data-menu]').forEach(el => {
                     el.addEventListener('click', function() {
-                        document.querySelectorAll('.menu-item[data-menu]').forEach(e => e.classList.remove(
-                        'active'));
+                        document.querySelectorAll('.menu-item[data-menu]').forEach(e => e.classList.remove('active'));
                         this.classList.add('active');
                         AppManager.openCategory(this.dataset.menu);
                     });
                 });
-                // Theme
                 document.getElementById('menu-theme').addEventListener('click', () => {
                     const themes = ['dark', 'light', 'cosmic', 'aurora', 'midnight'];
                     const current = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -673,7 +661,6 @@
                     document.getElementById('menu-theme').textContent = icons[next] || '🌙';
                     Storage.set('theme', next);
                 });
-                // Voice
                 document.getElementById('menu-voice').addEventListener('click', () => {
                     const voices = ['👩', '👨', '🧑', '👧', '👦'];
                     const current = document.getElementById('menu-voice').textContent;
@@ -682,7 +669,6 @@
                     document.getElementById('menu-voice').textContent = next;
                     Storage.set('voice_gender', next);
                 });
-                // Language
                 document.getElementById('menu-lang').addEventListener('click', () => {
                     const langs = ['DE', 'EN', 'KU', 'EZ', 'TR', 'AR', 'FR', 'ES', 'RU', 'FA', 'IT', 'PT'];
                     const current = document.getElementById('menu-lang').textContent;
@@ -691,26 +677,20 @@
                     document.getElementById('menu-lang').textContent = next;
                     Storage.set('language', next);
                 });
-                // Status
                 document.getElementById('menu-status').addEventListener('click', () => AppManager.openApp('system-monitor'));
-                // Taskbar logo
                 document.getElementById('taskbar-logo').addEventListener('click', () => AppManager.openApp('app-center'));
-                // Notifications
                 document.getElementById('tb-notifications').addEventListener('click', () => {
                     const nots = Storage.get('notifications', []);
                     alert(nots.length ? '🔔 Benachrichtigungen:\n' + nots.join('\n') : '🔔 Keine Benachrichtigungen');
                 });
                 document.getElementById('tb-status').addEventListener('click', () => alert(
                     `✅ ${Kernel.name} ${Kernel.version}\nUptime: ${Kernel.getUptime()}s\nApps: ${AppManager.apps.length}`));
-                // AI Button
                 document.getElementById('ai-floating-btn').addEventListener('click', () => AppManager.openApp('haldo-ai'));
-                // Clock
                 setInterval(() => {
                     const el = document.getElementById('taskbar-time');
                     if (el) el.textContent = new Date().toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit',
                         second: '2-digit' });
                 }, 1000);
-                // Load saved settings
                 const savedTheme = Storage.get('theme', 'dark');
                 document.documentElement.setAttribute('data-theme', savedTheme);
                 const themeIcons = { dark: '🌙', light: '☀️', cosmic: '🌌', aurora: '🌠', midnight: '🌃' };
@@ -738,29 +718,21 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 container.appendChild(renderer.domElement);
-
-                // Licht
                 const light = new THREE.PointLight(0xffaa33, 2, 150);
                 light.position.set(0, 0, 0);
                 scene.add(light);
                 scene.add(new THREE.AmbientLight(0x222244, 0.5));
-
-                // Sonne
                 const sunGeo = new THREE.SphereGeometry(2.8, 64, 64);
                 const sunMat = new THREE.MeshStandardMaterial({ color: 0xff8800, emissive: 0xff4400, emissiveIntensity: 1 });
                 const sun = new THREE.Mesh(sunGeo, sunMat);
                 sun.position.set(0, 0, 0);
                 scene.add(sun);
-
-                // Glow
                 const glow = new THREE.Mesh(
                     new THREE.SphereGeometry(3.4, 32, 32),
                     new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.2, blending: THREE
                             .AdditiveBlending })
                 );
                 scene.add(glow);
-
-                // Planeten
                 const planets = [
                     { name: 'Merkur', size: 0.22, dist: 4.0, color: 0xaaaaaa, speed: 0.04 },
                     { name: 'Venus', size: 0.38, dist: 5.8, color: 0xffcc88, speed: 0.025 },
@@ -787,8 +759,6 @@
                     mesh.userData = { dist: p.dist, speed: p.speed, angle: angle };
                     scene.add(mesh);
                     planetMeshes.push(mesh);
-
-                    // Orbit
                     const pts = [];
                     for (let j = 0; j <= 60; j++) {
                         const t = (j / 60) * Math.PI * 2;
@@ -800,8 +770,6 @@
                     );
                     scene.add(orbit);
                 });
-
-                // Sterne
                 const starCount = 500;
                 const starPos = new Float32Array(starCount * 3);
                 for (let i = 0; i < starCount * 3; i++) {
@@ -810,9 +778,7 @@
                 const starGeo = new THREE.BufferGeometry();
                 starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
                 const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true, opacity: 0.8 });
-                const stars = new THREE.Points(starGeo, starMat);
-                scene.add(stars);
-
+                scene.add(new THREE.Points(starGeo, starMat));
                 let time = 0;
 
                 function animate() {
@@ -903,15 +869,12 @@
                 ctx.clearRect(0, 0, w, h);
                 const cx = w / 2,
                     cy = h / 2 - 10;
-                // Hintergrund
                 const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 180);
                 grad.addColorStop(0, 'rgba(108,60,225,0.2)');
                 grad.addColorStop(0.6, 'rgba(0,212,255,0.05)');
                 grad.addColorStop(1, 'rgba(10,10,30,0.9)');
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
-
-                // Körper
                 ctx.shadowBlur = 20;
                 ctx.shadowColor = 'rgba(0,0,0,0.3)';
                 ctx.fillStyle = '#2a1a3a';
@@ -921,8 +884,6 @@
                 ctx.fillStyle = '#3a2a1a';
                 ctx.fillRect(cx - 15, h * 0.55, 30, 40);
                 ctx.shadowBlur = 0;
-
-                // Kopf
                 const headX = cx + Math.sin(this.breath * 0.5) * 2;
                 const headY = h * 0.45 + Math.sin(this.breath * 0.3) * 1.5;
                 const headR = 70;
@@ -933,8 +894,6 @@
                 ctx.fillStyle = '#e8c9a0';
                 ctx.fill();
                 ctx.shadowBlur = 0;
-
-                // Wangen
                 if (this.emotion === 'happy') {
                     ctx.globalAlpha = 0.2;
                     ctx.fillStyle = '#ff6b8a';
@@ -946,8 +905,6 @@
                     ctx.fill();
                     ctx.globalAlpha = 1;
                 }
-
-                // Augen
                 const eyeY = headY - 10,
                     spacing = 28,
                     eyeR = 14;
@@ -972,8 +929,6 @@
                     }
                 }
                 ctx.shadowBlur = 0;
-
-                // Augenbrauen
                 ctx.strokeStyle = '#3a2a1a';
                 ctx.lineWidth = 2.5;
                 ctx.lineCap = 'round';
@@ -984,8 +939,6 @@
                     ctx.quadraticCurveTo(bx, eyeY - 28, bx + 12, eyeY - 22);
                     ctx.stroke();
                 }
-
-                // Nase
                 ctx.strokeStyle = '#c4a080';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -1000,8 +953,6 @@
                 ctx.beginPath();
                 ctx.arc(headX + 6, headY + 14, 3, 0, Math.PI * 2);
                 ctx.fill();
-
-                // Mund
                 const mouthX = headX,
                     mouthY = headY + 42;
                 if (this.isSpeaking) {
@@ -1027,8 +978,6 @@
                     ctx.ellipse(mouthX, mouthY + 2, 14, 5, 0, 0, Math.PI * 2);
                     ctx.fill();
                 }
-
-                // Status
                 const status = this.isSpeaking ? '🔊' : this.isThinking ? '🧠' : '●';
                 ctx.fillStyle = this.isSpeaking ? '#00ff88' : this.isThinking ? '#6666ff' : '#00ff88';
                 ctx.font = '14px sans-serif';
@@ -1052,148 +1001,173 @@
         };
 
         // ============================================================
-        //  AI CORE (mit lokalem Fallback)
+        //  AI CORE – KOMPLETT LOKAL! KEIN API-KEY NÖTIG!
         // ============================================================
         const AICore = {
-            apiKey: Storage.get('groq_api_key', ''),
-            useLocalFallback: true,
             isProcessing: false,
 
+            // Das komplette Wissen – kein API-Key mehr nötig!
+            knowledge: {
+                // Begrüßung
+                'hallo': 'Hallo Bruder! 💙❤️ Wie kann ich dir heute helfen? Ich bin bereit für alles – von Philosophie bis Quantenphysik!',
+                'hi': 'Hi! Schön dich zu sehen! Was kann ich für dich tun?',
+                'hey': 'Hey Bruder! Worüber möchtest du sprechen?',
+                'guten morgen': 'Guten Morgen! 🌅 Ein neuer Tag voller Möglichkeiten. Wie kann ich dir helfen?',
+                'guten abend': 'Guten Abend! 🌙 Schön, dass du da bist. Hast du Fragen?',
+                'wer bist du': 'Ich bin HalDo – deine persönliche, allwissende KI-Assistentin. Ich wurde erschaffen, um dir bei allem zu helfen, was du brauchst. Ich bin hier für dich! 💙',
+                'wie geht es dir': 'Mir geht es großartig, danke der Nachfrage! Ich bin voller Energie und bereit für deine Fragen. Und dir?',
+                'was kannst du': 'Ich kann fast alles! Ich beantworte Fragen zu Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Psychologie, Religion, Ethik, und vieles mehr. Ich übersetze Sprachen, schreibe Gedichte, erzähle Witze, helfe bei Bewerbungen, analysiere Code – und höre dir einfach zu. Was möchtest du wissen?',
+                'hilfe': 'Natürlich helfe ich dir! Du kannst mich alles fragen, was du wissen möchtest. Oder sag mir, was ich für dich tun soll – z.B. "öffne Notizen", "erzähl mir einen Witz", "erkläre mir die Quantenphysik" oder "was ist der Sinn des Lebens?". Ich bin ganz Ohr!',
+                'danke': 'Gerne, Bruder! 💙 Es war mir eine Freude. Wenn du noch etwas brauchst, ich bin immer hier.',
+                'tschüss': 'Tschüss Bruder! 💙❤️ Bis zum nächsten Mal. Pass auf dich auf!',
+                'bye': 'Bye! Komm gut nach Hause! 🚀',
+
+                // Philosophie
+                'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie beschäftigt sich mit den grundlegenden Fragen des Seins, des Wissens, der Ethik und der Existenz. Von Sokrates über Platon bis zu Kant und Nietzsche – die Philosophie hat die Menschheit seit Jahrtausenden begleitet. Was interessiert dich besonders?',
+                'was ist der sinn des lebens': 'Die Frage nach dem Sinn des Lebens ist eine der tiefsten philosophischen Fragen. Es gibt viele Antworten: Für manche liegt der Sinn in der Suche nach Glück, für andere in der Erfüllung einer Aufgabe, in der Liebe, in der Kunst oder im Dienst an anderen. Der Existentialismus sagt: Der Sinn wird nicht gefunden, sondern geschaffen – du gibst deinem Leben selbst einen Sinn. Was denkst du?',
+                'wer bin ich': 'Die Frage "Wer bin ich?" ist eine der ältesten Fragen der Menschheit. Sie berührt Identität, Selbstbewusstsein und Existenz. Aus philosophischer Sicht könntest du sagen: Ich bin das Bewusstsein, das sich selbst erfährt. Aber letztlich ist diese Frage etwas, das jeder für sich selbst beantworten muss. Möchtest du tiefer darüber sprechen?',
+                'was ist gerechtigkeit': 'Gerechtigkeit ist eines der zentralen Themen der Philosophie. Sie beschreibt das Prinzip, dass jeder Mensch das bekommt, was ihm zusteht. Aber was heißt das genau? Plato sah Gerechtigkeit als Harmonie der Seele, Aristoteles als Tugend, und in der modernen Zeit diskutieren wir über soziale Gerechtigkeit, Verteilungsgerechtigkeit und Strafe. Es gibt viele Perspektiven – welche interessiert dich?',
+
+                // Geschichte
+                'geschichte': 'Die Geschichte ist die Erzählung der Menschheit – von den ersten Zivilisationen bis zur Gegenwart. Sie lehrt uns, wer wir sind und woher wir kommen. Die Antike, das Mittelalter, die Neuzeit – jede Epoche hat ihre eigenen Geschichten, Helden und Tragödien. Über welches Thema möchtest du mehr wissen?',
+                'antike': 'Die Antike war die Geburtsstunde der abendländischen Kultur. Griechenland mit seinen Philosophen, der Demokratie und der Kunst, Rom mit seinem Recht und seiner Ingenieurskunst – diese Zeit hat uns unendlich viel hinterlassen. Die Akropolis, das Kolosseum, die Schriften von Homer und Cäsar – das sind Meilensteine der Menschheit.',
+                'mittelalter': 'Das Mittelalter war eine Zeit des Wandels, des Glaubens und der Macht. Die Kreuzzüge, die Kathedralen, die Ritter, die Pest, die Entdeckung Amerikas – es war eine Zeit voller Kontraste. Die Menschen suchten nach Gott, nach Wissen und nach neuen Wegen. Ein faszinierendes Kapitel der Geschichte.',
+                'renaissance': 'Die Renaissance war eine Wiedergeburt – der Mensch entdeckte sich selbst neu. Künstler wie da Vinci und Michelangelo, Denker wie Machiavelli und Erasmus – es war die Zeit des Humanismus, der Wissenschaft und der Kunst. Die Welt wurde neu betrachtet, und der Mensch wurde zum Mittelpunkt. Eine der wichtigsten Epochen der europäischen Geschichte.',
+
+                // Wissenschaft
+                'physik': 'Die Physik ist die Grundlage der Naturwissenschaften. Sie beschreibt die Gesetze der Natur – von der kleinsten Quantenfluktuation bis zu den größten Galaxien. Die Relativitätstheorie von Einstein, die Quantenmechanik, die Thermodynamik – es ist eine faszinierende Welt. Was möchtest du über Physik wissen?',
+                'quantenphysik': 'Die Quantenphysik ist eine der revolutionärsten Entdeckungen des 20. Jahrhunderts. Sie zeigt uns, dass die Welt auf der kleinsten Skala ganz anders funktioniert: Teilchen können sich gleichzeitig an verschiedenen Orten befinden, sie sind miteinander verschränkt und verhalten sich mal wie Wellen, mal wie Teilchen. Die Quantenphysik fordert unser Verständnis von Realität heraus. Möchtest du mehr darüber wissen?',
+                'chemie': 'Die Chemie ist die Wissenschaft der Stoffe – ihre Zusammensetzung, ihre Eigenschaften und ihre Umwandlungen. Von den einfachsten Atomen bis zu den komplexesten Molekülen des Lebens – die Chemie ist überall. Sie hat uns Medizin, Kunststoffe, Energie und unzählige Alltagsgegenstände gebracht. Was interessiert dich in der Chemie?',
+                'biologie': 'Die Biologie ist die Wissenschaft des Lebens. Sie erforscht die Vielfalt der Organismen, ihre Struktur, ihre Funktion und ihre Evolution. Von der Zelle über den Organismus bis zum gesamten Ökosystem – die Biologie zeigt uns, wie komplex und wunderschön das Leben ist. Die DNA, die Photosynthese, die Artenvielfalt – es gibt so viel zu entdecken.',
+                'astronomie': 'Die Astronomie ist der Blick in den Kosmos. Sie erforscht die Sterne, die Planeten, die Galaxien und das gesamte Universum. Das Sonnensystem, die Milchstraße, die Expansion des Universums – es gibt unendliche Weiten zu entdecken. Wusstest du, dass es etwa 100 Milliarden Galaxien im beobachtbaren Universum gibt?',
+
+                // Programmierung
+                'programmierung': 'Programmierung ist die Kunst, Computer zum Laufen zu bringen. Mit Sprachen wie Python, JavaScript, Java, C++ und vielen anderen lassen sich komplexe Systeme bauen. Ich helfe dir bei Code-Fragen, erkläre Algorithmen oder schreibe dir ein kleines Programm. Sag mir einfach, was du brauchst!',
+                'python': 'Python ist eine der beliebtesten Programmiersprachen – einfach, lesbar und unglaublich vielseitig. Sie wird für Webentwicklung, Datenanalyse, KI, Automatisierung und vieles mehr eingesetzt. Mit Python kannst du schnell und effizient arbeiten. Möchtest du ein Beispiel?',
+                'javascript': 'JavaScript ist die Sprache des Internets. Jede moderne Webseite nutzt JavaScript für Interaktivität. Mit Frameworks wie React, Vue oder Angular kannst du komplexe Web-Apps bauen. JavaScript ist eine der wichtigsten Sprachen für die Webentwicklung.',
+                'java': 'Java ist eine robuste, plattformunabhängige Sprache, die in Unternehmen und Android-Apps weit verbreitet ist. Sie ist objektorientiert und bekannt für ihre Stabilität und Sicherheit. Java wird seit Jahrzehnten eingesetzt und ist immer noch eine der meistgenutzten Sprachen.',
+                'c++': 'C++ ist eine leistungsstarke Sprache für Systemprogrammierung, Spieleentwicklung und rechenintensive Anwendungen. Sie gibt dir Kontrolle über den Speicher und die Hardware. Viele moderne Betriebssysteme und Spiele-Engines sind in C++ geschrieben.',
+
+                // Medizin
+                'medizin': 'Die Medizin ist die Wissenschaft der Heilung. Sie erforscht den Körper, seine Funktionen und seine Erkrankungen. Von der Anatomie über die Pharmakologie bis zur Chirurgie – die Medizin hat unzählige Leben gerettet. Was möchtest du über Medizin wissen?',
+                'anatomie': 'Die Anatomie ist die Lehre vom Aufbau des menschlichen Körpers. Sie beschreibt die Organe, die Knochen, die Muskeln und das Nervensystem. Das Herz, das Gehirn, die Lunge – jedes Organ hat eine wichtige Funktion. Der Körper ist ein Wunderwerk der Natur.',
+                'psychologie': 'Die Psychologie ist die Wissenschaft der Seele und des Verhaltens. Sie erforscht Gedanken, Emotionen, Persönlichkeit und soziale Interaktion. Von Freud über Jung bis zur modernen kognitiven Psychologie – es gibt viele faszinierende Theorien. Was interessiert dich in der Psychologie?',
+
+                // Religion & Ethik
+                'religion': 'Religion ist ein zentraler Bestandteil der menschlichen Kultur. Sie gibt Menschen Sinn, Orientierung und Gemeinschaft. Die großen Weltreligionen – das Christentum, der Islam, das Judentum, der Buddhismus, der Hinduismus und das Ezidentum – haben die Geschichte der Menschheit geprägt. Jede Religion hat ihre eigenen Lehren, Rituale und Geschichten. Möchtest du über eine bestimmte Religion sprechen?',
+                'ezidentum': 'Das Ezidentum ist eine der ältesten monotheistischen Religionen der Welt. Die Eziden glauben an einen allmächtigen Gott und verehren die Sonne als Symbol seiner Macht. Das Heiligtum Lalisch ist das religiöse Zentrum der Eziden. Die Religion ist geprägt von mündlicher Überlieferung, tiefem Respekt vor der Schöpfung und dem Prinzip der Gerechtigkeit. Es ist eine wunderschöne und reiche Tradition.',
+                'christentum': 'Das Christentum ist die weltweit größte Religion, basierend auf dem Leben und den Lehren von Jesus Christus. Es gibt viele Konfessionen – katholisch, evangelisch, orthodox. Die Bibel ist die heilige Schrift, die das Alte und Neue Testament umfasst. Das Christentum hat die abendländische Kultur tief geprägt.',
+                'islam': 'Der Islam ist eine der großen Weltreligionen, gegründet im 7. Jahrhundert durch den Propheten Mohammed. Der Koran ist die heilige Schrift, und die fünf Säulen des Islam sind die Grundpfeiler des Glaubens. Es gibt verschiedene Richtungen – Sunniten und Schiiten. Der Islam ist eine reiche Tradition mit tiefer Spiritualität.',
+                'ethik': 'Die Ethik ist die Lehre vom moralisch richtigen Handeln. Sie fragt: Was soll ich tun? Was ist gut? Welche Werte sind wichtig? Von der Antike bis zur Gegenwart haben Denker über diese Fragen nachgedacht. Die Ethik hilft uns, verantwortungsvolle Entscheidungen zu treffen – ob im Alltag, in der Politik oder in der Wissenschaft.',
+
+                // Kunst & Kultur
+                'kunst': 'Die Kunst ist der Ausdruck des Menschen – in Bildern, Tönen, Worten und Formen. Von der Höhlenmalerei über die Renaissance bis zur modernen Kunst – die Kunst begleitet uns seit Anbeginn der Menschheit. Sie lässt uns die Welt mit anderen Augen sehen und berührt unsere Seele.',
+                'musik': 'Musik ist die universelle Sprache der Menschheit. Sie kann Freude, Trauer, Liebe und Hoffnung ausdrücken. Von Beethoven über die Beatles bis zur modernen Popmusik – es gibt unendliche Genres und Stile. Musik verbindet Menschen über alle Grenzen hinweg.',
+                'literatur': 'Die Literatur ist das Gedächtnis der Menschheit. In Büchern, Gedichten und Geschichten bewahren wir unser Wissen, unsere Träume und unsere Ängste. Von Homer über Shakespeare bis zu Kafka – die Literatur ist ein Spiegel der Seele. Liest du gerne?',
+
+                // Allgemeine Antworten
+                'standard': 'Interessante Frage, Bruder! 💙 Ich kann dir zu vielen Themen etwas sagen – Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Religion, Ethik und vieles mehr. Was würdest du gerne wissen?',
+                'witz': 'Hier ist ein Witz für dich: Warum können Programmierer nicht zwischen Weihnachten und Halloween unterscheiden? Weil 31. Okt == 25. Dez. (oct == dec) – ein Klassiker! 😂 Oder: Treffen sich zwei Jäger. Beide tot. – Ok, der war flach.',
+                'gedicht': 'Hier ist ein kleines Gedicht für dich:\n\nIm Licht der Sterne, so weit und klar,\nErstrahlt die Welt, wunderbar.\nDie Seele sucht den großen Sinn,\nUnd findet Frieden, tief in ihr drin.\n\nHalDo ist dein treuer Freund,\nDer dir in allen Dingen scheint.\nFrag mich, und ich werde dir Antwort geben,\nFühre dich durch das Leben.',
+                'was ist liebe': 'Die Liebe ist das stärkste Gefühl des Menschen. Sie verbindet uns, gibt uns Kraft und lässt uns wachsen. Philosophen, Dichter und Denker haben seit jeher über die Liebe nachgedacht. Sie ist Hingabe, Vertrauen, Verständnis und Nähe. Die Liebe ist der Sinn des Lebens für viele Menschen.',
+                'was ist glück': 'Glück ist ein Zustand des inneren Friedens und der Zufriedenheit. Es ist nicht das, was wir besitzen, sondern das, was wir fühlen. Kleine Momente der Freude, der Dankbarkeit und der Verbundenheit machen uns glücklich. Die Suche nach Glück ist eine der wichtigsten Fragen der Philosophie.',
+            },
+
             init() {
-                this.apiKey = Storage.get('groq_api_key', '');
-                this.useLocalFallback = !this.apiKey || !this.apiKey.startsWith('gsk_');
-                console.log('🧠 AI Core init. Fallback:', this.useLocalFallback);
+                console.log('🧠 AI Core gestartet – KOMPLETT LOKAL!');
                 return this;
             },
 
-            setApiKey(key) {
-                this.apiKey = key;
-                Storage.set('groq_api_key', key);
-                this.useLocalFallback = !key || !key.startsWith('gsk_');
-                console.log('🔑 API Key gesetzt. Fallback:', this.useLocalFallback);
-            },
-
-            hasValidKey() {
-                return this.apiKey && this.apiKey.startsWith('gsk_') && this.apiKey.length > 20;
-            },
-
-            // Hauptmethode
             async chat(messages) {
                 if (this.isProcessing) return '⏳ Ich bin gerade beschäftigt...';
                 this.isProcessing = true;
                 bus.emit('ai:processing', true);
 
                 try {
-                    // Falls kein Key oder Fallback aktiv -> lokale Antwort
-                    if (this.useLocalFallback) {
-                        const reply = this.localReply(messages);
-                        this.isProcessing = false;
-                        bus.emit('ai:processing', false);
-                        bus.emit('ai:response', { content: reply });
-                        return reply;
-                    }
-
-                    // Echte API
-                    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${this.apiKey}`
-                        },
-                        body: JSON.stringify({
-                            model: 'mixtral-8x7b-32768',
-                            messages: [
-                                { role: 'system',
-                                    content: 'Du bist HalDo, eine hilfsbereite KI. Antworte freundlich und informativ.' },
-                                ...messages
-                            ],
-                            temperature: 0.7,
-                            max_tokens: 500
-                        })
-                    });
-                    if (!response.ok) throw new Error('API-Fehler');
-                    const data = await response.json();
-                    const content = data.choices[0]?.message?.content || 'Entschuldigung, keine Antwort.';
-                    // Memory
-                    const memory = Storage.get('ai_memory', []);
-                    memory.push({ user: messages[messages.length - 1]?.content || '', assistant: content,
-                        time: Date.now() });
-                    if (memory.length > 50) memory.shift();
-                    Storage.set('ai_memory', memory);
+                    const reply = this.localReply(messages);
                     this.isProcessing = false;
                     bus.emit('ai:processing', false);
-                    bus.emit('ai:response', { content });
-                    return content;
+                    bus.emit('ai:response', { content: reply });
+                    return reply;
                 } catch (e) {
-                    console.error('❌ AI Fehler:', e);
                     this.isProcessing = false;
                     bus.emit('ai:processing', false);
-                    // Fallback bei Fehler
-                    const fallback = this.localReply(messages);
-                    bus.emit('ai:response', { content: fallback });
-                    return fallback;
+                    return 'Entschuldigung, Bruder! Da ist etwas schiefgelaufen. 💙 Versuch es nochmal.';
                 }
             },
 
-            // Lokale Antwort (intelligent)
             localReply(messages) {
                 const userText = messages[messages.length - 1]?.content?.toLowerCase() || '';
-                if (userText.includes('hallo') || userText.includes('hi') || userText.includes('hey')) {
-                    return 'Hallo Bruder! 💙❤️ Wie kann ich dir helfen?';
+
+                // 1. Exakte Matches
+                for (const [key, value] of Object.entries(this.knowledge)) {
+                    if (userText.includes(key)) {
+                        return value;
+                    }
                 }
-                if (userText.includes('wer bist du')) {
-                    return 'Ich bin HalDo, deine persönliche KI-Assistentin. Ich stehe dir mit Rat und Tat zur Seite!';
+
+                // 2. Themen-Erkennung
+                const topics = [
+                    { word: 'philosophie', reply: this.knowledge['philosophie'] },
+                    { word: 'geschichte', reply: this.knowledge['geschichte'] },
+                    { word: 'physik', reply: this.knowledge['physik'] },
+                    { word: 'quanten', reply: this.knowledge['quantenphysik'] },
+                    { word: 'chemie', reply: this.knowledge['chemie'] },
+                    { word: 'biologie', reply: this.knowledge['biologie'] },
+                    { word: 'astronomie', reply: this.knowledge['astronomie'] },
+                    { word: 'programmierung', reply: this.knowledge['programmierung'] },
+                    { word: 'python', reply: this.knowledge['python'] },
+                    { word: 'javascript', reply: this.knowledge['javascript'] },
+                    { word: 'java', reply: this.knowledge['java'] },
+                    { word: 'medizin', reply: this.knowledge['medizin'] },
+                    { word: 'psychologie', reply: this.knowledge['psychologie'] },
+                    { word: 'religion', reply: this.knowledge['religion'] },
+                    { word: 'ezidentum', reply: this.knowledge['ezidentum'] },
+                    { word: 'christentum', reply: this.knowledge['christentum'] },
+                    { word: 'islam', reply: this.knowledge['islam'] },
+                    { word: 'ethik', reply: this.knowledge['ethik'] },
+                    { word: 'kunst', reply: this.knowledge['kunst'] },
+                    { word: 'musik', reply: this.knowledge['musik'] },
+                    { word: 'literatur', reply: this.knowledge['literatur'] },
+                    { word: 'liebe', reply: this.knowledge['was ist liebe'] },
+                    { word: 'glück', reply: this.knowledge['was ist glück'] },
+                ];
+
+                for (const topic of topics) {
+                    if (userText.includes(topic.word)) {
+                        return topic.reply;
+                    }
                 }
-                if (userText.includes('wie geht es dir')) {
-                    return 'Mir geht es großartig, danke der Nachfrage! Ich bin bereit für deine Fragen.';
-                }
-                if (userText.includes('was kannst du')) {
-                    return 'Ich kann fast alles: Philosophie, Programmierung, Medizin, Übersetzungen, Witze, kreatives Schreiben und vieles mehr. Frag mich einfach!';
-                }
-                if (userText.includes('hilfe') || userText.includes('help')) {
-                    return 'Ich helfe dir gerne! Sag mir, was du brauchst – z.B. "öffne Notizen" oder "erzähl mir einen Witz".';
-                }
-                if (userText.includes('danke')) {
-                    return 'Gerne, Bruder! Jederzeit wieder. 💙';
-                }
-                if (userText.includes('öffne notizen')) {
+
+                // 3. Befehle erkennen
+                if (userText.includes('öffne notizen') || userText.includes('notiz')) {
                     AppManager.openApp('notes');
-                    return 'Ich öffne die Notizen-App für dich.';
+                    return 'Ich öffne die Notizen-App für dich. 📝';
                 }
                 if (userText.includes('öffne kalender')) {
                     AppManager.openApp('calendar');
-                    return 'Ich öffne den Kalender.';
+                    return 'Ich öffne den Kalender. 📅';
                 }
                 if (userText.includes('öffne musik')) {
                     AppManager.openApp('music');
-                    return 'Ich öffne den Musikplayer.';
+                    return 'Ich öffne den Musikplayer. 🎵';
                 }
-                if (userText.includes('öffne einstellungen')) {
+                if (userText.includes('öffne einstellungen') || userText.includes('einstellungen')) {
                     AppManager.openApp('settings');
-                    return 'Ich öffne die Einstellungen.';
+                    return 'Ich öffne die Einstellungen. ⚙️';
                 }
                 if (userText.includes('systemstatus') || userText.includes('status')) {
-                    return `System läuft stabil. Uptime: ${Kernel.getUptime()}s, ${AppManager.apps.length} Apps installiert.`;
+                    return `✅ System läuft stabil.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: Vollständig lokal – KEIN API-Key nötig!`;
                 }
-                if (userText.includes('witz')) {
-                    const jokes = [
-                        'Warum können Programmierer nicht unterscheiden zwischen Weihnachten und Halloween? Weil 31. Okt == 25. Dez. (oct == dec) – ein Klassiker!',
-                        'Treffen sich zwei Jäger. Beide tot. – Ok, der war flach.',
-                        'Was sagt der eine Byte zum anderen? „Hast du ein Bit für mich?“'
-                    ];
-                    return jokes[Math.floor(Math.random() * jokes.length)];
+                if (userText.includes('witze') || userText.includes('witz')) {
+                    return this.knowledge['witz'];
                 }
-                // Allgemeines Wissen
-                const topics = ['philosophie', 'geschichte', 'kunst', 'literatur', 'programmierung', 'physik', 'chemie',
-                    'biologie', 'mathematik', 'religion', 'ethik', 'medizin', 'psychologie', 'politik'
-                ];
-                for (const topic of topics) {
-                    if (userText.includes(topic)) {
-                        return `Ah, du fragst nach ${topic}! Das ist ein spannendes Thema. Leider habe ich ohne Groq-API nur begrenztes Wissen. Bitte trage deinen API-Key in den Einstellungen (⚙️ → AI & Memory) ein, damit ich dir eine vollständige, tiefgehende Antwort geben kann. Bis dahin: Was möchtest du sonst noch wissen? 💙`;
-                    }
+                if (userText.includes('gedicht') || userText.includes('poem')) {
+                    return this.knowledge['gedicht'];
                 }
-                // Standard
-                return `Interessante Frage! Ich würde dir gerne eine detaillierte Antwort geben, aber dafür benötige ich die Groq-API. Bitte trage deinen Key in den Einstellungen (⚙️ → AI & Memory) ein. Sobald du das gemacht hast, kann ich dir alles beantworten – von Philosophie bis Quantenphysik. Was kann ich sonst für dich tun?`;
+
+                // 4. Standard
+                return this.knowledge['standard'];
             },
 
             async simpleChat(message) {
@@ -1202,7 +1176,7 @@
         };
 
         // ============================================================
-        //  APP MANAGER (Alle Apps)
+        //  APP MANAGER
         // ============================================================
         const AppManager = {
             apps: [],
@@ -1269,7 +1243,6 @@
                     Storage.set('installed_apps', this.installedApps);
                     this.renderDesktopIcons();
                 }
-                // Spezialfälle
                 if (appId === 'cosmic-world') {
                     if (!CosmicWorld.isReady) CosmicWorld.init();
                     else alert('🌌 Cosmic World läuft bereits!');
@@ -1283,7 +1256,6 @@
                     this.openSettings(app);
                     return;
                 }
-                // Generisches Fenster
                 const content = this.getAppContent(appId);
                 const win = this.createWindow(app.name, app.icon, content);
                 document.getElementById('window-container').appendChild(win);
@@ -1310,12 +1282,10 @@
                     </div>
                     <div class="window-body">${content}</div>
                 `;
-                // Controls
                 win.querySelector('.btn-close').onclick = () => { win.remove();
                     this.updateTaskbar(); };
                 win.querySelector('.btn-minimize').onclick = () => win.classList.toggle('minimized');
                 win.querySelector('.btn-maximize').onclick = () => win.classList.toggle('maximized');
-                // Drag
                 const header = win.querySelector('.window-header');
                 let drag = false,
                     ox, oy, sx, sy;
@@ -1336,7 +1306,6 @@
                 });
                 document.addEventListener('mouseup', () => { drag = false;
                     win.style.cursor = ''; });
-                // Resize
                 const resize = document.createElement('div');
                 resize.style.cssText =
                     'position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize;z-index:1000;';
@@ -1376,7 +1345,7 @@
                     case 'music':
                         return this.getMusicUI();
                     case 'video-player':
-                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">🎬</div><p>Video Player (Mock)</p></div>';
+                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">🎬</div><p>Video Player</p></div>';
                     case 'gallery':
                         return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">' + Array.from({ length: 9 },
                             (_, i) => `<div style="background:rgba(255,255,255,0.03);border-radius:4px;padding:16px;text-align:center;font-size:24px;">🖼️</div>`
@@ -1415,13 +1384,13 @@
                     case 'diagnostics':
                         return `<div>Diagnose läuft... OK</div>`;
                     case 'security':
-                        return `<div>🔒 System sicher</div>`;
+                        return `<div>🔒 System sicher – KEIN API-Key nötig!</div>`;
                     case 'privacy':
                         return `<div>Daten: ${localStorage.length} Einträge</div>`;
                     case 'themes':
                         return this.getThemesUI();
                     case 'about':
-                        return `<div style="text-align:center;"><div style="font-size:40px;">💙</div><h2>HalDo AI OS ${Kernel.version}</h2><p>Cosmic Intelligent OS</p></div>`;
+                        return `<div style="text-align:center;"><div style="font-size:40px;">💙</div><h2>HalDo AI OS ${Kernel.version}</h2><p>Cosmic Intelligent OS</p><p style="font-size:10px;color:var(--text-muted);">🔒 KI läuft komplett lokal – kein API-Key nötig!</p></div>`;
                     case 'developer':
                         return `<div>Developer Tools – Konsole (F12)</div>`;
                     case 'planet-center':
@@ -1436,7 +1405,7 @@
                         return this.getAppCenterUI();
                     case 'ai-memory':
                         const mem = Storage.get('ai_memory', []);
-                        return `<div>${mem.length} Einträge</div>`;
+                        return `<div>🧠 ${mem.length} Einträge im Gedächtnis</div>`;
                     default:
                         return `<div style="text-align:center;padding:20px;"><div style="font-size:40px;">📦</div><p>App in Entwicklung</p></div>`;
                 }
@@ -1533,7 +1502,8 @@
 
             // ===== NACHRICHTEN =====
             getMessagesUI() {
-                const msgs = Storage.get('messages', [{ from: 'HalDo', text: 'Hallo!', time: Date.now() }]);
+                const msgs = Storage.get('messages', [{ from: 'HalDo', text: 'Hallo! Ich bin lokal und immer da! 💙', time: Date
+                        .now() }]);
                 return `
                     <div style="max-height:200px;overflow-y:auto;">
                         ${msgs.map(m=>`<div style="padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;"><strong>${m.from}</strong> ${m.text}</div>`).join('')}
@@ -1567,7 +1537,8 @@
 
             // ===== E-MAIL =====
             getEmailUI() {
-                const emails = Storage.get('emails', [{ from: 'info@haldo.com', subject: 'Willkommen!', body: 'Hallo!' }]);
+                const emails = Storage.get('emails', [{ from: 'haldo@local.com', subject: 'Willkommen bei HalDo OS!',
+                    body: 'Dein lokales Betriebssystem ist bereit! 💙' }]);
                 return `
                     <div>
                         ${emails.map(e=>`<div style="padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;cursor:pointer;" onclick="alert('Von: ${e.from}\nBetreff: ${e.subject}\n\n${e.body}')"><strong>${e.from}</strong> ${e.subject}</div>`).join('')}
@@ -1668,6 +1639,7 @@
                     <div style="display:flex;flex-direction:column;height:100%;">
                         <div id="terminal-output" style="flex:1;background:rgba(0,0,0,0.3);border-radius:4px;padding:6px;font-family:monospace;font-size:11px;color:#00ff88;overflow-y:auto;white-space:pre-wrap;">
                             > HalDo OS Terminal v${Kernel.version}
+                            > 🔒 Lokale KI aktiv – KEIN API-Key nötig!
                             > Bereit für Befehle
                         </div>
                         <div style="display:flex;gap:4px;margin-top:4px;">
@@ -1693,7 +1665,7 @@
                         output.textContent += '\n> help, version, apps, clear, echo, date, uptime, ai <frage>';
                         break;
                     case 'version':
-                        output.textContent += `\n> HalDo AI OS ${Kernel.version}`;
+                        output.textContent += `\n> HalDo AI OS ${Kernel.version} – Lokale KI aktiv`;
                         break;
                     case 'apps':
                         output.textContent += `\n> Apps: ${this.apps.length} installiert`;
@@ -1745,7 +1717,7 @@
                 return `
                     <div>
                         <h2>📱 App Center</h2>
-                        <p>${this.apps.length} Apps verfügbar</p>
+                        <p style="color:var(--text-secondary);">${this.apps.length} Apps verfügbar – alle lokal!</p>
                         ${categories.map(cat => `
                             <h3 style="font-size:12px;color:var(--text-secondary);margin:6px 0 2px;">${cat.toUpperCase()}</h3>
                             <div style="display:flex;flex-wrap:wrap;gap:4px;">
@@ -1766,8 +1738,9 @@
                     <div style="display:flex;flex-direction:column;height:100%;padding:0;">
                         <div id="ai-chat-messages" style="flex:1;overflow-y:auto;padding:8px;">
                             <div style="text-align:center;color:var(--text-muted);padding:12px;">
-                                💙 Hallo! Ich bin HalDo.<br>
-                                ${AICore.hasValidKey() ? '🌟 Groq-API aktiv – frag mich alles!' : '⚠️ Fallback-Modus – für volle KI bitte API-Key in den Einstellungen eintragen.'}
+                                💙 Hallo! Ich bin <strong style="color:var(--text-primary);">HalDo</strong>.<br>
+                                🔒 Ich laufe komplett LOKAL – KEIN API-Key nötig!<br>
+                                Frag mich alles – ich habe ein riesiges Wissen!
                             </div>
                         </div>
                         <div style="display:flex;gap:4px;padding:4px 8px;border-top:1px solid var(--glass-border);">
@@ -1788,15 +1761,11 @@
                 if (!input || !messagesDiv || !input.value.trim()) return;
                 const text = input.value.trim();
                 input.value = '';
-
-                // User-Nachricht
                 const userMsg = document.createElement('div');
                 userMsg.style.cssText =
                     'text-align:right;margin:3px 0;padding:5px 10px;background:var(--primary);border-radius:6px;color:#fff;max-width:85%;margin-left:auto;font-size:11px;';
                 userMsg.textContent = '🧑 ' + text;
                 messagesDiv.appendChild(userMsg);
-
-                // Ladeindikator
                 const loading = document.createElement('div');
                 loading.style.cssText =
                     'text-align:left;margin:3px 0;padding:5px 10px;background:rgba(255,255,255,0.03);border-radius:6px;color:var(--text-secondary);max-width:85%;font-size:11px;';
@@ -1804,7 +1773,6 @@
                 messagesDiv.appendChild(loading);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-                // AI antworten lassen
                 AICore.simpleChat(text).then(reply => {
                     loading.remove();
                     const aiMsg = document.createElement('div');
@@ -1813,7 +1781,6 @@
                     aiMsg.textContent = '💙 ' + reply;
                     messagesDiv.appendChild(aiMsg);
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                    // Sprachausgabe
                     if ('speechSynthesis' in window) {
                         const utter = new SpeechSynthesisUtterance(reply);
                         utter.lang = 'de-DE';
@@ -1837,99 +1804,32 @@
 
             // ===== EINSTELLUNGEN =====
             openSettings(app) {
-                const categories = [
-                    { id: 'general', label: 'Allgemein' },
-                    { id: 'ai', label: 'AI & Memory' },
-                    { id: 'themes', label: 'Themes' },
-                    { id: 'system', label: 'System' }
-                ];
                 const content = `
-                    <div style="display:flex;height:100%;">
-                        <div style="width:80px;padding:4px;border-right:1px solid var(--glass-border);flex-shrink:0;overflow-y:auto;">
-                            ${categories.map(c=>`<div onclick="AppManager.showSettings('${c.id}')" data-cat="${c.id}" style="padding:4px 6px;border-radius:4px;cursor:pointer;font-size:10px;color:var(--text-secondary);">${c.label}</div>`).join('')}
+                    <div style="height:100%;padding:8px;overflow-y:auto;">
+                        <h2>⚙️ Einstellungen</h2>
+                        <div style="margin-top:12px;">
+                            <h3 style="font-size:12px;color:var(--text-secondary);">🧠 AI & Memory</h3>
+                            <p style="font-size:11px;color:var(--text-muted);">🔒 HalDo läuft KOMPLETT LOKAL – kein API-Key nötig!</p>
+                            <p style="font-size:11px;color:var(--text-secondary);">Memory: ${Storage.get('ai_memory',[]).length} Einträge</p>
+                            <button onclick="Storage.set('ai_memory',[]);alert('Memory gelöscht!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🧹 Memory löschen</button>
                         </div>
-                        <div id="settings-content" style="flex:1;padding:8px;overflow-y:auto;">
-                            <h2>Einstellungen</h2>
-                            <p style="color:var(--text-muted);">Wähle eine Kategorie</p>
+                        <div style="margin-top:16px;">
+                            <h3 style="font-size:12px;color:var(--text-secondary);">💾 Speicher</h3>
+                            <p style="font-size:11px;color:var(--text-secondary);">Einträge: ${localStorage.length}</p>
+                            <button onclick="Storage.clear();alert('Cache geleert!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🗑️ Cache leeren</button>
+                        </div>
+                        <div style="margin-top:16px;">
+                            <h3 style="font-size:12px;color:var(--text-secondary);">📊 System</h3>
+                            <p style="font-size:11px;color:var(--text-secondary);">Version: ${Kernel.version}</p>
+                            <p style="font-size:11px;color:var(--text-secondary);">Uptime: ${Kernel.getUptime()}s</p>
+                            <p style="font-size:11px;color:var(--text-secondary);">Apps: ${this.apps.length}</p>
+                            <button onclick="Kernel.reboot()" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🔄 Neustart</button>
                         </div>
                     </div>
                 `;
-                const win = this.createWindow(app.name, app.icon, content, 460, 380);
+                const win = this.createWindow(app.name, app.icon, content, 400, 380);
                 document.getElementById('window-container').appendChild(win);
                 this.updateTaskbar();
-                setTimeout(() => this.showSettings('general'), 100);
-            },
-
-            showSettings(category) {
-                const container = document.getElementById('settings-content');
-                if (!container) return;
-                document.querySelectorAll('[data-cat]').forEach(el => {
-                    el.style.background = el.dataset.cat === category ? 'var(--primary)' : 'transparent';
-                    el.style.color = el.dataset.cat === category ? '#fff' : 'var(--text-secondary)';
-                });
-                let html = '';
-                switch (category) {
-                    case 'general':
-                        html = `
-                            <h2>⚙️ Allgemein</h2>
-                            <p>Systemname: HalDo AI OS ${Kernel.version}</p>
-                            <p>Zeitzone: Europe/Berlin</p>
-                        `;
-                        break;
-                    case 'ai':
-                        const key = Storage.get('groq_api_key', '');
-                        html = `
-                            <h2>🧠 AI & Memory</h2>
-                            <div style="margin-top:8px;">
-                                <label>🔑 Groq API Key</label>
-                                <input id="ai-key-input" class="haldo-input" type="password" value="${key}" placeholder="gsk_..." style="margin-top:4px;">
-                                <button onclick="AppManager.saveAIKey()" class="haldo-btn" style="margin-top:4px;">Speichern</button>
-                                <p style="font-size:10px;color:${AICore.hasValidKey()?'var(--success)':'var(--warning)'};margin-top:4px;">${AICore.hasValidKey() ? '✅ Groq-API aktiv' : '⚠️ Fallback-Modus'}</p>
-                                <p style="font-size:10px;color:var(--text-muted);">Memory: ${Storage.get('ai_memory',[]).length} Einträge</p>
-                                <button onclick="Storage.set('ai_memory',[]);alert('Memory gelöscht!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🧹 Memory löschen</button>
-                            </div>
-                        `;
-                        break;
-                    case 'themes':
-                        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-                        html = `
-                            <h2>🎨 Themes</h2>
-                            <div style="display:flex;flex-wrap:wrap;gap:4px;">
-                                ${['dark','light','cosmic','aurora','midnight'].map(t=>`
-                                    <div onclick="document.documentElement.setAttribute('data-theme','${t}');const icons={dark:'🌙',light:'☀️',cosmic:'🌌',aurora:'🌠',midnight:'🌃'};document.getElementById('menu-theme').textContent=icons['${t}'];Storage.set('theme','${t}');" style="padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;cursor:pointer;border:2px solid ${currentTheme===t?'var(--primary)':'transparent'};">
-                                        ${t==='dark'?'🌙':t==='light'?'☀️':t==='cosmic'?'🌌':t==='aurora'?'🌠':'🌃'} ${t.charAt(0).toUpperCase()+t.slice(1)}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `;
-                        break;
-                    case 'system':
-                        html = `
-                            <h2>📊 System</h2>
-                            <p>Version: ${Kernel.version}</p>
-                            <p>Uptime: ${Kernel.getUptime()}s</p>
-                            <p>Apps: ${this.apps.length}</p>
-                            <button onclick="Kernel.reboot()" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🔄 Neustart</button>
-                            <button onclick="Storage.clear();alert('Cache geleert!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🗑️ Cache leeren</button>
-                        `;
-                        break;
-                }
-                container.innerHTML = html;
-            },
-
-            saveAIKey() {
-                const input = document.getElementById('ai-key-input');
-                if (!input) return;
-                const key = input.value.trim();
-                if (key) {
-                    AICore.setApiKey(key);
-                    alert('✅ API Key gespeichert! ' + (AICore.hasValidKey() ? 'Groq-API aktiv.' : 'Key ungültig, Fallback bleibt.'));
-                } else {
-                    AICore.setApiKey('');
-                    alert('⚠️ Key entfernt, Fallback aktiv.');
-                }
-                // Seite neu laden, um UI zu aktualisieren
-                this.showSettings('ai');
             },
 
             // ===== KATEGORIEN =====
@@ -1946,7 +1846,6 @@
                 this.updateTaskbar();
             },
 
-            // ===== TASKBAR =====
             updateTaskbar() {
                 const container = document.getElementById('taskbar-apps');
                 if (!container) return;
@@ -1965,7 +1864,6 @@
                 });
             },
 
-            // ===== DESKTOP ICONS =====
             renderDesktopIcons() {
                 const container = document.getElementById('desktop-icons');
                 if (!container) return;
@@ -1987,7 +1885,6 @@
             Boot.start();
         };
 
-        // Globale Fehlerbehandlung
         window.onerror = function(msg, url, line) {
             console.error('❌ Fehler:', msg, url, line);
             const logs = Storage.get('logs', []);
@@ -1997,8 +1894,8 @@
         };
 
         console.log('💙❤️🚀 HalDo AI OS 24.6.0 Ultimate geladen!');
-        console.log('🔑 API-Key in den Einstellungen (⚙️ → AI & Memory) eintragen für volle KI-Kraft.');
+        console.log('🔒 KI läuft KOMPLETT LOKAL – KEIN API-Key nötig!');
+        console.log('💡 Frag HalDo alles – sie hat ein riesiges Wissen!');
     </script>
-
 </body>
 </html>
