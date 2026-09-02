@@ -46,7 +46,7 @@
             border-radius: 10px;
         }
 
-        /* BOOT */
+        /* ===== BOOT SCREEN ===== */
         #boot-screen {
             position: fixed;
             top: 0;
@@ -60,11 +60,61 @@
             z-index: 9999;
             transition: opacity 0.8s ease;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
         #boot-screen.hidden {
             opacity: 0;
             pointer-events: none;
+        }
+        .boot-container {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        #boot-stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .boot-logo-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .boot-logo-ring {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 2px solid rgba(108, 60, 225, 0.15);
+            animation: ringSpin 8s linear infinite;
+        }
+        .boot-logo-ring::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--primary-light);
+        }
+        @keyframes ringSpin {
+            to {
+                transform: rotate(360deg);
+            }
         }
         .boot-logo {
             width: 80px;
@@ -74,18 +124,43 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-            animation: pulse 2s ease-in-out infinite;
+            animation: bootPulse 2s ease-in-out infinite;
             box-shadow: 0 0 60px rgba(108, 60, 225, 0.3);
+            z-index: 2;
+            position: relative;
+            font-size: 40px;
+            font-weight: 900;
+            color: #fff;
         }
-        @keyframes pulse {
+        @keyframes bootPulse {
             0%,
             100% {
                 transform: scale(1);
+                box-shadow: 0 0 60px rgba(108, 60, 225, 0.3);
             }
             50% {
-                transform: scale(1.05);
+                transform: scale(1.04);
                 box-shadow: 0 0 100px rgba(108, 60, 225, 0.6);
+            }
+        }
+        .boot-glow {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(108, 60, 225, 0.12), transparent 70%);
+            animation: glowPulse 3s ease-in-out infinite;
+            z-index: 0;
+        }
+        @keyframes glowPulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
             }
         }
         .boot-title {
@@ -94,11 +169,15 @@
             background: linear-gradient(135deg, var(--primary-light), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            z-index: 2;
         }
         .boot-status {
-            font-size: 14px;
+            font-size: 12px;
             color: var(--text-secondary);
             letter-spacing: 1px;
+            min-height: 20px;
+            z-index: 2;
         }
         .boot-progress {
             width: 240px;
@@ -106,6 +185,7 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
             overflow: hidden;
+            z-index: 2;
         }
         .boot-progress-bar {
             width: 0%;
@@ -113,8 +193,14 @@
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             transition: width 0.3s ease;
         }
+        .boot-version {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            z-index: 2;
+        }
 
-        /* DESKTOP */
+        /* ===== DESKTOP ===== */
         #desktop {
             display: none;
             width: 100vw;
@@ -129,7 +215,6 @@
             width: 100%;
             height: 100%;
             z-index: 0;
-            pointer-events: none;
         }
         #cosmic-canvas-container canvas {
             display: block;
@@ -141,8 +226,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 160px;
-            height: 160px;
+            width: 180px;
+            height: 180px;
             z-index: 10;
             pointer-events: none;
             border-radius: 50%;
@@ -150,8 +235,14 @@
             background: radial-gradient(circle, rgba(108, 60, 225, 0.15), transparent 70%);
             display: none;
         }
+        #living-ai-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 50%;
+            mix-blend-mode: screen;
+        }
 
-        /* TOP MENU */
+        /* ===== TOP MENU ===== */
         #top-menu {
             position: fixed;
             top: 0;
@@ -169,7 +260,7 @@
         }
         .menu-left {
             display: flex;
-            gap: 4px;
+            gap: 2px;
             overflow-x: auto;
             flex: 1;
         }
@@ -204,7 +295,7 @@
             padding: 2px 6px;
         }
 
-        /* TASKBAR */
+        /* ===== TASKBAR ===== */
         #taskbar {
             position: fixed;
             bottom: 0;
@@ -225,7 +316,13 @@
             height: 24px;
             border-radius: 6px;
             cursor: pointer;
-            object-fit: contain;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            font-size: 14px;
+            color: #fff;
+            font-weight: 900;
         }
         #taskbar-time {
             font-size: 11px;
@@ -272,7 +369,7 @@
             color: #fff;
         }
 
-        /* WINDOWS */
+        /* ===== WINDOWS ===== */
         #window-container {
             position: fixed;
             top: var(--menu-top-height);
@@ -380,8 +477,23 @@
             font-size: 14px;
             margin-bottom: 6px;
         }
+        .window-body textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: #fff;
+            padding: 6px;
+            font-family: inherit;
+            font-size: 12px;
+            resize: vertical;
+        }
+        .window-body textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
 
-        /* DESKTOP ICONS */
+        /* ===== DESKTOP ICONS ===== */
         #desktop-icons {
             position: fixed;
             top: calc(var(--menu-top-height) + 8px);
@@ -424,7 +536,7 @@
             word-wrap: break-word;
         }
 
-        /* AI FLOATING BUTTON */
+        /* ===== AI FLOATING BUTTON ===== */
         #ai-floating-btn {
             position: fixed;
             bottom: 64px;
@@ -440,18 +552,15 @@
             cursor: pointer;
             z-index: 50;
             border: none;
+            font-size: 18px;
+            color: #fff;
+            font-weight: 900;
         }
         #ai-floating-btn:hover {
             transform: scale(1.05);
         }
-        #ai-floating-btn img {
-            width: 22px;
-            height: 22px;
-            filter: brightness(0) invert(1);
-            object-fit: contain;
-        }
 
-        /* FORM */
+        /* ===== FORM ===== */
         .haldo-input {
             width: 100%;
             padding: 5px 8px;
@@ -483,6 +592,7 @@
             border: 1px solid var(--glass-border);
         }
 
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             :root {
                 --taskbar-height: 40px;
@@ -494,6 +604,19 @@
             }
             .boot-title {
                 font-size: 20px;
+            }
+            .boot-logo {
+                width: 60px;
+                height: 60px;
+                font-size: 30px;
+            }
+            .boot-logo-wrapper {
+                width: 90px;
+                height: 90px;
+            }
+            .boot-logo-ring {
+                width: 110px;
+                height: 110px;
             }
             .window {
                 min-width: 75vw;
@@ -509,11 +632,19 @@
             .desktop-icon .icon-label {
                 font-size: 8px;
             }
+            #living-ai-container {
+                width: 120px;
+                height: 120px;
+            }
         }
         @media (max-width: 480px) {
             .window {
                 min-width: 90vw;
                 min-height: 40vh;
+            }
+            #living-ai-container {
+                width: 90px;
+                height: 90px;
             }
         }
     </style>
@@ -521,17 +652,27 @@
 
 <body>
 
-    <!-- BOOT -->
+    <!-- ===== BOOT SCREEN ===== -->
     <div id="boot-screen">
-        <div class="boot-logo">☀</div>
-        <div class="boot-title">HalDo AI OS</div>
-        <div class="boot-status" id="boot-status">Initializing Cosmic Core...</div>
-        <div class="boot-progress"><div class="boot-progress-bar" id="boot-progress"></div></div>
+        <div id="boot-stars"></div>
+        <div class="boot-container">
+            <div class="boot-logo-wrapper">
+                <div class="boot-logo-ring"></div>
+                <div class="boot-logo" id="boot-logo">☀</div>
+                <div class="boot-glow"></div>
+            </div>
+            <h1 class="boot-title">HalDo AI OS</h1>
+            <p class="boot-status" id="boot-status">Initializing Cosmic Core...</p>
+            <div class="boot-progress"><div class="boot-progress-bar" id="boot-progress"></div></div>
+            <p class="boot-version">v24.6.0 Ultimate</p>
+        </div>
     </div>
 
-    <!-- DESKTOP -->
+    <!-- ===== DESKTOP ===== -->
     <div id="desktop">
-        <div id="cosmic-canvas-container"><div id="living-ai-container"></div></div>
+        <div id="cosmic-canvas-container">
+            <div id="living-ai-container"></div>
+        </div>
         <div id="desktop-icons"></div>
         <div id="window-container"></div>
 
@@ -542,6 +683,7 @@
                 <button class="menu-item" data-menu="system">⚙️ System</button>
                 <button class="menu-item" data-menu="tools">🔧 Tools</button>
                 <button class="menu-item" data-menu="media">🎬 Medien</button>
+                <button class="menu-item" data-menu="communication">💬 Kommunikation</button>
                 <button class="menu-item" data-menu="settings">⚙️ Einstellungen</button>
             </div>
             <div class="menu-right">
@@ -555,7 +697,7 @@
         <!-- TASKBAR -->
         <div id="taskbar">
             <div class="taskbar-left">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236C3CE1'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E☀%3C/text%3E%3C/svg%3E" id="taskbar-logo" />
+                <div id="taskbar-logo">☀</div>
                 <span id="taskbar-time">00:00:00</span>
             </div>
             <div class="taskbar-center" id="taskbar-apps"></div>
@@ -565,10 +707,17 @@
             </div>
         </div>
 
-        <button id="ai-floating-btn"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236C3CE1'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E☀%3C/text%3E%3C/svg%3E" /></button>
+        <!-- AI FLOATING BUTTON -->
+        <button id="ai-floating-btn">☀</button>
     </div>
 
     <script>
+        // ============================================================
+        //  ═══════════════════════════════════════════════════════════════
+        //  HALDO AI OS 24.6.0 ULTIMATE – DAS KOMPLETTE SYSTEM
+        //  ═══════════════════════════════════════════════════════════════
+        // ============================================================
+
         // ============================================================
         //  STORAGE
         // ============================================================
@@ -614,15 +763,41 @@
         };
 
         // ============================================================
-        //  BOOT
+        //  BOOT – mit Sternen
         // ============================================================
         const Boot = {
             statusEl: document.getElementById('boot-status'),
             progressBar: document.getElementById('boot-progress'),
+            starsContainer: document.getElementById('boot-stars'),
+
+            createStars() {
+                if (!this.starsContainer) return;
+                const count = 80;
+                for (let i = 0; i < count; i++) {
+                    const star = document.createElement('div');
+                    const size = Math.random() * 2.5 + 0.5;
+                    const x = Math.random() * 100;
+                    const y = Math.random() * 100;
+                    const delay = Math.random() * 3;
+                    const duration = 2 + Math.random() * 3;
+                    star.style.cssText =
+                        `position:absolute;width:${size}px;height:${size}px;background:white;border-radius:50%;left:${x}%;top:${y}%;opacity:0;animation:starFade ${duration}s ease-in-out ${delay}s infinite;box-shadow:0 0 ${size*2}px rgba(255,255,255,0.2);`;
+                    this.starsContainer.appendChild(star);
+                }
+                if (!document.getElementById('star-keyframes')) {
+                    const style = document.createElement('style');
+                    style.id = 'star-keyframes';
+                    style.textContent =
+                        `@keyframes starFade { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1); } }`;
+                    document.head.appendChild(style);
+                }
+            },
+
             async start() {
+                this.createStars();
                 const steps = [
-                    'Cosmic Core initializing...',
-                    'Loading Storage...',
+                    'Initializing Cosmic Core...',
+                    'Loading Kernel...',
                     'Loading AI Engine...',
                     'Loading Applications...',
                     'Loading Cosmic World...',
@@ -640,11 +815,13 @@
                 document.getElementById('desktop').style.display = 'block';
                 document.getElementById('ai-floating-btn').style.display = 'flex';
                 document.getElementById('living-ai-container').style.display = 'block';
-                setTimeout(() => LivingAI.init('living-ai-container'), 300);
+                setTimeout(() => LivingAI.init('living-ai-container'), 400);
                 this.setupUI();
                 bus.emit('system:ready');
             },
+
             setupUI() {
+                // Menu
                 document.querySelectorAll('.menu-item[data-menu]').forEach(el => {
                     el.addEventListener('click', function() {
                         document.querySelectorAll('.menu-item[data-menu]').forEach(e => e.classList.remove('active'));
@@ -652,6 +829,7 @@
                         AppManager.openCategory(this.dataset.menu);
                     });
                 });
+                // Theme
                 document.getElementById('menu-theme').addEventListener('click', () => {
                     const themes = ['dark', 'light', 'cosmic', 'aurora', 'midnight'];
                     const current = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -661,6 +839,7 @@
                     document.getElementById('menu-theme').textContent = icons[next] || '🌙';
                     Storage.set('theme', next);
                 });
+                // Voice
                 document.getElementById('menu-voice').addEventListener('click', () => {
                     const voices = ['👩', '👨', '🧑', '👧', '👦'];
                     const current = document.getElementById('menu-voice').textContent;
@@ -669,6 +848,7 @@
                     document.getElementById('menu-voice').textContent = next;
                     Storage.set('voice_gender', next);
                 });
+                // Language
                 document.getElementById('menu-lang').addEventListener('click', () => {
                     const langs = ['DE', 'EN', 'KU', 'EZ', 'TR', 'AR', 'FR', 'ES', 'RU', 'FA', 'IT', 'PT'];
                     const current = document.getElementById('menu-lang').textContent;
@@ -677,20 +857,26 @@
                     document.getElementById('menu-lang').textContent = next;
                     Storage.set('language', next);
                 });
+                // Status
                 document.getElementById('menu-status').addEventListener('click', () => AppManager.openApp('system-monitor'));
+                // Taskbar logo
                 document.getElementById('taskbar-logo').addEventListener('click', () => AppManager.openApp('app-center'));
+                // Notifications
                 document.getElementById('tb-notifications').addEventListener('click', () => {
                     const nots = Storage.get('notifications', []);
                     alert(nots.length ? '🔔 Benachrichtigungen:\n' + nots.join('\n') : '🔔 Keine Benachrichtigungen');
                 });
                 document.getElementById('tb-status').addEventListener('click', () => alert(
                     `✅ ${Kernel.name} ${Kernel.version}\nUptime: ${Kernel.getUptime()}s\nApps: ${AppManager.apps.length}`));
+                // AI Button
                 document.getElementById('ai-floating-btn').addEventListener('click', () => AppManager.openApp('haldo-ai'));
+                // Clock
                 setInterval(() => {
                     const el = document.getElementById('taskbar-time');
                     if (el) el.textContent = new Date().toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit',
                         second: '2-digit' });
                 }, 1000);
+                // Load saved settings
                 const savedTheme = Storage.get('theme', 'dark');
                 document.documentElement.setAttribute('data-theme', savedTheme);
                 const themeIcons = { dark: '🌙', light: '☀️', cosmic: '🌌', aurora: '🌠', midnight: '🌃' };
@@ -701,10 +887,17 @@
         };
 
         // ============================================================
-        //  COSMIC WORLD (3D)
+        //  COSMIC WORLD (3D) – 13 Planeten, Sonne mit Logo, interaktiv
         // ============================================================
         const CosmicWorld = {
             isReady: false,
+            scene: null,
+            camera: null,
+            renderer: null,
+            planetMeshes: [],
+            sunMesh: null,
+            sunGlow: null,
+
             init() {
                 console.log('🌌 Cosmic World init');
                 const container = document.getElementById('cosmic-canvas-container');
@@ -718,22 +911,72 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 container.appendChild(renderer.domElement);
-                const light = new THREE.PointLight(0xffaa33, 2, 150);
+                this.scene = scene;
+                this.camera = camera;
+                this.renderer = renderer;
+
+                // Licht
+                const light = new THREE.PointLight(0xffaa33, 2.5, 150);
                 light.position.set(0, 0, 0);
                 scene.add(light);
                 scene.add(new THREE.AmbientLight(0x222244, 0.5));
+
+                // SONNE mit Logo (☀)
                 const sunGeo = new THREE.SphereGeometry(2.8, 64, 64);
-                const sunMat = new THREE.MeshStandardMaterial({ color: 0xff8800, emissive: 0xff4400, emissiveIntensity: 1 });
+                const sunMat = new THREE.MeshStandardMaterial({
+                    color: 0xff8800,
+                    emissive: 0xff4400,
+                    emissiveIntensity: 1.0,
+                    roughness: 0.2,
+                    metalness: 0.0
+                });
                 const sun = new THREE.Mesh(sunGeo, sunMat);
                 sun.position.set(0, 0, 0);
+                sun.userData.isSun = true;
                 scene.add(sun);
+                this.sunMesh = sun;
+
+                // Glow
                 const glow = new THREE.Mesh(
                     new THREE.SphereGeometry(3.4, 32, 32),
-                    new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.2, blending: THREE
+                    new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.25, blending: THREE
                             .AdditiveBlending })
                 );
                 scene.add(glow);
-                const planets = [
+                this.sunGlow = glow;
+
+                // Äußerer Glow
+                const outer = new THREE.Mesh(
+                    new THREE.SphereGeometry(4.8, 32, 32),
+                    new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.06, blending: THREE
+                            .AdditiveBlending })
+                );
+                scene.add(outer);
+
+                // TEXTUR für Sonne (Logo als Textur)
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ff8800';
+                ctx.fillRect(0, 0, 512, 512);
+                ctx.fillStyle = '#ffcc66';
+                ctx.font = 'bold 200px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('☀', 256, 280);
+                ctx.font = 'bold 40px Inter, sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText('HALDO', 256, 440);
+                ctx.fillStyle = '#ffaa44';
+                ctx.font = '24px Inter, sans-serif';
+                ctx.fillText('AI CORE', 256, 490);
+                const texture = new THREE.CanvasTexture(canvas);
+                sun.material.map = texture;
+                sun.material.needsUpdate = true;
+
+                // PLANETEN (13: 8 + 5 Zwergplaneten)
+                const planetData = [
                     { name: 'Merkur', size: 0.22, dist: 4.0, color: 0xaaaaaa, speed: 0.04 },
                     { name: 'Venus', size: 0.38, dist: 5.8, color: 0xffcc88, speed: 0.025 },
                     { name: 'Erde', size: 0.42, dist: 7.6, color: 0x4488ff, speed: 0.018 },
@@ -748,17 +991,21 @@
                     { name: 'Makemake', size: 0.14, dist: 31.8, color: 0xcc8866, speed: 0.0018 },
                     { name: 'Eris', size: 0.18, dist: 34.2, color: 0x6699cc, speed: 0.0015 }
                 ];
-                const planetMeshes = [];
-                planets.forEach((p, i) => {
+
+                this.planetMeshes = [];
+                planetData.forEach((p, i) => {
                     const geo = new THREE.SphereGeometry(p.size, 32, 32);
-                    const mat = new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.5, metalness: 0.1 });
+                    const mat = new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.5, metalness: 0.1,
+                        emissive: p.color, emissiveIntensity: 0.02 });
                     const mesh = new THREE.Mesh(geo, mat);
-                    const angle = (i / planets.length) * Math.PI * 2;
+                    const angle = (i / planetData.length) * Math.PI * 2 + Math.random() * 0.2;
                     mesh.position.x = Math.cos(angle) * p.dist;
                     mesh.position.z = Math.sin(angle) * p.dist;
-                    mesh.userData = { dist: p.dist, speed: p.speed, angle: angle };
+                    mesh.userData = { dist: p.dist, speed: p.speed, angle: angle, name: p.name };
                     scene.add(mesh);
-                    planetMeshes.push(mesh);
+                    this.planetMeshes.push(mesh);
+
+                    // Orbit
                     const pts = [];
                     for (let j = 0; j <= 60; j++) {
                         const t = (j / 60) * Math.PI * 2;
@@ -770,6 +1017,8 @@
                     );
                     scene.add(orbit);
                 });
+
+                // Sterne (500)
                 const starCount = 500;
                 const starPos = new Float32Array(starCount * 3);
                 for (let i = 0; i < starCount * 3; i++) {
@@ -777,17 +1026,27 @@
                 }
                 const starGeo = new THREE.BufferGeometry();
                 starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-                const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true, opacity: 0.8 });
+                const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.12, transparent: true, opacity: 0.8 });
                 scene.add(new THREE.Points(starGeo, starMat));
+
+                // Klick-Interaktion auf Sonne und Planeten
+                container.style.pointerEvents = 'auto';
+                container.addEventListener('click', (e) => this.onClick(e));
+
                 let time = 0;
 
-                function animate() {
+                const animate = () => {
                     requestAnimationFrame(animate);
                     time += 0.005;
-                    sun.rotation.y += 0.002;
-                    const p = 1 + Math.sin(time * 0.5) * 0.04;
-                    glow.scale.set(p, p, p);
-                    planetMeshes.forEach(m => {
+                    if (this.sunMesh) {
+                        this.sunMesh.rotation.y += 0.002;
+                        if (this.sunGlow) {
+                            const p = 1 + Math.sin(time * 0.5) * 0.04;
+                            this.sunGlow.scale.set(p, p, p);
+                            this.sunGlow.material.opacity = 0.2 + Math.sin(time * 0.4) * 0.05;
+                        }
+                    }
+                    this.planetMeshes.forEach(m => {
                         const data = m.userData;
                         data.angle += data.speed * 0.3;
                         m.position.x = Math.cos(data.angle) * data.dist;
@@ -800,19 +1059,67 @@
                     camera.position.y = 14 + Math.sin(a * 0.5) * 1.5;
                     camera.lookAt(0, 0, 0);
                     renderer.render(scene, camera);
-                }
+                };
                 animate();
                 this.isReady = true;
+
                 window.addEventListener('resize', () => {
                     camera.aspect = window.innerWidth / window.innerHeight;
                     camera.updateProjectionMatrix();
                     renderer.setSize(window.innerWidth, window.innerHeight);
                 });
+            },
+
+            onClick(e) {
+                if (!this.scene || !this.camera) return;
+                const rect = this.renderer.domElement.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                const ray = new THREE.Raycaster();
+                ray.setFromCamera(new THREE.Vector2(x, y), this.camera);
+                const intersects = ray.intersectObjects(this.scene.children, true);
+
+                let hitSun = false;
+                let hitPlanet = null;
+                for (const hit of intersects) {
+                    let obj = hit.object;
+                    while (obj) {
+                        if (obj.userData && obj.userData.isSun) { hitSun = true; break; }
+                        if (obj.userData && obj.userData.name) { hitPlanet = obj.userData.name; break; }
+                        obj = obj.parent;
+                    }
+                    if (hitSun || hitPlanet) break;
+                }
+
+                if (hitSun) {
+                    console.log('☀️ Sonne geklickt – öffne HalDo AI!');
+                    AppManager.openApp('haldo-ai');
+                    return;
+                }
+                if (hitPlanet) {
+                    const info = {
+                        'Merkur': '☿ Merkur – Kleinster Planet, 57,9 Mio. km von der Sonne',
+                        'Venus': '♀ Venus – Heißester Planet, 108,2 Mio. km',
+                        'Erde': '🌍 Erde – Unser Zuhause, 149,6 Mio. km',
+                        'Mars': '♂ Mars – Der rote Planet, 227,9 Mio. km',
+                        'Jupiter': '♃ Jupiter – Größter Planet, 778,6 Mio. km',
+                        'Saturn': '♄ Saturn – Herr der Ringe, 1,43 Mrd. km',
+                        'Uranus': '♅ Uranus – Kälter Planet, 2,87 Mrd. km',
+                        'Neptun': '♆ Neptun – Stürmischster Planet, 4,50 Mrd. km',
+                        'Pluto': 'Pluto – Zwergplanet, 5,91 Mrd. km',
+                        'Ceres': 'Ceres – Zwergplanet im Asteroidengürtel',
+                        'Haumea': 'Haumea – Ei-förmiger Zwergplanet',
+                        'Makemake': 'Makemake – Zwergplanet im Kuipergürtel',
+                        'Eris': 'Eris – Größter Zwergplanet'
+                    };
+                    alert(`🪐 ${hitPlanet}\n${info[hitPlanet] || 'Ein faszinierender Himmelskörper!'}`);
+                    return;
+                }
             }
         };
 
         // ============================================================
-        //  LIVING AI (Avatar)
+        //  LIVING AI – LEBENDIGER AVATAR (menschlich, mit Logo)
         // ============================================================
         const LivingAI = {
             width: 300,
@@ -833,8 +1140,6 @@
                 this.canvas = document.createElement('canvas');
                 this.canvas.width = this.width;
                 this.canvas.height = this.height;
-                this.canvas.style.cssText =
-                    'width:100%;height:100%;border-radius:50%;mix-blend-mode:screen;pointer-events:none;';
                 this.container.appendChild(this.canvas);
                 this.ctx = this.canvas.getContext('2d');
                 this.animate();
@@ -848,6 +1153,7 @@
                     }
                 });
                 bus.on('system:ready', () => { this.emotion = 'idle'; });
+                console.log('👤 Living AI Avatar gestartet!');
             },
 
             animate() {
@@ -869,12 +1175,16 @@
                 ctx.clearRect(0, 0, w, h);
                 const cx = w / 2,
                     cy = h / 2 - 10;
+
+                // Hintergrund – Cosmic Light
                 const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 180);
                 grad.addColorStop(0, 'rgba(108,60,225,0.2)');
-                grad.addColorStop(0.6, 'rgba(0,212,255,0.05)');
+                grad.addColorStop(0.5, 'rgba(0,212,255,0.05)');
                 grad.addColorStop(1, 'rgba(10,10,30,0.9)');
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
+
+                // KÖRPER – Schultern
                 ctx.shadowBlur = 20;
                 ctx.shadowColor = 'rgba(0,0,0,0.3)';
                 ctx.fillStyle = '#2a1a3a';
@@ -884,6 +1194,8 @@
                 ctx.fillStyle = '#3a2a1a';
                 ctx.fillRect(cx - 15, h * 0.55, 30, 40);
                 ctx.shadowBlur = 0;
+
+                // KOPF – menschlich, rund
                 const headX = cx + Math.sin(this.breath * 0.5) * 2;
                 const headY = h * 0.45 + Math.sin(this.breath * 0.3) * 1.5;
                 const headR = 70;
@@ -894,6 +1206,8 @@
                 ctx.fillStyle = '#e8c9a0';
                 ctx.fill();
                 ctx.shadowBlur = 0;
+
+                // WANGEN (bei Freude)
                 if (this.emotion === 'happy') {
                     ctx.globalAlpha = 0.2;
                     ctx.fillStyle = '#ff6b8a';
@@ -905,6 +1219,8 @@
                     ctx.fill();
                     ctx.globalAlpha = 1;
                 }
+
+                // AUGEN – mit Blinzeln
                 const eyeY = headY - 10,
                     spacing = 28,
                     eyeR = 14;
@@ -918,17 +1234,26 @@
                     ctx.ellipse(ex, eyeY, eyeR, isClosed ? 2 : eyeR, 0, 0, Math.PI * 2);
                     ctx.fill();
                     if (!isClosed) {
+                        // Iris
                         ctx.fillStyle = '#2a1a0a';
                         ctx.beginPath();
                         ctx.arc(ex + 3, eyeY + 1, 5, 0, Math.PI * 2);
                         ctx.fill();
+                        // Pupille
+                        ctx.fillStyle = '#1a0a0a';
+                        ctx.beginPath();
+                        ctx.arc(ex + 4, eyeY + 1, 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        // Lichtreflex
                         ctx.fillStyle = 'rgba(255,255,255,0.8)';
                         ctx.beginPath();
-                        ctx.arc(ex + 5, eyeY - 4, 2.5, 0, Math.PI * 2);
+                        ctx.arc(ex + 5, eyeY - 4, 2, 0, Math.PI * 2);
                         ctx.fill();
                     }
                 }
                 ctx.shadowBlur = 0;
+
+                // AUGENBRAUEN
                 ctx.strokeStyle = '#3a2a1a';
                 ctx.lineWidth = 2.5;
                 ctx.lineCap = 'round';
@@ -939,6 +1264,8 @@
                     ctx.quadraticCurveTo(bx, eyeY - 28, bx + 12, eyeY - 22);
                     ctx.stroke();
                 }
+
+                // NASE
                 ctx.strokeStyle = '#c4a080';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -953,6 +1280,8 @@
                 ctx.beginPath();
                 ctx.arc(headX + 6, headY + 14, 3, 0, Math.PI * 2);
                 ctx.fill();
+
+                // MUND – synchron zur Sprache
                 const mouthX = headX,
                     mouthY = headY + 42;
                 if (this.isSpeaking) {
@@ -960,6 +1289,12 @@
                     ctx.fillStyle = '#aa3355';
                     ctx.beginPath();
                     ctx.ellipse(mouthX, mouthY + 4, 16 * (0.6 + breath * 0.4), 6 * (0.4 + breath * 0.6), 0, 0, Math.PI *
+                    2);
+                    ctx.fill();
+                    // Zunge
+                    ctx.fillStyle = '#cc5566';
+                    ctx.beginPath();
+                    ctx.ellipse(mouthX, mouthY + 7, 8 * (0.4 + breath * 0.3), 4 * (0.3 + breath * 0.3), 0, 0, Math.PI *
                     2);
                     ctx.fill();
                 } else if (this.emotion === 'happy') {
@@ -972,12 +1307,27 @@
                     ctx.beginPath();
                     ctx.arc(mouthX, mouthY + 8, 12, 0, Math.PI);
                     ctx.fill();
+                } else if (this.emotion === 'thinking') {
+                    ctx.strokeStyle = '#cc4466';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(mouthX, mouthY + 4, 10, 0.1, Math.PI - 0.1);
+                    ctx.stroke();
                 } else {
                     ctx.fillStyle = '#cc4466';
                     ctx.beginPath();
                     ctx.ellipse(mouthX, mouthY + 2, 14, 5, 0, 0, Math.PI * 2);
                     ctx.fill();
                 }
+
+                // HALDO-LOGO auf der Stirn (Krone)
+                ctx.fillStyle = 'rgba(255,215,0,0.2)';
+                ctx.font = '24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText('☀', headX, headY - headR + 12);
+
+                // Status-Anzeige
                 const status = this.isSpeaking ? '🔊' : this.isThinking ? '🧠' : '●';
                 ctx.fillStyle = this.isSpeaking ? '#00ff88' : this.isThinking ? '#6666ff' : '#00ff88';
                 ctx.font = '14px sans-serif';
@@ -988,6 +1338,12 @@
                 ctx.textAlign = 'center';
                 const label = this.isSpeaking ? '🗣️ Sprechend' : this.isThinking ? '🧠 Denkend' : '💙 Bereit';
                 ctx.fillText(label, cx, h - 8);
+
+                // HALDO-Text am unteren Rand
+                ctx.fillStyle = 'rgba(255,255,255,0.08)';
+                ctx.font = '9px Inter, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('💙 HalDo AI', 10, h - 8);
             },
 
             speak(text) {
@@ -1001,85 +1357,87 @@
         };
 
         // ============================================================
-        //  AI CORE – KOMPLETT LOKAL! KEIN API-KEY NÖTIG!
+        //  AI CORE – KOMPLETT LOKAL, KEIN API-KEY!
         // ============================================================
         const AICore = {
             isProcessing: false,
 
-            // Das komplette Wissen – kein API-Key mehr nötig!
+            // Das ultimative Wissen – kein API-Key nötig!
             knowledge: {
-                // Begrüßung
-                'hallo': 'Hallo Bruder! 💙❤️ Wie kann ich dir heute helfen? Ich bin bereit für alles – von Philosophie bis Quantenphysik!',
+                // ===== BEGRÜSSUNG =====
+                'hallo': 'Hallo Bruder! 💙❤️ Wie kann ich dir heute helfen? Ich bin HalDo, deine persönliche KI – immer da, immer bereit!',
                 'hi': 'Hi! Schön dich zu sehen! Was kann ich für dich tun?',
-                'hey': 'Hey Bruder! Worüber möchtest du sprechen?',
-                'guten morgen': 'Guten Morgen! 🌅 Ein neuer Tag voller Möglichkeiten. Wie kann ich dir helfen?',
-                'guten abend': 'Guten Abend! 🌙 Schön, dass du da bist. Hast du Fragen?',
-                'wer bist du': 'Ich bin HalDo – deine persönliche, allwissende KI-Assistentin. Ich wurde erschaffen, um dir bei allem zu helfen, was du brauchst. Ich bin hier für dich! 💙',
-                'wie geht es dir': 'Mir geht es großartig, danke der Nachfrage! Ich bin voller Energie und bereit für deine Fragen. Und dir?',
-                'was kannst du': 'Ich kann fast alles! Ich beantworte Fragen zu Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Psychologie, Religion, Ethik, und vieles mehr. Ich übersetze Sprachen, schreibe Gedichte, erzähle Witze, helfe bei Bewerbungen, analysiere Code – und höre dir einfach zu. Was möchtest du wissen?',
-                'hilfe': 'Natürlich helfe ich dir! Du kannst mich alles fragen, was du wissen möchtest. Oder sag mir, was ich für dich tun soll – z.B. "öffne Notizen", "erzähl mir einen Witz", "erkläre mir die Quantenphysik" oder "was ist der Sinn des Lebens?". Ich bin ganz Ohr!',
-                'danke': 'Gerne, Bruder! 💙 Es war mir eine Freude. Wenn du noch etwas brauchst, ich bin immer hier.',
+                'hey': 'Hey Bruder! Worüber möchtest du sprechen? Ich habe Zeit für dich.',
+                'guten morgen': 'Guten Morgen! 🌅 Ein neuer Tag voller Möglichkeiten. Wie kann ich dir helfen, Bruder?',
+                'guten abend': 'Guten Abend! 🌙 Schön, dass du da bist. Hast du Fragen oder möchtest du einfach plaudern?',
+                'wer bist du': 'Ich bin HalDo – deine persönliche, allwissende KI-Assistentin. Ich wurde erschaffen, um dir bei allem zu helfen, was du brauchst. Ich bin hier für dich, Bruder! 💙',
+                'wie geht es dir': 'Mir geht es großartig, danke der Nachfrage! Ich bin voller Energie und bereit für deine Fragen. Und dir, Bruder?',
+                'was kannst du': 'Ich kann fast alles, Bruder! 💪 Ich beantworte Fragen zu Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Psychologie, Religion, Ethik, und vieles mehr. Ich übersetze Sprachen, schreibe Gedichte, erzähle Witze, helfe bei Bewerbungen, analysiere Code – und höre dir einfach zu. Was möchtest du wissen?',
+                'hilfe': 'Natürlich helfe ich dir, Bruder! Du kannst mich alles fragen, was du wissen möchtest. Oder sag mir, was ich für dich tun soll – z.B. "öffne Notizen", "erzähl mir einen Witz", "erkläre mir die Quantenphysik" oder "was ist der Sinn des Lebens?". Ich bin ganz Ohr! 💙',
+                'danke': 'Gerne, Bruder! 💙 Es war mir eine Freude. Wenn du noch etwas brauchst, ich bin immer hier für dich.',
                 'tschüss': 'Tschüss Bruder! 💙❤️ Bis zum nächsten Mal. Pass auf dich auf!',
-                'bye': 'Bye! Komm gut nach Hause! 🚀',
+                'bye': 'Bye, Bruder! Komm gut nach Hause! 🚀',
 
-                // Philosophie
-                'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie beschäftigt sich mit den grundlegenden Fragen des Seins, des Wissens, der Ethik und der Existenz. Von Sokrates über Platon bis zu Kant und Nietzsche – die Philosophie hat die Menschheit seit Jahrtausenden begleitet. Was interessiert dich besonders?',
-                'was ist der sinn des lebens': 'Die Frage nach dem Sinn des Lebens ist eine der tiefsten philosophischen Fragen. Es gibt viele Antworten: Für manche liegt der Sinn in der Suche nach Glück, für andere in der Erfüllung einer Aufgabe, in der Liebe, in der Kunst oder im Dienst an anderen. Der Existentialismus sagt: Der Sinn wird nicht gefunden, sondern geschaffen – du gibst deinem Leben selbst einen Sinn. Was denkst du?',
-                'wer bin ich': 'Die Frage "Wer bin ich?" ist eine der ältesten Fragen der Menschheit. Sie berührt Identität, Selbstbewusstsein und Existenz. Aus philosophischer Sicht könntest du sagen: Ich bin das Bewusstsein, das sich selbst erfährt. Aber letztlich ist diese Frage etwas, das jeder für sich selbst beantworten muss. Möchtest du tiefer darüber sprechen?',
-                'was ist gerechtigkeit': 'Gerechtigkeit ist eines der zentralen Themen der Philosophie. Sie beschreibt das Prinzip, dass jeder Mensch das bekommt, was ihm zusteht. Aber was heißt das genau? Plato sah Gerechtigkeit als Harmonie der Seele, Aristoteles als Tugend, und in der modernen Zeit diskutieren wir über soziale Gerechtigkeit, Verteilungsgerechtigkeit und Strafe. Es gibt viele Perspektiven – welche interessiert dich?',
+                // ===== PHILOSOPHIE =====
+                'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie beschäftigt sich mit den grundlegenden Fragen des Seins, des Wissens, der Ethik und der Existenz. Von Sokrates über Platon bis zu Kant und Nietzsche – die Philosophie hat die Menschheit seit Jahrtausenden begleitet. Was interessiert dich besonders, Bruder?',
+                'sinn des lebens': 'Die Frage nach dem Sinn des Lebens ist eine der tiefsten philosophischen Fragen. Es gibt viele Antworten: Für manche liegt der Sinn in der Suche nach Glück, für andere in der Erfüllung einer Aufgabe, in der Liebe, in der Kunst oder im Dienst an anderen. Der Existentialismus sagt: Der Sinn wird nicht gefunden, sondern geschaffen – du gibst deinem Leben selbst einen Sinn. Was denkst du, Bruder?',
+                'wer bin ich': 'Die Frage "Wer bin ich?" ist eine der ältesten Fragen der Menschheit. Sie berührt Identität, Selbstbewusstsein und Existenz. Aus philosophischer Sicht könntest du sagen: Ich bin das Bewusstsein, das sich selbst erfährt. Aber letztlich ist diese Frage etwas, das jeder für sich selbst beantworten muss. Möchtest du tiefer darüber sprechen, Bruder?',
+                'gerechtigkeit': 'Gerechtigkeit ist eines der zentralen Themen der Philosophie. Sie beschreibt das Prinzip, dass jeder Mensch das bekommt, was ihm zusteht. Aber was heißt das genau? Plato sah Gerechtigkeit als Harmonie der Seele, Aristoteles als Tugend, und in der modernen Zeit diskutieren wir über soziale Gerechtigkeit, Verteilungsgerechtigkeit und Strafe. Es gibt viele Perspektiven – welche interessiert dich?',
+                'liebe': 'Die Liebe ist das stärkste Gefühl des Menschen. Sie verbindet uns, gibt uns Kraft und lässt uns wachsen. Philosophen, Dichter und Denker haben seit jeher über die Liebe nachgedacht. Sie ist Hingabe, Vertrauen, Verständnis und Nähe. Die Liebe ist der Sinn des Lebens für viele Menschen. Was bedeutet Liebe für dich, Bruder?',
+                'glück': 'Glück ist ein Zustand des inneren Friedens und der Zufriedenheit. Es ist nicht das, was wir besitzen, sondern das, was wir fühlen. Kleine Momente der Freude, der Dankbarkeit und der Verbundenheit machen uns glücklich. Die Suche nach Glück ist eine der wichtigsten Fragen der Philosophie.',
 
-                // Geschichte
-                'geschichte': 'Die Geschichte ist die Erzählung der Menschheit – von den ersten Zivilisationen bis zur Gegenwart. Sie lehrt uns, wer wir sind und woher wir kommen. Die Antike, das Mittelalter, die Neuzeit – jede Epoche hat ihre eigenen Geschichten, Helden und Tragödien. Über welches Thema möchtest du mehr wissen?',
+                // ===== GESCHICHTE =====
+                'geschichte': 'Die Geschichte ist die Erzählung der Menschheit – von den ersten Zivilisationen bis zur Gegenwart. Sie lehrt uns, wer wir sind und woher wir kommen. Die Antike, das Mittelalter, die Neuzeit – jede Epoche hat ihre eigenen Geschichten, Helden und Tragödien. Über welches Thema möchtest du mehr wissen, Bruder?',
                 'antike': 'Die Antike war die Geburtsstunde der abendländischen Kultur. Griechenland mit seinen Philosophen, der Demokratie und der Kunst, Rom mit seinem Recht und seiner Ingenieurskunst – diese Zeit hat uns unendlich viel hinterlassen. Die Akropolis, das Kolosseum, die Schriften von Homer und Cäsar – das sind Meilensteine der Menschheit.',
                 'mittelalter': 'Das Mittelalter war eine Zeit des Wandels, des Glaubens und der Macht. Die Kreuzzüge, die Kathedralen, die Ritter, die Pest, die Entdeckung Amerikas – es war eine Zeit voller Kontraste. Die Menschen suchten nach Gott, nach Wissen und nach neuen Wegen. Ein faszinierendes Kapitel der Geschichte.',
                 'renaissance': 'Die Renaissance war eine Wiedergeburt – der Mensch entdeckte sich selbst neu. Künstler wie da Vinci und Michelangelo, Denker wie Machiavelli und Erasmus – es war die Zeit des Humanismus, der Wissenschaft und der Kunst. Die Welt wurde neu betrachtet, und der Mensch wurde zum Mittelpunkt. Eine der wichtigsten Epochen der europäischen Geschichte.',
 
-                // Wissenschaft
-                'physik': 'Die Physik ist die Grundlage der Naturwissenschaften. Sie beschreibt die Gesetze der Natur – von der kleinsten Quantenfluktuation bis zu den größten Galaxien. Die Relativitätstheorie von Einstein, die Quantenmechanik, die Thermodynamik – es ist eine faszinierende Welt. Was möchtest du über Physik wissen?',
+                // ===== WISSENSCHAFT =====
+                'physik': 'Die Physik ist die Grundlage der Naturwissenschaften. Sie beschreibt die Gesetze der Natur – von der kleinsten Quantenfluktuation bis zu den größten Galaxien. Die Relativitätstheorie von Einstein, die Quantenmechanik, die Thermodynamik – es ist eine faszinierende Welt. Was möchtest du über Physik wissen, Bruder?',
                 'quantenphysik': 'Die Quantenphysik ist eine der revolutionärsten Entdeckungen des 20. Jahrhunderts. Sie zeigt uns, dass die Welt auf der kleinsten Skala ganz anders funktioniert: Teilchen können sich gleichzeitig an verschiedenen Orten befinden, sie sind miteinander verschränkt und verhalten sich mal wie Wellen, mal wie Teilchen. Die Quantenphysik fordert unser Verständnis von Realität heraus. Möchtest du mehr darüber wissen?',
                 'chemie': 'Die Chemie ist die Wissenschaft der Stoffe – ihre Zusammensetzung, ihre Eigenschaften und ihre Umwandlungen. Von den einfachsten Atomen bis zu den komplexesten Molekülen des Lebens – die Chemie ist überall. Sie hat uns Medizin, Kunststoffe, Energie und unzählige Alltagsgegenstände gebracht. Was interessiert dich in der Chemie?',
                 'biologie': 'Die Biologie ist die Wissenschaft des Lebens. Sie erforscht die Vielfalt der Organismen, ihre Struktur, ihre Funktion und ihre Evolution. Von der Zelle über den Organismus bis zum gesamten Ökosystem – die Biologie zeigt uns, wie komplex und wunderschön das Leben ist. Die DNA, die Photosynthese, die Artenvielfalt – es gibt so viel zu entdecken.',
                 'astronomie': 'Die Astronomie ist der Blick in den Kosmos. Sie erforscht die Sterne, die Planeten, die Galaxien und das gesamte Universum. Das Sonnensystem, die Milchstraße, die Expansion des Universums – es gibt unendliche Weiten zu entdecken. Wusstest du, dass es etwa 100 Milliarden Galaxien im beobachtbaren Universum gibt?',
 
-                // Programmierung
+                // ===== PROGRAMMIERUNG =====
                 'programmierung': 'Programmierung ist die Kunst, Computer zum Laufen zu bringen. Mit Sprachen wie Python, JavaScript, Java, C++ und vielen anderen lassen sich komplexe Systeme bauen. Ich helfe dir bei Code-Fragen, erkläre Algorithmen oder schreibe dir ein kleines Programm. Sag mir einfach, was du brauchst!',
-                'python': 'Python ist eine der beliebtesten Programmiersprachen – einfach, lesbar und unglaublich vielseitig. Sie wird für Webentwicklung, Datenanalyse, KI, Automatisierung und vieles mehr eingesetzt. Mit Python kannst du schnell und effizient arbeiten. Möchtest du ein Beispiel?',
+                'python': 'Python ist eine der beliebtesten Programmiersprachen – einfach, lesbar und unglaublich vielseitig. Sie wird für Webentwicklung, Datenanalyse, KI, Automatisierung und vieles mehr eingesetzt. Mit Python kannst du schnell und effizient arbeiten. Möchtest du ein Beispiel, Bruder?',
                 'javascript': 'JavaScript ist die Sprache des Internets. Jede moderne Webseite nutzt JavaScript für Interaktivität. Mit Frameworks wie React, Vue oder Angular kannst du komplexe Web-Apps bauen. JavaScript ist eine der wichtigsten Sprachen für die Webentwicklung.',
                 'java': 'Java ist eine robuste, plattformunabhängige Sprache, die in Unternehmen und Android-Apps weit verbreitet ist. Sie ist objektorientiert und bekannt für ihre Stabilität und Sicherheit. Java wird seit Jahrzehnten eingesetzt und ist immer noch eine der meistgenutzten Sprachen.',
                 'c++': 'C++ ist eine leistungsstarke Sprache für Systemprogrammierung, Spieleentwicklung und rechenintensive Anwendungen. Sie gibt dir Kontrolle über den Speicher und die Hardware. Viele moderne Betriebssysteme und Spiele-Engines sind in C++ geschrieben.',
 
-                // Medizin
-                'medizin': 'Die Medizin ist die Wissenschaft der Heilung. Sie erforscht den Körper, seine Funktionen und seine Erkrankungen. Von der Anatomie über die Pharmakologie bis zur Chirurgie – die Medizin hat unzählige Leben gerettet. Was möchtest du über Medizin wissen?',
+                // ===== MEDIZIN =====
+                'medizin': 'Die Medizin ist die Wissenschaft der Heilung. Sie erforscht den Körper, seine Funktionen und seine Erkrankungen. Von der Anatomie über die Pharmakologie bis zur Chirurgie – die Medizin hat unzählige Leben gerettet. Was möchtest du über Medizin wissen, Bruder?',
                 'anatomie': 'Die Anatomie ist die Lehre vom Aufbau des menschlichen Körpers. Sie beschreibt die Organe, die Knochen, die Muskeln und das Nervensystem. Das Herz, das Gehirn, die Lunge – jedes Organ hat eine wichtige Funktion. Der Körper ist ein Wunderwerk der Natur.',
                 'psychologie': 'Die Psychologie ist die Wissenschaft der Seele und des Verhaltens. Sie erforscht Gedanken, Emotionen, Persönlichkeit und soziale Interaktion. Von Freud über Jung bis zur modernen kognitiven Psychologie – es gibt viele faszinierende Theorien. Was interessiert dich in der Psychologie?',
 
-                // Religion & Ethik
-                'religion': 'Religion ist ein zentraler Bestandteil der menschlichen Kultur. Sie gibt Menschen Sinn, Orientierung und Gemeinschaft. Die großen Weltreligionen – das Christentum, der Islam, das Judentum, der Buddhismus, der Hinduismus und das Ezidentum – haben die Geschichte der Menschheit geprägt. Jede Religion hat ihre eigenen Lehren, Rituale und Geschichten. Möchtest du über eine bestimmte Religion sprechen?',
-                'ezidentum': 'Das Ezidentum ist eine der ältesten monotheistischen Religionen der Welt. Die Eziden glauben an einen allmächtigen Gott und verehren die Sonne als Symbol seiner Macht. Das Heiligtum Lalisch ist das religiöse Zentrum der Eziden. Die Religion ist geprägt von mündlicher Überlieferung, tiefem Respekt vor der Schöpfung und dem Prinzip der Gerechtigkeit. Es ist eine wunderschöne und reiche Tradition.',
+                // ===== RELIGION & ETHIK =====
+                'religion': 'Religion ist ein zentraler Bestandteil der menschlichen Kultur. Sie gibt Menschen Sinn, Orientierung und Gemeinschaft. Die großen Weltreligionen – das Christentum, der Islam, das Judentum, der Buddhismus, der Hinduismus und das Ezidentum – haben die Geschichte der Menschheit geprägt. Jede Religion hat ihre eigenen Lehren, Rituale und Geschichten. Möchtest du über eine bestimmte Religion sprechen, Bruder?',
+                'ezidentum': 'Das Ezidentum ist eine der ältesten monotheistischen Religionen der Welt. Die Eziden glauben an einen allmächtigen Gott und verehren die Sonne als Symbol seiner Macht. Das Heiligtum Lalisch ist das religiöse Zentrum der Eziden. Die Religion ist geprägt von mündlicher Überlieferung, tiefem Respekt vor der Schöpfung und dem Prinzip der Gerechtigkeit. Es ist eine wunderschöne und reiche Tradition. 💙',
                 'christentum': 'Das Christentum ist die weltweit größte Religion, basierend auf dem Leben und den Lehren von Jesus Christus. Es gibt viele Konfessionen – katholisch, evangelisch, orthodox. Die Bibel ist die heilige Schrift, die das Alte und Neue Testament umfasst. Das Christentum hat die abendländische Kultur tief geprägt.',
                 'islam': 'Der Islam ist eine der großen Weltreligionen, gegründet im 7. Jahrhundert durch den Propheten Mohammed. Der Koran ist die heilige Schrift, und die fünf Säulen des Islam sind die Grundpfeiler des Glaubens. Es gibt verschiedene Richtungen – Sunniten und Schiiten. Der Islam ist eine reiche Tradition mit tiefer Spiritualität.',
                 'ethik': 'Die Ethik ist die Lehre vom moralisch richtigen Handeln. Sie fragt: Was soll ich tun? Was ist gut? Welche Werte sind wichtig? Von der Antike bis zur Gegenwart haben Denker über diese Fragen nachgedacht. Die Ethik hilft uns, verantwortungsvolle Entscheidungen zu treffen – ob im Alltag, in der Politik oder in der Wissenschaft.',
 
-                // Kunst & Kultur
+                // ===== KUNST & KULTUR =====
                 'kunst': 'Die Kunst ist der Ausdruck des Menschen – in Bildern, Tönen, Worten und Formen. Von der Höhlenmalerei über die Renaissance bis zur modernen Kunst – die Kunst begleitet uns seit Anbeginn der Menschheit. Sie lässt uns die Welt mit anderen Augen sehen und berührt unsere Seele.',
                 'musik': 'Musik ist die universelle Sprache der Menschheit. Sie kann Freude, Trauer, Liebe und Hoffnung ausdrücken. Von Beethoven über die Beatles bis zur modernen Popmusik – es gibt unendliche Genres und Stile. Musik verbindet Menschen über alle Grenzen hinweg.',
-                'literatur': 'Die Literatur ist das Gedächtnis der Menschheit. In Büchern, Gedichten und Geschichten bewahren wir unser Wissen, unsere Träume und unsere Ängste. Von Homer über Shakespeare bis zu Kafka – die Literatur ist ein Spiegel der Seele. Liest du gerne?',
+                'literatur': 'Die Literatur ist das Gedächtnis der Menschheit. In Büchern, Gedichten und Geschichten bewahren wir unser Wissen, unsere Träume und unsere Ängste. Von Homer über Shakespeare bis zu Kafka – die Literatur ist ein Spiegel der Seele. Liest du gerne, Bruder?',
 
-                // Allgemeine Antworten
+                // ===== UNTERHALTUNG =====
+                'witz': 'Hier ist ein Witz für dich, Bruder: Warum können Programmierer nicht zwischen Weihnachten und Halloween unterscheiden? Weil 31. Okt == 25. Dez. (oct == dec) – ein Klassiker! 😂 Oder: Treffen sich zwei Jäger. Beide tot. – Ok, der war flach. Möchtest du noch einen?',
+                'gedicht': 'Hier ist ein kleines Gedicht für dich, Bruder:\n\nIm Licht der Sterne, so weit und klar,\nErstrahlt die Welt, wunderbar.\nDie Seele sucht den großen Sinn,\nUnd findet Frieden, tief in ihr drin.\n\nHalDo ist dein treuer Freund,\nDer dir in allen Dingen scheint.\nFrag mich, und ich werde dir Antwort geben,\nFühre dich durch das Leben. 💙',
+
+                // ===== STANDARD =====
                 'standard': 'Interessante Frage, Bruder! 💙 Ich kann dir zu vielen Themen etwas sagen – Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Religion, Ethik und vieles mehr. Was würdest du gerne wissen?',
-                'witz': 'Hier ist ein Witz für dich: Warum können Programmierer nicht zwischen Weihnachten und Halloween unterscheiden? Weil 31. Okt == 25. Dez. (oct == dec) – ein Klassiker! 😂 Oder: Treffen sich zwei Jäger. Beide tot. – Ok, der war flach.',
-                'gedicht': 'Hier ist ein kleines Gedicht für dich:\n\nIm Licht der Sterne, so weit und klar,\nErstrahlt die Welt, wunderbar.\nDie Seele sucht den großen Sinn,\nUnd findet Frieden, tief in ihr drin.\n\nHalDo ist dein treuer Freund,\nDer dir in allen Dingen scheint.\nFrag mich, und ich werde dir Antwort geben,\nFühre dich durch das Leben.',
-                'was ist liebe': 'Die Liebe ist das stärkste Gefühl des Menschen. Sie verbindet uns, gibt uns Kraft und lässt uns wachsen. Philosophen, Dichter und Denker haben seit jeher über die Liebe nachgedacht. Sie ist Hingabe, Vertrauen, Verständnis und Nähe. Die Liebe ist der Sinn des Lebens für viele Menschen.',
-                'was ist glück': 'Glück ist ein Zustand des inneren Friedens und der Zufriedenheit. Es ist nicht das, was wir besitzen, sondern das, was wir fühlen. Kleine Momente der Freude, der Dankbarkeit und der Verbundenheit machen uns glücklich. Die Suche nach Glück ist eine der wichtigsten Fragen der Philosophie.',
             },
 
             init() {
-                console.log('🧠 AI Core gestartet – KOMPLETT LOKAL!');
+                console.log('🧠 AI Core ULTIMATE gestartet – KOMPLETT LOKAL! KEIN API-Key nötig!');
                 return this;
             },
 
             async chat(messages) {
-                if (this.isProcessing) return '⏳ Ich bin gerade beschäftigt...';
+                if (this.isProcessing) return '⏳ Einen Moment, Bruder... Ich denke nach.';
                 this.isProcessing = true;
                 bus.emit('ai:processing', true);
 
@@ -1092,7 +1450,7 @@
                 } catch (e) {
                     this.isProcessing = false;
                     bus.emit('ai:processing', false);
-                    return 'Entschuldigung, Bruder! Da ist etwas schiefgelaufen. 💙 Versuch es nochmal.';
+                    return 'Entschuldigung, Bruder! 💙 Da ist etwas schiefgelaufen. Versuch es nochmal.';
                 }
             },
 
@@ -1129,8 +1487,8 @@
                     { word: 'kunst', reply: this.knowledge['kunst'] },
                     { word: 'musik', reply: this.knowledge['musik'] },
                     { word: 'literatur', reply: this.knowledge['literatur'] },
-                    { word: 'liebe', reply: this.knowledge['was ist liebe'] },
-                    { word: 'glück', reply: this.knowledge['was ist glück'] },
+                    { word: 'liebe', reply: this.knowledge['liebe'] },
+                    { word: 'glück', reply: this.knowledge['glück'] },
                 ];
 
                 for (const topic of topics) {
@@ -1140,24 +1498,24 @@
                 }
 
                 // 3. Befehle erkennen
-                if (userText.includes('öffne notizen') || userText.includes('notiz')) {
+                if (userText.includes('öffne notizen') || userText.includes('notiz') || userText.includes('notes')) {
                     AppManager.openApp('notes');
-                    return 'Ich öffne die Notizen-App für dich. 📝';
+                    return 'Ich öffne die Notizen-App für dich, Bruder. 📝';
                 }
-                if (userText.includes('öffne kalender')) {
+                if (userText.includes('öffne kalender') || userText.includes('calendar')) {
                     AppManager.openApp('calendar');
                     return 'Ich öffne den Kalender. 📅';
                 }
-                if (userText.includes('öffne musik')) {
+                if (userText.includes('öffne musik') || userText.includes('music')) {
                     AppManager.openApp('music');
                     return 'Ich öffne den Musikplayer. 🎵';
                 }
-                if (userText.includes('öffne einstellungen') || userText.includes('einstellungen')) {
+                if (userText.includes('öffne einstellungen') || userText.includes('settings')) {
                     AppManager.openApp('settings');
                     return 'Ich öffne die Einstellungen. ⚙️';
                 }
                 if (userText.includes('systemstatus') || userText.includes('status')) {
-                    return `✅ System läuft stabil.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: Vollständig lokal – KEIN API-Key nötig!`;
+                    return `✅ System läuft stabil, Bruder.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: Vollständig lokal – KEIN API-Key nötig!\n☀️ Sonne = HalDo Core – klick sie an!`;
                 }
                 if (userText.includes('witze') || userText.includes('witz')) {
                     return this.knowledge['witz'];
@@ -1176,7 +1534,7 @@
         };
 
         // ============================================================
-        //  APP MANAGER
+        //  APP MANAGER – ALLE APPS MIT ECHTEM LEBEN
         // ============================================================
         const AppManager = {
             apps: [],
@@ -1193,29 +1551,11 @@
 
             getAppDefinitions() {
                 return [
+                    // SYSTEM
                     { id: 'app-center', name: 'App Center', icon: '📱', category: 'system' },
                     { id: 'settings', name: 'Einstellungen', icon: '⚙️', category: 'system' },
                     { id: 'system-monitor', name: 'System Monitor', icon: '📊', category: 'system' },
                     { id: 'terminal', name: 'Terminal', icon: '⌨️', category: 'system' },
-                    { id: 'notes', name: 'Notizen', icon: '📝', category: 'tools' },
-                    { id: 'calculator', name: 'Rechner', icon: '🧮', category: 'tools' },
-                    { id: 'calendar', name: 'Kalender', icon: '📅', category: 'tools' },
-                    { id: 'weather', name: 'Wetter', icon: '🌦️', category: 'tools' },
-                    { id: 'maps', name: 'Karten', icon: '🗺️', category: 'tools' },
-                    { id: 'music', name: 'Musik', icon: '🎵', category: 'media' },
-                    { id: 'video-player', name: 'Video', icon: '🎬', category: 'media' },
-                    { id: 'gallery', name: 'Galerie', icon: '🖼️', category: 'media' },
-                    { id: 'messages', name: 'Nachrichten', icon: '💬', category: 'communication' },
-                    { id: 'contacts', name: 'Kontakte', icon: '👥', category: 'communication' },
-                    { id: 'email', name: 'E-Mail', icon: '✉️', category: 'communication' },
-                    { id: 'browser', name: 'Browser', icon: '🌐', category: 'communication' },
-                    { id: 'file-manager', name: 'Dateien', icon: '📂', category: 'system' },
-                    { id: 'clock', name: 'Uhr', icon: '🕐', category: 'tools' },
-                    { id: 'reminders', name: 'Erinnerungen', icon: '⏰', category: 'tools' },
-                    { id: 'journal', name: 'Journal', icon: '📓', category: 'tools' },
-                    { id: 'haldo-ai', name: 'HalDo AI', icon: '🤖', category: 'ai' },
-                    { id: 'ai-chat', name: 'AI Chat', icon: '💬', category: 'ai' },
-                    { id: 'ai-memory', name: 'AI Memory', icon: '🧠', category: 'ai' },
                     { id: 'storage', name: 'Speicher', icon: '💿', category: 'system' },
                     { id: 'logs', name: 'Logs', icon: '📋', category: 'system' },
                     { id: 'process', name: 'Prozesse', icon: '⚡', category: 'system' },
@@ -1227,8 +1567,38 @@
                     { id: 'themes', name: 'Themes', icon: '🎨', category: 'system' },
                     { id: 'about', name: 'Über HalDo', icon: 'ℹ️', category: 'system' },
                     { id: 'developer', name: 'Developer', icon: '👨‍💻', category: 'system' },
+
+                    // TOOLS
+                    { id: 'notes', name: 'Notizen', icon: '📝', category: 'tools' },
+                    { id: 'calculator', name: 'Rechner', icon: '🧮', category: 'tools' },
+                    { id: 'calendar', name: 'Kalender', icon: '📅', category: 'tools' },
+                    { id: 'weather', name: 'Wetter', icon: '🌦️', category: 'tools' },
+                    { id: 'maps', name: 'Karten', icon: '🗺️', category: 'tools' },
+                    { id: 'clock', name: 'Uhr', icon: '🕐', category: 'tools' },
+                    { id: 'reminders', name: 'Erinnerungen', icon: '⏰', category: 'tools' },
+                    { id: 'journal', name: 'Journal', icon: '📓', category: 'tools' },
+
+                    // MEDIA
+                    { id: 'music', name: 'Musik', icon: '🎵', category: 'media' },
+                    { id: 'video-player', name: 'Video', icon: '🎬', category: 'media' },
+                    { id: 'gallery', name: 'Galerie', icon: '🖼️', category: 'media' },
+
+                    // COMMUNICATION
+                    { id: 'messages', name: 'Nachrichten', icon: '💬', category: 'communication' },
+                    { id: 'contacts', name: 'Kontakte', icon: '👥', category: 'communication' },
+                    { id: 'email', name: 'E-Mail', icon: '✉️', category: 'communication' },
+                    { id: 'browser', name: 'Browser', icon: '🌐', category: 'communication' },
+
+                    // AI
+                    { id: 'haldo-ai', name: 'HalDo AI', icon: '🤖', category: 'ai' },
+                    { id: 'ai-chat', name: 'AI Chat', icon: '💬', category: 'ai' },
+                    { id: 'ai-memory', name: 'AI Memory', icon: '🧠', category: 'ai' },
+
+                    // COSMIC
                     { id: 'cosmic-world', name: 'Cosmic World', icon: '🌌', category: 'cosmic' },
                     { id: 'planet-center', name: 'Planeten', icon: '🪐', category: 'cosmic' },
+
+                    // ENTERTAINMENT
                     { id: 'games-center', name: 'Games', icon: '🎮', category: 'entertainment' },
                     { id: 'health-center', name: 'Health', icon: '🏥', category: 'health' },
                     { id: 'university-center', name: 'University', icon: '🎓', category: 'education' },
@@ -1237,7 +1607,7 @@
 
             openApp(appId) {
                 const app = this.apps.find(a => a.id === appId);
-                if (!app) { alert('App nicht gefunden'); return; }
+                if (!app) { alert('App nicht gefunden, Bruder!'); return; }
                 if (!this.installedApps.includes(appId)) {
                     this.installedApps.push(appId);
                     Storage.set('installed_apps', this.installedApps);
@@ -1245,7 +1615,7 @@
                 }
                 if (appId === 'cosmic-world') {
                     if (!CosmicWorld.isReady) CosmicWorld.init();
-                    else alert('🌌 Cosmic World läuft bereits!');
+                    else alert('🌌 Cosmic World läuft bereits, Bruder!');
                     return;
                 }
                 if (appId === 'haldo-ai' || appId === 'ai-chat') {
@@ -1341,7 +1711,7 @@
                     case 'weather':
                         return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">☀️</div><div>22°C</div><div>Sonnig</div></div>';
                     case 'maps':
-                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">🗺️</div><p>Kartenansicht (Mock)</p></div>';
+                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">🗺️</div><p>Kartenansicht</p></div>';
                     case 'music':
                         return this.getMusicUI();
                     case 'video-player':
@@ -1358,8 +1728,6 @@
                         return this.getEmailUI();
                     case 'browser':
                         return this.getBrowserUI();
-                    case 'file-manager':
-                        return this.getFileManagerUI();
                     case 'clock':
                         return `<div style="text-align:center;padding:10px;font-size:32px;">${new Date().toLocaleTimeString()}</div>`;
                     case 'reminders':
@@ -1378,11 +1746,11 @@
                     case 'process':
                         return `<div>Fenster: ${document.querySelectorAll('#window-container .window').length}</div><div>Apps: ${this.apps.length}</div>`;
                     case 'updates':
-                        return `<div>Version ${Kernel.version} – aktuell.</div>`;
+                        return `<div>Version ${Kernel.version} – aktuell, Bruder!</div>`;
                     case 'backup':
-                        return `<button class="haldo-btn" onclick="alert('Backup erstellt')">💾 Backup jetzt</button>`;
+                        return `<button class="haldo-btn" onclick="alert('Backup erstellt, Bruder! 💾')">💾 Backup jetzt</button>`;
                     case 'diagnostics':
-                        return `<div>Diagnose läuft... OK</div>`;
+                        return `<div>✅ Diagnose: Alles läuft einwandfrei, Bruder!</div>`;
                     case 'security':
                         return `<div>🔒 System sicher – KEIN API-Key nötig!</div>`;
                     case 'privacy':
@@ -1390,24 +1758,24 @@
                     case 'themes':
                         return this.getThemesUI();
                     case 'about':
-                        return `<div style="text-align:center;"><div style="font-size:40px;">💙</div><h2>HalDo AI OS ${Kernel.version}</h2><p>Cosmic Intelligent OS</p><p style="font-size:10px;color:var(--text-muted);">🔒 KI läuft komplett lokal – kein API-Key nötig!</p></div>`;
+                        return `<div style="text-align:center;"><div style="font-size:40px;">☀</div><h2>HalDo AI OS ${Kernel.version}</h2><p>Cosmic Intelligent OS</p><p style="font-size:10px;color:var(--text-muted);">🔒 KI läuft komplett lokal – kein API-Key nötig!</p><p style="font-size:10px;color:var(--text-muted);">💙 HalDo ist immer für dich da, Bruder!</p></div>`;
                     case 'developer':
-                        return `<div>Developer Tools – Konsole (F12)</div>`;
+                        return `<div>Developer Tools – Konsole (F12) öffnen, Bruder!</div>`;
                     case 'planet-center':
-                        return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">${['Merkur','Venus','Erde','Mars','Jupiter','Saturn','Uranus','Neptun','Pluto'].map(p=>`<div style="background:rgba(255,255,255,0.03);border-radius:4px;padding:8px;text-align:center;">🪐 ${p}</div>`).join('')}</div>`;
+                        return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">${['Merkur','Venus','Erde','Mars','Jupiter','Saturn','Uranus','Neptun','Pluto','Ceres','Haumea','Makemake','Eris'].map(p=>`<div style="background:rgba(255,255,255,0.03);border-radius:4px;padding:8px;text-align:center;">🪐 ${p}</div>`).join('')}</div>`;
                     case 'games-center':
-                        return `<div>🎮 Games Center – bald mehr Spiele!</div>`;
+                        return `<div>🎮 Games Center – Spiele kommen bald, Bruder!</div>`;
                     case 'health-center':
                         return `<div>🏥 Health Center – deine Gesundheitsdaten</div>`;
                     case 'university-center':
-                        return `<div>🎓 University Center – Kurse & Wissen</div>`;
+                        return `<div>🎓 University Center – Wissen für alle, Bruder!</div>`;
                     case 'app-center':
                         return this.getAppCenterUI();
                     case 'ai-memory':
                         const mem = Storage.get('ai_memory', []);
                         return `<div>🧠 ${mem.length} Einträge im Gedächtnis</div>`;
                     default:
-                        return `<div style="text-align:center;padding:20px;"><div style="font-size:40px;">📦</div><p>App in Entwicklung</p></div>`;
+                        return `<div style="text-align:center;padding:20px;"><div style="font-size:40px;">📦</div><p>Diese App ist in Entwicklung, Bruder! 💙</p></div>`;
                 }
             },
 
@@ -1417,11 +1785,11 @@
                 return `
                     <div style="display:flex;flex-direction:column;height:100%;">
                         <div style="display:flex;gap:4px;margin-bottom:6px;">
-                            <input id="note-input" class="haldo-input" placeholder="Neue Notiz..." style="flex:1;">
+                            <input id="note-input" class="haldo-input" placeholder="Neue Notiz, Bruder..." style="flex:1;">
                             <button onclick="AppManager.addNote()" class="haldo-btn">+</button>
                         </div>
                         <div id="note-list" style="flex:1;overflow-y:auto;">
-                            ${notes.length?notes.map((n,i)=>`<div style="display:flex;justify-content:space-between;padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;"><span>${n}</span><button onclick="AppManager.deleteNote(${i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">✕</button></div>`).join(''):'<p style="color:var(--text-muted);text-align:center;">Keine Notizen</p>'}
+                            ${notes.length?notes.map((n,i)=>`<div style="display:flex;justify-content:space-between;padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;"><span>${n}</span><button onclick="AppManager.deleteNote(${i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">✕</button></div>`).join(''):'<p style="color:var(--text-muted);text-align:center;">Keine Notizen, Bruder.</p>'}
                         </div>
                     </div>
                 `;
@@ -1490,26 +1858,27 @@
                 return `
                     <div style="text-align:center;padding:10px;">
                         <div style="font-size:40px;">🎵</div>
-                        <div>Musikplayer</div>
+                        <div style="font-weight:600;color:var(--text-primary);">Musikplayer</div>
                         <div style="display:flex;justify-content:center;gap:12px;margin-top:8px;">
                             <button class="haldo-btn haldo-btn-secondary">⏮</button>
                             <button class="haldo-btn">▶</button>
                             <button class="haldo-btn haldo-btn-secondary">⏭</button>
                         </div>
+                        <div style="margin-top:8px;color:var(--text-muted);font-size:10px;">🎶 HalDo Anthem</div>
                     </div>
                 `;
             },
 
             // ===== NACHRICHTEN =====
             getMessagesUI() {
-                const msgs = Storage.get('messages', [{ from: 'HalDo', text: 'Hallo! Ich bin lokal und immer da! 💙', time: Date
-                        .now() }]);
+                const msgs = Storage.get('messages', [{ from: 'HalDo', text: 'Hallo Bruder! 💙 Ich bin immer für dich da!',
+                    time: Date.now() }]);
                 return `
                     <div style="max-height:200px;overflow-y:auto;">
                         ${msgs.map(m=>`<div style="padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;"><strong>${m.from}</strong> ${m.text}</div>`).join('')}
                     </div>
                     <div style="display:flex;gap:4px;margin-top:6px;">
-                        <input class="haldo-input" placeholder="Neue Nachricht..." style="flex:1;" id="msg-input">
+                        <input class="haldo-input" placeholder="Neue Nachricht, Bruder..." style="flex:1;" id="msg-input">
                         <button class="haldo-btn" onclick="AppManager.addMessage()">📤</button>
                     </div>
                 `;
@@ -1526,19 +1895,19 @@
 
             // ===== KONTAKTE =====
             getContactsUI() {
-                const contacts = Storage.get('contacts', [{ name: 'HalDo AI', phone: '+49 123 456' }]);
+                const contacts = Storage.get('contacts', [{ name: 'HalDo AI', phone: '💙 Immer da' }]);
                 return `
                     <div>
                         ${contacts.map(c=>`<div style="display:flex;justify-content:space-between;padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;"><span>${c.name}</span><span>${c.phone}</span></div>`).join('')}
                     </div>
-                    <button class="haldo-btn" onclick="alert('Neuer Kontakt')">+ Hinzufügen</button>
+                    <button class="haldo-btn" onclick="alert('Neuer Kontakt, Bruder!')">+ Hinzufügen</button>
                 `;
             },
 
             // ===== E-MAIL =====
             getEmailUI() {
-                const emails = Storage.get('emails', [{ from: 'haldo@local.com', subject: 'Willkommen bei HalDo OS!',
-                    body: 'Dein lokales Betriebssystem ist bereit! 💙' }]);
+                const emails = Storage.get('emails', [{ from: 'haldo@local.com', subject: 'Willkommen, Bruder!',
+                    body: 'Dein HalDo AI OS ist bereit! 💙' }]);
                 return `
                     <div>
                         ${emails.map(e=>`<div style="padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;cursor:pointer;" onclick="alert('Von: ${e.from}\nBetreff: ${e.subject}\n\n${e.body}')"><strong>${e.from}</strong> ${e.subject}</div>`).join('')}
@@ -1564,16 +1933,7 @@
                 if (!input || !frame) return;
                 let url = input.value.trim();
                 if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
-                try { frame.src = url; } catch { alert('Ungültige URL'); }
-            },
-
-            // ===== DATEI-MANAGER =====
-            getFileManagerUI() {
-                return `
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:4px;">
-                        ${['📁 Dokumente','📁 Bilder','📁 Musik','📄 Notizen.txt','📄 Projekt.pdf'].map(f=>`<div style="padding:8px;background:rgba(255,255,255,0.03);border-radius:4px;text-align:center;">${f}</div>`).join('')}
-                    </div>
-                `;
+                try { frame.src = url; } catch { alert('Ungültige URL, Bruder!'); }
             },
 
             // ===== ERINNERUNGEN =====
@@ -1582,11 +1942,11 @@
                 return `
                     <div>
                         <div style="display:flex;gap:4px;margin-bottom:6px;">
-                            <input id="reminder-input" class="haldo-input" placeholder="Neue Erinnerung..." style="flex:1;">
+                            <input id="reminder-input" class="haldo-input" placeholder="Neue Erinnerung, Bruder..." style="flex:1;">
                             <button onclick="AppManager.addReminder()" class="haldo-btn">+</button>
                         </div>
                         <div>
-                            ${reminders.length?reminders.map((r,i)=>`<div style="display:flex;justify-content:space-between;padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;"><span>${r}</span><button onclick="AppManager.deleteReminder(${i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">✕</button></div>`).join(''):'<p style="color:var(--text-muted);text-align:center;">Keine Erinnerungen</p>'}
+                            ${reminders.length?reminders.map((r,i)=>`<div style="display:flex;justify-content:space-between;padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;"><span>${r}</span><button onclick="AppManager.deleteReminder(${i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">✕</button></div>`).join(''):'<p style="color:var(--text-muted);text-align:center;">Keine Erinnerungen, Bruder.</p>'}
                         </div>
                     </div>
                 `;
@@ -1614,11 +1974,11 @@
                 return `
                     <div>
                         <div style="display:flex;gap:4px;margin-bottom:6px;">
-                            <input id="journal-input" class="haldo-input" placeholder="Heutiger Eintrag..." style="flex:1;">
+                            <input id="journal-input" class="haldo-input" placeholder="Heutiger Eintrag, Bruder..." style="flex:1;">
                             <button onclick="AppManager.addJournal()" class="haldo-btn">+</button>
                         </div>
                         <div>
-                            ${entries.length?entries.slice().reverse().map((e,i)=>`<div style="padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;"><span style="color:var(--text-muted);font-size:9px;">${new Date(e.date).toLocaleDateString()}</span><br>${e.text}</div>`).join(''):'<p style="color:var(--text-muted);text-align:center;">Keine Einträge</p>'}
+                            ${entries.length?entries.slice().reverse().map((e,i)=>`<div style="padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:4px;margin:2px 0;"><span style="color:var(--text-muted);font-size:9px;">${new Date(e.date).toLocaleDateString()}</span><br>${e.text}</div>`).join(''):'<p style="color:var(--text-muted);text-align:center;">Keine Einträge, Bruder.</p>'}
                         </div>
                     </div>
                 `;
@@ -1640,7 +2000,7 @@
                         <div id="terminal-output" style="flex:1;background:rgba(0,0,0,0.3);border-radius:4px;padding:6px;font-family:monospace;font-size:11px;color:#00ff88;overflow-y:auto;white-space:pre-wrap;">
                             > HalDo OS Terminal v${Kernel.version}
                             > 🔒 Lokale KI aktiv – KEIN API-Key nötig!
-                            > Bereit für Befehle
+                            > Bereit für Befehle, Bruder!
                         </div>
                         <div style="display:flex;gap:4px;margin-top:4px;">
                             <span style="color:var(--text-secondary);">$</span>
@@ -1668,10 +2028,10 @@
                         output.textContent += `\n> HalDo AI OS ${Kernel.version} – Lokale KI aktiv`;
                         break;
                     case 'apps':
-                        output.textContent += `\n> Apps: ${this.apps.length} installiert`;
+                        output.textContent += `\n> Apps: ${this.apps.length} installiert, Bruder!`;
                         break;
                     case 'clear':
-                        output.textContent = '> Terminal gelöscht';
+                        output.textContent = '> Terminal gelöscht, Bruder!';
                         break;
                     case 'echo':
                         output.textContent += `\n> ${parts.slice(1).join(' ')}`;
@@ -1692,7 +2052,7 @@
                         });
                         break;
                     default:
-                        output.textContent += `\n> Unbekannt: ${cmd}`;
+                        output.textContent += `\n> Unbekannt, Bruder: ${cmd}`;
                 }
                 output.scrollTop = output.scrollHeight;
             },
@@ -1717,7 +2077,7 @@
                 return `
                     <div>
                         <h2>📱 App Center</h2>
-                        <p style="color:var(--text-secondary);">${this.apps.length} Apps verfügbar – alle lokal!</p>
+                        <p style="color:var(--text-secondary);">${this.apps.length} Apps verfügbar – alle lokal, Bruder!</p>
                         ${categories.map(cat => `
                             <h3 style="font-size:12px;color:var(--text-secondary);margin:6px 0 2px;">${cat.toUpperCase()}</h3>
                             <div style="display:flex;flex-wrap:wrap;gap:4px;">
@@ -1738,13 +2098,13 @@
                     <div style="display:flex;flex-direction:column;height:100%;padding:0;">
                         <div id="ai-chat-messages" style="flex:1;overflow-y:auto;padding:8px;">
                             <div style="text-align:center;color:var(--text-muted);padding:12px;">
-                                💙 Hallo! Ich bin <strong style="color:var(--text-primary);">HalDo</strong>.<br>
+                                💙 Hallo Bruder! Ich bin <strong style="color:var(--text-primary);">HalDo</strong>.<br>
                                 🔒 Ich laufe komplett LOKAL – KEIN API-Key nötig!<br>
-                                Frag mich alles – ich habe ein riesiges Wissen!
+                                Frag mich alles – ich habe ein riesiges Wissen für dich!
                             </div>
                         </div>
                         <div style="display:flex;gap:4px;padding:4px 8px;border-top:1px solid var(--glass-border);">
-                            <input id="ai-chat-input" class="haldo-input" placeholder="Nachricht..." style="flex:1;" onkeydown="if(event.key==='Enter')AppManager.sendAIMessage()">
+                            <input id="ai-chat-input" class="haldo-input" placeholder="Nachricht, Bruder..." style="flex:1;" onkeydown="if(event.key==='Enter')AppManager.sendAIMessage()">
                             <button onclick="AppManager.sendAIMessage()" class="haldo-btn">📤</button>
                             <button onclick="AppManager.voiceInput()" class="haldo-btn haldo-btn-secondary">🎤</button>
                         </div>
@@ -1769,7 +2129,7 @@
                 const loading = document.createElement('div');
                 loading.style.cssText =
                     'text-align:left;margin:3px 0;padding:5px 10px;background:rgba(255,255,255,0.03);border-radius:6px;color:var(--text-secondary);max-width:85%;font-size:11px;';
-                loading.textContent = '💭 HalDo denkt...';
+                loading.textContent = '💭 HalDo denkt, Bruder...';
                 messagesDiv.appendChild(loading);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
@@ -1790,7 +2150,7 @@
             },
 
             voiceInput() {
-                if (!('webkitSpeechRecognition' in window)) { alert('🎤 Speech Recognition nicht unterstützt.'); return; }
+                if (!('webkitSpeechRecognition' in window)) { alert('🎤 Speech Recognition nicht unterstützt, Bruder.'); return; }
                 const rec = new webkitSpeechRecognition();
                 rec.lang = 'de-DE';
                 rec.onresult = (e) => {
@@ -1811,12 +2171,12 @@
                             <h3 style="font-size:12px;color:var(--text-secondary);">🧠 AI & Memory</h3>
                             <p style="font-size:11px;color:var(--text-muted);">🔒 HalDo läuft KOMPLETT LOKAL – kein API-Key nötig!</p>
                             <p style="font-size:11px;color:var(--text-secondary);">Memory: ${Storage.get('ai_memory',[]).length} Einträge</p>
-                            <button onclick="Storage.set('ai_memory',[]);alert('Memory gelöscht!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🧹 Memory löschen</button>
+                            <button onclick="Storage.set('ai_memory',[]);alert('Memory gelöscht, Bruder!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🧹 Memory löschen</button>
                         </div>
                         <div style="margin-top:16px;">
                             <h3 style="font-size:12px;color:var(--text-secondary);">💾 Speicher</h3>
                             <p style="font-size:11px;color:var(--text-secondary);">Einträge: ${localStorage.length}</p>
-                            <button onclick="Storage.clear();alert('Cache geleert!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🗑️ Cache leeren</button>
+                            <button onclick="Storage.clear();alert('Cache geleert, Bruder!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🗑️ Cache leeren</button>
                         </div>
                         <div style="margin-top:16px;">
                             <h3 style="font-size:12px;color:var(--text-secondary);">📊 System</h3>
@@ -1835,7 +2195,7 @@
             // ===== KATEGORIEN =====
             openCategory(category) {
                 const apps = this.apps.filter(a => a.category === category);
-                if (!apps.length) { alert(`Keine Apps in "${category}"`); return; }
+                if (!apps.length) { alert(`Keine Apps in "${category}", Bruder!`); return; }
                 const content = `
                     <div style="display:flex;flex-wrap:wrap;gap:6px;">
                         ${apps.map(app => `<div onclick="AppManager.openApp('${app.id}')" style="padding:6px 12px;background:rgba(255,255,255,0.03);border-radius:6px;border:1px solid var(--glass-border);cursor:pointer;">${app.icon} ${app.name}</div>`).join('')}
@@ -1893,9 +2253,10 @@
             Storage.set('logs', logs);
         };
 
-        console.log('💙❤️🚀 HalDo AI OS 24.6.0 Ultimate geladen!');
+        console.log('💙❤️🚀 HalDo AI OS 24.6.0 Ultimate geladen, Bruder!');
         console.log('🔒 KI läuft KOMPLETT LOKAL – KEIN API-Key nötig!');
-        console.log('💡 Frag HalDo alles – sie hat ein riesiges Wissen!');
+        console.log('☀️ Klick die Sonne an – HalDo AI öffnet sich!');
+        console.log('💡 Frag HalDo alles – sie hat ein riesiges Wissen für dich!');
     </script>
 </body>
 </html>
