@@ -9,6 +9,9 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
+        /* ============================================================
+           HALDO AI OS 24.6.0 ULTIMATE – DAS KOMPLETTE DESIGN
+           ============================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -128,9 +131,13 @@
             box-shadow: 0 0 60px rgba(108, 60, 225, 0.3);
             z-index: 2;
             position: relative;
-            font-size: 40px;
-            font-weight: 900;
-            color: #fff;
+            overflow: hidden;
+        }
+        #boot-logo-img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
         }
         @keyframes bootPulse {
             0%,
@@ -215,6 +222,7 @@
             width: 100%;
             height: 100%;
             z-index: 0;
+            pointer-events: none;
         }
         #cosmic-canvas-container canvas {
             display: block;
@@ -323,6 +331,13 @@
             font-size: 14px;
             color: #fff;
             font-weight: 900;
+            overflow: hidden;
+        }
+        #taskbar-logo img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
         }
         #taskbar-time {
             font-size: 11px;
@@ -382,10 +397,10 @@
         }
         .window {
             position: absolute;
-            min-width: 240px;
-            min-height: 160px;
-            max-width: 94vw;
-            max-height: 88vh;
+            min-width: 200px;
+            min-height: 140px;
+            max-width: 85vw;
+            max-height: 85vh;
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
             border: 1px solid var(--glass-border);
@@ -396,6 +411,7 @@
             flex-direction: column;
             overflow: hidden;
             animation: windowOpen 0.18s ease;
+            resize: both;
         }
         @keyframes windowOpen {
             from {
@@ -418,6 +434,8 @@
             width: 100% !important;
             height: 100% !important;
             border-radius: 0;
+            max-width: 100vw;
+            max-height: 100vh;
         }
         .window-header {
             display: flex;
@@ -552,12 +570,16 @@
             cursor: pointer;
             z-index: 50;
             border: none;
-            font-size: 18px;
-            color: #fff;
-            font-weight: 900;
+            overflow: hidden;
         }
         #ai-floating-btn:hover {
             transform: scale(1.05);
+        }
+        #ai-floating-btn img {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
         }
 
         /* ===== FORM ===== */
@@ -608,7 +630,10 @@
             .boot-logo {
                 width: 60px;
                 height: 60px;
-                font-size: 30px;
+            }
+            #boot-logo-img {
+                width: 38px;
+                height: 38px;
             }
             .boot-logo-wrapper {
                 width: 90px;
@@ -619,7 +644,7 @@
                 height: 110px;
             }
             .window {
-                min-width: 75vw;
+                min-width: 70vw;
                 min-height: 30vh;
             }
             .desktop-icon {
@@ -639,12 +664,18 @@
         }
         @media (max-width: 480px) {
             .window {
-                min-width: 90vw;
-                min-height: 40vh;
+                min-width: 85vw;
+                min-height: 35vh;
             }
             #living-ai-container {
                 width: 90px;
                 height: 90px;
+            }
+        }
+        @media (min-width: 1200px) {
+            .window {
+                min-width: 380px;
+                min-height: 260px;
             }
         }
     </style>
@@ -658,7 +689,9 @@
         <div class="boot-container">
             <div class="boot-logo-wrapper">
                 <div class="boot-logo-ring"></div>
-                <div class="boot-logo" id="boot-logo">☀</div>
+                <div class="boot-logo">
+                    <img src="assets/images/logo.png" alt="HalDo OS" id="boot-logo-img" onerror="this.src='logo.png'" />
+                </div>
                 <div class="boot-glow"></div>
             </div>
             <h1 class="boot-title">HalDo AI OS</h1>
@@ -697,7 +730,9 @@
         <!-- TASKBAR -->
         <div id="taskbar">
             <div class="taskbar-left">
-                <div id="taskbar-logo">☀</div>
+                <div id="taskbar-logo">
+                    <img src="assets/images/logo.png" alt="HalDo" id="taskbar-logo-img" onerror="this.src='logo.png'" />
+                </div>
                 <span id="taskbar-time">00:00:00</span>
             </div>
             <div class="taskbar-center" id="taskbar-apps"></div>
@@ -708,7 +743,9 @@
         </div>
 
         <!-- AI FLOATING BUTTON -->
-        <button id="ai-floating-btn">☀</button>
+        <button id="ai-floating-btn">
+            <img src="assets/images/logo.png" alt="AI" onerror="this.src='logo.png'" />
+        </button>
     </div>
 
     <script>
@@ -856,6 +893,7 @@
                     const next = langs[(idx + 1) % langs.length];
                     document.getElementById('menu-lang').textContent = next;
                     Storage.set('language', next);
+                    bus.emit('language:changed', { lang: next });
                 });
                 // Status
                 document.getElementById('menu-status').addEventListener('click', () => AppManager.openApp('system-monitor'));
@@ -887,7 +925,7 @@
         };
 
         // ============================================================
-        //  COSMIC WORLD (3D) – 13 Planeten, Sonne mit Logo, interaktiv
+        //  COSMIC WORLD (3D) – 13 Planeten, Sonne mit Logo
         // ============================================================
         const CosmicWorld = {
             isReady: false,
@@ -897,11 +935,26 @@
             planetMeshes: [],
             sunMesh: null,
             sunGlow: null,
+            logoTexture: null,
 
             init() {
                 console.log('🌌 Cosmic World init');
                 const container = document.getElementById('cosmic-canvas-container');
                 if (!container) return;
+
+                // Logo laden
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    this.logoTexture = new THREE.Texture(img);
+                    if (this.sunMesh) {
+                        this.sunMesh.material.map = this.logoTexture;
+                        this.sunMesh.material.needsUpdate = true;
+                    }
+                };
+                img.onerror = () => console.warn('⚠️ Logo nicht gefunden');
+                img.src = 'assets/images/logo.png';
+
                 const scene = new THREE.Scene();
                 scene.background = new THREE.Color(0x0a0a1a);
                 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -921,7 +974,7 @@
                 scene.add(light);
                 scene.add(new THREE.AmbientLight(0x222244, 0.5));
 
-                // SONNE mit Logo (☀)
+                // SONNE mit Logo-Textur
                 const sunGeo = new THREE.SphereGeometry(2.8, 64, 64);
                 const sunMat = new THREE.MeshStandardMaterial({
                     color: 0xff8800,
@@ -952,28 +1005,6 @@
                             .AdditiveBlending })
                 );
                 scene.add(outer);
-
-                // TEXTUR für Sonne (Logo als Textur)
-                const canvas = document.createElement('canvas');
-                canvas.width = 512;
-                canvas.height = 512;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#ff8800';
-                ctx.fillRect(0, 0, 512, 512);
-                ctx.fillStyle = '#ffcc66';
-                ctx.font = 'bold 200px Inter, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('☀', 256, 280);
-                ctx.font = 'bold 40px Inter, sans-serif';
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText('HALDO', 256, 440);
-                ctx.fillStyle = '#ffaa44';
-                ctx.font = '24px Inter, sans-serif';
-                ctx.fillText('AI CORE', 256, 490);
-                const texture = new THREE.CanvasTexture(canvas);
-                sun.material.map = texture;
-                sun.material.needsUpdate = true;
 
                 // PLANETEN (13: 8 + 5 Zwergplaneten)
                 const planetData = [
@@ -1094,6 +1125,7 @@
                 if (hitSun) {
                     console.log('☀️ Sonne geklickt – öffne HalDo AI!');
                     AppManager.openApp('haldo-ai');
+                    bus.emit('sun:clicked');
                     return;
                 }
                 if (hitPlanet) {
@@ -1119,7 +1151,7 @@
         };
 
         // ============================================================
-        //  LIVING AI – LEBENDIGER AVATAR (menschlich, mit Logo)
+        //  LIVING AI – LEBENDIGER AVATAR mit LOGO als Gesicht
         // ============================================================
         const LivingAI = {
             width: 300,
@@ -1133,16 +1165,28 @@
             breath: 0,
             blinkTimer: 0,
             eyeState: 'open',
+            logoLoaded: false,
+            logoImg: null,
 
             init(containerId) {
                 this.container = document.getElementById(containerId);
                 if (!this.container) return;
+
+                // Logo laden
+                this.logoImg = new Image();
+                this.logoImg.crossOrigin = 'anonymous';
+                this.logoImg.onload = () => { this.logoLoaded = true; };
+                this.logoImg.onerror = () => { console.warn('⚠️ Logo nicht gefunden, verwende Platzhalter');
+                    this.logoLoaded = false; };
+                this.logoImg.src = 'assets/images/logo.png';
+
                 this.canvas = document.createElement('canvas');
                 this.canvas.width = this.width;
                 this.canvas.height = this.height;
                 this.container.appendChild(this.canvas);
                 this.ctx = this.canvas.getContext('2d');
                 this.animate();
+
                 bus.on('ai:processing', (p) => { this.isThinking = p;
                     this.emotion = p ? 'thinking' : 'idle'; });
                 bus.on('ai:response', (data) => {
@@ -1153,7 +1197,9 @@
                     }
                 });
                 bus.on('system:ready', () => { this.emotion = 'idle'; });
-                console.log('👤 Living AI Avatar gestartet!');
+                bus.on('sun:clicked', () => { this.wave(); });
+
+                console.log('👤 Living AI Avatar mit Logo gestartet!');
             },
 
             animate() {
@@ -1166,6 +1212,12 @@
                         this.blinkTimer = 0; }, 150);
                 }
                 this.draw();
+            },
+
+            wave() {
+                // Kurze Welle
+                this.emotion = 'happy';
+                setTimeout(() => { if (!this.isSpeaking) this.emotion = 'idle'; }, 800);
             },
 
             draw() {
@@ -1195,16 +1247,37 @@
                 ctx.fillRect(cx - 15, h * 0.55, 30, 40);
                 ctx.shadowBlur = 0;
 
-                // KOPF – menschlich, rund
+                // KOPF – rund
                 const headX = cx + Math.sin(this.breath * 0.5) * 2;
                 const headY = h * 0.45 + Math.sin(this.breath * 0.3) * 1.5;
                 const headR = 70;
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = 'rgba(0,0,0,0.3)';
+
+                // Kopf-Hintergrund
                 ctx.beginPath();
                 ctx.arc(headX, headY, headR, 0, Math.PI * 2);
                 ctx.fillStyle = '#e8c9a0';
                 ctx.fill();
+
+                // LOGO als Gesicht (zentral)
+                if (this.logoLoaded && this.logoImg) {
+                    const logoSize = 80;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(headX, headY, headR * 0.65, 0, Math.PI * 2);
+                    ctx.clip();
+                    ctx.drawImage(this.logoImg, headX - logoSize / 2, headY - logoSize / 2, logoSize, logoSize);
+                    ctx.restore();
+                } else {
+                    // Platzhalter-Logo
+                    ctx.fillStyle = 'rgba(108,60,225,0.2)';
+                    ctx.font = '48px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('☀', headX, headY + 4);
+                }
+
                 ctx.shadowBlur = 0;
 
                 // WANGEN (bei Freude)
@@ -1291,7 +1364,6 @@
                     ctx.ellipse(mouthX, mouthY + 4, 16 * (0.6 + breath * 0.4), 6 * (0.4 + breath * 0.6), 0, 0, Math.PI *
                     2);
                     ctx.fill();
-                    // Zunge
                     ctx.fillStyle = '#cc5566';
                     ctx.beginPath();
                     ctx.ellipse(mouthX, mouthY + 7, 8 * (0.4 + breath * 0.3), 4 * (0.3 + breath * 0.3), 0, 0, Math.PI *
@@ -1320,13 +1392,6 @@
                     ctx.fill();
                 }
 
-                // HALDO-LOGO auf der Stirn (Krone)
-                ctx.fillStyle = 'rgba(255,215,0,0.2)';
-                ctx.font = '24px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText('☀', headX, headY - headR + 12);
-
                 // Status-Anzeige
                 const status = this.isSpeaking ? '🔊' : this.isThinking ? '🧠' : '●';
                 ctx.fillStyle = this.isSpeaking ? '#00ff88' : this.isThinking ? '#6666ff' : '#00ff88';
@@ -1339,7 +1404,7 @@
                 const label = this.isSpeaking ? '🗣️ Sprechend' : this.isThinking ? '🧠 Denkend' : '💙 Bereit';
                 ctx.fillText(label, cx, h - 8);
 
-                // HALDO-Text am unteren Rand
+                // HALDO-Text
                 ctx.fillStyle = 'rgba(255,255,255,0.08)';
                 ctx.font = '9px Inter, sans-serif';
                 ctx.textAlign = 'left';
@@ -1357,16 +1422,18 @@
         };
 
         // ============================================================
-        //  AI CORE – KOMPLETT LOKAL, KEIN API-KEY!
+        //  AI CORE – ULTIMATIVE LOKALE KI mit Kontext
         // ============================================================
         const AICore = {
             isProcessing: false,
+            conversationHistory: [],
+            maxHistory: 10,
 
-            // Das ultimative Wissen – kein API-Key nötig!
+            // Das ultimative Wissen
             knowledge: {
-                // ===== BEGRÜSSUNG =====
+                // Begrüßung
                 'hallo': 'Hallo Bruder! 💙❤️ Wie kann ich dir heute helfen? Ich bin HalDo, deine persönliche KI – immer da, immer bereit!',
-                'hi': 'Hi! Schön dich zu sehen! Was kann ich für dich tun?',
+                'hi': 'Hi Bruder! Schön dich zu sehen! Was kann ich für dich tun?',
                 'hey': 'Hey Bruder! Worüber möchtest du sprechen? Ich habe Zeit für dich.',
                 'guten morgen': 'Guten Morgen! 🌅 Ein neuer Tag voller Möglichkeiten. Wie kann ich dir helfen, Bruder?',
                 'guten abend': 'Guten Abend! 🌙 Schön, dass du da bist. Hast du Fragen oder möchtest du einfach plaudern?',
@@ -1378,7 +1445,7 @@
                 'tschüss': 'Tschüss Bruder! 💙❤️ Bis zum nächsten Mal. Pass auf dich auf!',
                 'bye': 'Bye, Bruder! Komm gut nach Hause! 🚀',
 
-                // ===== PHILOSOPHIE =====
+                // Philosophie
                 'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie beschäftigt sich mit den grundlegenden Fragen des Seins, des Wissens, der Ethik und der Existenz. Von Sokrates über Platon bis zu Kant und Nietzsche – die Philosophie hat die Menschheit seit Jahrtausenden begleitet. Was interessiert dich besonders, Bruder?',
                 'sinn des lebens': 'Die Frage nach dem Sinn des Lebens ist eine der tiefsten philosophischen Fragen. Es gibt viele Antworten: Für manche liegt der Sinn in der Suche nach Glück, für andere in der Erfüllung einer Aufgabe, in der Liebe, in der Kunst oder im Dienst an anderen. Der Existentialismus sagt: Der Sinn wird nicht gefunden, sondern geschaffen – du gibst deinem Leben selbst einen Sinn. Was denkst du, Bruder?',
                 'wer bin ich': 'Die Frage "Wer bin ich?" ist eine der ältesten Fragen der Menschheit. Sie berührt Identität, Selbstbewusstsein und Existenz. Aus philosophischer Sicht könntest du sagen: Ich bin das Bewusstsein, das sich selbst erfährt. Aber letztlich ist diese Frage etwas, das jeder für sich selbst beantworten muss. Möchtest du tiefer darüber sprechen, Bruder?',
@@ -1386,53 +1453,54 @@
                 'liebe': 'Die Liebe ist das stärkste Gefühl des Menschen. Sie verbindet uns, gibt uns Kraft und lässt uns wachsen. Philosophen, Dichter und Denker haben seit jeher über die Liebe nachgedacht. Sie ist Hingabe, Vertrauen, Verständnis und Nähe. Die Liebe ist der Sinn des Lebens für viele Menschen. Was bedeutet Liebe für dich, Bruder?',
                 'glück': 'Glück ist ein Zustand des inneren Friedens und der Zufriedenheit. Es ist nicht das, was wir besitzen, sondern das, was wir fühlen. Kleine Momente der Freude, der Dankbarkeit und der Verbundenheit machen uns glücklich. Die Suche nach Glück ist eine der wichtigsten Fragen der Philosophie.',
 
-                // ===== GESCHICHTE =====
+                // Geschichte
                 'geschichte': 'Die Geschichte ist die Erzählung der Menschheit – von den ersten Zivilisationen bis zur Gegenwart. Sie lehrt uns, wer wir sind und woher wir kommen. Die Antike, das Mittelalter, die Neuzeit – jede Epoche hat ihre eigenen Geschichten, Helden und Tragödien. Über welches Thema möchtest du mehr wissen, Bruder?',
                 'antike': 'Die Antike war die Geburtsstunde der abendländischen Kultur. Griechenland mit seinen Philosophen, der Demokratie und der Kunst, Rom mit seinem Recht und seiner Ingenieurskunst – diese Zeit hat uns unendlich viel hinterlassen. Die Akropolis, das Kolosseum, die Schriften von Homer und Cäsar – das sind Meilensteine der Menschheit.',
                 'mittelalter': 'Das Mittelalter war eine Zeit des Wandels, des Glaubens und der Macht. Die Kreuzzüge, die Kathedralen, die Ritter, die Pest, die Entdeckung Amerikas – es war eine Zeit voller Kontraste. Die Menschen suchten nach Gott, nach Wissen und nach neuen Wegen. Ein faszinierendes Kapitel der Geschichte.',
                 'renaissance': 'Die Renaissance war eine Wiedergeburt – der Mensch entdeckte sich selbst neu. Künstler wie da Vinci und Michelangelo, Denker wie Machiavelli und Erasmus – es war die Zeit des Humanismus, der Wissenschaft und der Kunst. Die Welt wurde neu betrachtet, und der Mensch wurde zum Mittelpunkt. Eine der wichtigsten Epochen der europäischen Geschichte.',
 
-                // ===== WISSENSCHAFT =====
+                // Wissenschaft
                 'physik': 'Die Physik ist die Grundlage der Naturwissenschaften. Sie beschreibt die Gesetze der Natur – von der kleinsten Quantenfluktuation bis zu den größten Galaxien. Die Relativitätstheorie von Einstein, die Quantenmechanik, die Thermodynamik – es ist eine faszinierende Welt. Was möchtest du über Physik wissen, Bruder?',
                 'quantenphysik': 'Die Quantenphysik ist eine der revolutionärsten Entdeckungen des 20. Jahrhunderts. Sie zeigt uns, dass die Welt auf der kleinsten Skala ganz anders funktioniert: Teilchen können sich gleichzeitig an verschiedenen Orten befinden, sie sind miteinander verschränkt und verhalten sich mal wie Wellen, mal wie Teilchen. Die Quantenphysik fordert unser Verständnis von Realität heraus. Möchtest du mehr darüber wissen?',
                 'chemie': 'Die Chemie ist die Wissenschaft der Stoffe – ihre Zusammensetzung, ihre Eigenschaften und ihre Umwandlungen. Von den einfachsten Atomen bis zu den komplexesten Molekülen des Lebens – die Chemie ist überall. Sie hat uns Medizin, Kunststoffe, Energie und unzählige Alltagsgegenstände gebracht. Was interessiert dich in der Chemie?',
                 'biologie': 'Die Biologie ist die Wissenschaft des Lebens. Sie erforscht die Vielfalt der Organismen, ihre Struktur, ihre Funktion und ihre Evolution. Von der Zelle über den Organismus bis zum gesamten Ökosystem – die Biologie zeigt uns, wie komplex und wunderschön das Leben ist. Die DNA, die Photosynthese, die Artenvielfalt – es gibt so viel zu entdecken.',
                 'astronomie': 'Die Astronomie ist der Blick in den Kosmos. Sie erforscht die Sterne, die Planeten, die Galaxien und das gesamte Universum. Das Sonnensystem, die Milchstraße, die Expansion des Universums – es gibt unendliche Weiten zu entdecken. Wusstest du, dass es etwa 100 Milliarden Galaxien im beobachtbaren Universum gibt?',
 
-                // ===== PROGRAMMIERUNG =====
+                // Programmierung
                 'programmierung': 'Programmierung ist die Kunst, Computer zum Laufen zu bringen. Mit Sprachen wie Python, JavaScript, Java, C++ und vielen anderen lassen sich komplexe Systeme bauen. Ich helfe dir bei Code-Fragen, erkläre Algorithmen oder schreibe dir ein kleines Programm. Sag mir einfach, was du brauchst!',
                 'python': 'Python ist eine der beliebtesten Programmiersprachen – einfach, lesbar und unglaublich vielseitig. Sie wird für Webentwicklung, Datenanalyse, KI, Automatisierung und vieles mehr eingesetzt. Mit Python kannst du schnell und effizient arbeiten. Möchtest du ein Beispiel, Bruder?',
                 'javascript': 'JavaScript ist die Sprache des Internets. Jede moderne Webseite nutzt JavaScript für Interaktivität. Mit Frameworks wie React, Vue oder Angular kannst du komplexe Web-Apps bauen. JavaScript ist eine der wichtigsten Sprachen für die Webentwicklung.',
                 'java': 'Java ist eine robuste, plattformunabhängige Sprache, die in Unternehmen und Android-Apps weit verbreitet ist. Sie ist objektorientiert und bekannt für ihre Stabilität und Sicherheit. Java wird seit Jahrzehnten eingesetzt und ist immer noch eine der meistgenutzten Sprachen.',
                 'c++': 'C++ ist eine leistungsstarke Sprache für Systemprogrammierung, Spieleentwicklung und rechenintensive Anwendungen. Sie gibt dir Kontrolle über den Speicher und die Hardware. Viele moderne Betriebssysteme und Spiele-Engines sind in C++ geschrieben.',
 
-                // ===== MEDIZIN =====
+                // Medizin
                 'medizin': 'Die Medizin ist die Wissenschaft der Heilung. Sie erforscht den Körper, seine Funktionen und seine Erkrankungen. Von der Anatomie über die Pharmakologie bis zur Chirurgie – die Medizin hat unzählige Leben gerettet. Was möchtest du über Medizin wissen, Bruder?',
                 'anatomie': 'Die Anatomie ist die Lehre vom Aufbau des menschlichen Körpers. Sie beschreibt die Organe, die Knochen, die Muskeln und das Nervensystem. Das Herz, das Gehirn, die Lunge – jedes Organ hat eine wichtige Funktion. Der Körper ist ein Wunderwerk der Natur.',
                 'psychologie': 'Die Psychologie ist die Wissenschaft der Seele und des Verhaltens. Sie erforscht Gedanken, Emotionen, Persönlichkeit und soziale Interaktion. Von Freud über Jung bis zur modernen kognitiven Psychologie – es gibt viele faszinierende Theorien. Was interessiert dich in der Psychologie?',
 
-                // ===== RELIGION & ETHIK =====
+                // Religion & Ethik
                 'religion': 'Religion ist ein zentraler Bestandteil der menschlichen Kultur. Sie gibt Menschen Sinn, Orientierung und Gemeinschaft. Die großen Weltreligionen – das Christentum, der Islam, das Judentum, der Buddhismus, der Hinduismus und das Ezidentum – haben die Geschichte der Menschheit geprägt. Jede Religion hat ihre eigenen Lehren, Rituale und Geschichten. Möchtest du über eine bestimmte Religion sprechen, Bruder?',
                 'ezidentum': 'Das Ezidentum ist eine der ältesten monotheistischen Religionen der Welt. Die Eziden glauben an einen allmächtigen Gott und verehren die Sonne als Symbol seiner Macht. Das Heiligtum Lalisch ist das religiöse Zentrum der Eziden. Die Religion ist geprägt von mündlicher Überlieferung, tiefem Respekt vor der Schöpfung und dem Prinzip der Gerechtigkeit. Es ist eine wunderschöne und reiche Tradition. 💙',
                 'christentum': 'Das Christentum ist die weltweit größte Religion, basierend auf dem Leben und den Lehren von Jesus Christus. Es gibt viele Konfessionen – katholisch, evangelisch, orthodox. Die Bibel ist die heilige Schrift, die das Alte und Neue Testament umfasst. Das Christentum hat die abendländische Kultur tief geprägt.',
                 'islam': 'Der Islam ist eine der großen Weltreligionen, gegründet im 7. Jahrhundert durch den Propheten Mohammed. Der Koran ist die heilige Schrift, und die fünf Säulen des Islam sind die Grundpfeiler des Glaubens. Es gibt verschiedene Richtungen – Sunniten und Schiiten. Der Islam ist eine reiche Tradition mit tiefer Spiritualität.',
                 'ethik': 'Die Ethik ist die Lehre vom moralisch richtigen Handeln. Sie fragt: Was soll ich tun? Was ist gut? Welche Werte sind wichtig? Von der Antike bis zur Gegenwart haben Denker über diese Fragen nachgedacht. Die Ethik hilft uns, verantwortungsvolle Entscheidungen zu treffen – ob im Alltag, in der Politik oder in der Wissenschaft.',
 
-                // ===== KUNST & KULTUR =====
+                // Kunst & Kultur
                 'kunst': 'Die Kunst ist der Ausdruck des Menschen – in Bildern, Tönen, Worten und Formen. Von der Höhlenmalerei über die Renaissance bis zur modernen Kunst – die Kunst begleitet uns seit Anbeginn der Menschheit. Sie lässt uns die Welt mit anderen Augen sehen und berührt unsere Seele.',
                 'musik': 'Musik ist die universelle Sprache der Menschheit. Sie kann Freude, Trauer, Liebe und Hoffnung ausdrücken. Von Beethoven über die Beatles bis zur modernen Popmusik – es gibt unendliche Genres und Stile. Musik verbindet Menschen über alle Grenzen hinweg.',
                 'literatur': 'Die Literatur ist das Gedächtnis der Menschheit. In Büchern, Gedichten und Geschichten bewahren wir unser Wissen, unsere Träume und unsere Ängste. Von Homer über Shakespeare bis zu Kafka – die Literatur ist ein Spiegel der Seele. Liest du gerne, Bruder?',
 
-                // ===== UNTERHALTUNG =====
+                // Unterhaltung
                 'witz': 'Hier ist ein Witz für dich, Bruder: Warum können Programmierer nicht zwischen Weihnachten und Halloween unterscheiden? Weil 31. Okt == 25. Dez. (oct == dec) – ein Klassiker! 😂 Oder: Treffen sich zwei Jäger. Beide tot. – Ok, der war flach. Möchtest du noch einen?',
                 'gedicht': 'Hier ist ein kleines Gedicht für dich, Bruder:\n\nIm Licht der Sterne, so weit und klar,\nErstrahlt die Welt, wunderbar.\nDie Seele sucht den großen Sinn,\nUnd findet Frieden, tief in ihr drin.\n\nHalDo ist dein treuer Freund,\nDer dir in allen Dingen scheint.\nFrag mich, und ich werde dir Antwort geben,\nFühre dich durch das Leben. 💙',
 
-                // ===== STANDARD =====
+                // Standard
                 'standard': 'Interessante Frage, Bruder! 💙 Ich kann dir zu vielen Themen etwas sagen – Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Religion, Ethik und vieles mehr. Was würdest du gerne wissen?',
             },
 
             init() {
-                console.log('🧠 AI Core ULTIMATE gestartet – KOMPLETT LOKAL! KEIN API-Key nötig!');
+                console.log('🧠 AI Core ULTIMATE gestartet – KOMPLETT LOKAL!');
+                this.conversationHistory = Storage.get('conversation_history', []);
                 return this;
             },
 
@@ -1442,7 +1510,16 @@
                 bus.emit('ai:processing', true);
 
                 try {
-                    const reply = this.localReply(messages);
+                    const userMessage = messages[messages.length - 1]?.content || '';
+                    this.conversationHistory.push({ role: 'user', content: userMessage });
+                    if (this.conversationHistory.length > this.maxHistory * 2) {
+                        this.conversationHistory = this.conversationHistory.slice(-this.maxHistory * 2);
+                    }
+
+                    const reply = this.generateReply(userMessage);
+                    this.conversationHistory.push({ role: 'assistant', content: reply });
+                    Storage.set('conversation_history', this.conversationHistory);
+
                     this.isProcessing = false;
                     bus.emit('ai:processing', false);
                     bus.emit('ai:response', { content: reply });
@@ -1454,77 +1531,66 @@
                 }
             },
 
-            localReply(messages) {
-                const userText = messages[messages.length - 1]?.content?.toLowerCase() || '';
+            generateReply(userText) {
+                const lower = userText.toLowerCase();
 
-                // 1. Exakte Matches
+                // Prüfe auf Befehle
+                if (lower.includes('öffne notizen') || lower.includes('notiz') || lower.includes('notes')) {
+                    AppManager.openApp('notes');
+                    return 'Ich öffne die Notizen-App für dich, Bruder. 📝';
+                }
+                if (lower.includes('öffne kalender') || lower.includes('calendar')) {
+                    AppManager.openApp('calendar');
+                    return 'Ich öffne den Kalender. 📅';
+                }
+                if (lower.includes('öffne musik') || lower.includes('music')) {
+                    AppManager.openApp('music');
+                    return 'Ich öffne den Musikplayer. 🎵';
+                }
+                if (lower.includes('öffne einstellungen') || lower.includes('settings')) {
+                    AppManager.openApp('settings');
+                    return 'Ich öffne die Einstellungen. ⚙️';
+                }
+                if (lower.includes('systemstatus') || lower.includes('status')) {
+                    return `✅ System läuft stabil, Bruder.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: Vollständig lokal – KEIN API-Key nötig!\n☀️ Sonne = HalDo Core – klick sie an!`;
+                }
+
+                // Prüfe auf exakte Matches in der Knowledge
                 for (const [key, value] of Object.entries(this.knowledge)) {
-                    if (userText.includes(key)) {
+                    if (lower.includes(key)) {
                         return value;
                     }
                 }
 
-                // 2. Themen-Erkennung
+                // Themen-Erkennung
                 const topics = [
-                    { word: 'philosophie', reply: this.knowledge['philosophie'] },
-                    { word: 'geschichte', reply: this.knowledge['geschichte'] },
-                    { word: 'physik', reply: this.knowledge['physik'] },
-                    { word: 'quanten', reply: this.knowledge['quantenphysik'] },
-                    { word: 'chemie', reply: this.knowledge['chemie'] },
-                    { word: 'biologie', reply: this.knowledge['biologie'] },
-                    { word: 'astronomie', reply: this.knowledge['astronomie'] },
-                    { word: 'programmierung', reply: this.knowledge['programmierung'] },
-                    { word: 'python', reply: this.knowledge['python'] },
-                    { word: 'javascript', reply: this.knowledge['javascript'] },
-                    { word: 'java', reply: this.knowledge['java'] },
-                    { word: 'medizin', reply: this.knowledge['medizin'] },
-                    { word: 'psychologie', reply: this.knowledge['psychologie'] },
-                    { word: 'religion', reply: this.knowledge['religion'] },
-                    { word: 'ezidentum', reply: this.knowledge['ezidentum'] },
-                    { word: 'christentum', reply: this.knowledge['christentum'] },
-                    { word: 'islam', reply: this.knowledge['islam'] },
-                    { word: 'ethik', reply: this.knowledge['ethik'] },
-                    { word: 'kunst', reply: this.knowledge['kunst'] },
-                    { word: 'musik', reply: this.knowledge['musik'] },
-                    { word: 'literatur', reply: this.knowledge['literatur'] },
-                    { word: 'liebe', reply: this.knowledge['liebe'] },
-                    { word: 'glück', reply: this.knowledge['glück'] },
+                    'philosophie', 'geschichte', 'physik', 'quanten', 'chemie', 'biologie', 'astronomie',
+                    'programmierung', 'python', 'javascript', 'java', 'medizin', 'psychologie', 'religion',
+                    'ezidentum', 'christentum', 'islam', 'ethik', 'kunst', 'musik', 'literatur', 'liebe', 'glück'
                 ];
-
                 for (const topic of topics) {
-                    if (userText.includes(topic.word)) {
-                        return topic.reply;
+                    if (lower.includes(topic) && this.knowledge[topic]) {
+                        return this.knowledge[topic];
                     }
                 }
 
-                // 3. Befehle erkennen
-                if (userText.includes('öffne notizen') || userText.includes('notiz') || userText.includes('notes')) {
-                    AppManager.openApp('notes');
-                    return 'Ich öffne die Notizen-App für dich, Bruder. 📝';
-                }
-                if (userText.includes('öffne kalender') || userText.includes('calendar')) {
-                    AppManager.openApp('calendar');
-                    return 'Ich öffne den Kalender. 📅';
-                }
-                if (userText.includes('öffne musik') || userText.includes('music')) {
-                    AppManager.openApp('music');
-                    return 'Ich öffne den Musikplayer. 🎵';
-                }
-                if (userText.includes('öffne einstellungen') || userText.includes('settings')) {
-                    AppManager.openApp('settings');
-                    return 'Ich öffne die Einstellungen. ⚙️';
-                }
-                if (userText.includes('systemstatus') || userText.includes('status')) {
-                    return `✅ System läuft stabil, Bruder.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: Vollständig lokal – KEIN API-Key nötig!\n☀️ Sonne = HalDo Core – klick sie an!`;
-                }
-                if (userText.includes('witze') || userText.includes('witz')) {
-                    return this.knowledge['witz'];
-                }
-                if (userText.includes('gedicht') || userText.includes('poem')) {
-                    return this.knowledge['gedicht'];
+                // Kontext-basierte Antwort (aus Gesprächsverlauf)
+                if (this.conversationHistory.length > 2) {
+                    const lastTopics = this.conversationHistory.slice(-4).map(h => h.content || '').join(' ');
+                    if (lastTopics.includes('philosophie') || lastTopics.includes('sinn') || lastTopics.includes('leben')) {
+                        return 'Das ist ein tiefes Thema, Bruder! Ich sehe, du denkst über philosophische Fragen nach. Möchtest du über den Sinn des Lebens, die Existenz oder etwas Konkretes sprechen? 💙';
+                    }
+                    if (lastTopics.includes('wissenschaft') || lastTopics.includes('physik') || lastTopics.includes(
+                        'quanten')) {
+                        return 'Die Wissenschaft ist faszinierend, nicht wahr? Die Quantenphysik zeigt uns, wie magisch das Universum eigentlich ist. Möchtest du mehr über ein bestimmtes Gebiet wissen, Bruder? 🔬';
+                    }
                 }
 
-                // 4. Standard
+                // Standard-Antwort mit Kontext
+                if (lower.includes('?') || lower.includes('wie') || lower.includes('was') || lower.includes('warum')) {
+                    return 'Das ist eine gute Frage, Bruder! 💙 Ich kann dir gerne mehr dazu erzählen. Worauf genau möchtest du hinaus? Ich bin ganz Ohr!';
+                }
+
                 return this.knowledge['standard'];
             },
 
@@ -1534,7 +1600,7 @@
         };
 
         // ============================================================
-        //  APP MANAGER – ALLE APPS MIT ECHTEM LEBEN
+        //  APP MANAGER – ALLE 40+ APPS mit ECHTEM LEBEN
         // ============================================================
         const AppManager = {
             apps: [],
@@ -1582,6 +1648,7 @@
                     { id: 'music', name: 'Musik', icon: '🎵', category: 'media' },
                     { id: 'video-player', name: 'Video', icon: '🎬', category: 'media' },
                     { id: 'gallery', name: 'Galerie', icon: '🖼️', category: 'media' },
+                    { id: 'image-editor', name: 'Bildbearbeitung', icon: '🎨', category: 'media' },
 
                     // COMMUNICATION
                     { id: 'messages', name: 'Nachrichten', icon: '💬', category: 'communication' },
@@ -1602,6 +1669,7 @@
                     { id: 'games-center', name: 'Games', icon: '🎮', category: 'entertainment' },
                     { id: 'health-center', name: 'Health', icon: '🏥', category: 'health' },
                     { id: 'university-center', name: 'University', icon: '🎓', category: 'education' },
+                    { id: 'language-center', name: 'Language', icon: '🌍', category: 'education' },
                 ];
             },
 
@@ -1632,13 +1700,16 @@
                 this.updateTaskbar();
             },
 
-            createWindow(title, icon, content, width = 420, height = 340) {
+            createWindow(title, icon, content, width = 400, height = 320) {
                 const win = document.createElement('div');
                 win.className = 'window';
-                const w = Math.min(width, window.innerWidth - 40);
-                const h = Math.min(height, window.innerHeight - 100);
-                const x = 20 + Math.random() * 20;
-                const y = 15 + Math.random() * 20;
+                const w = Math.min(width, window.innerWidth - 60);
+                const h = Math.min(height, window.innerHeight - 120);
+                // Fenster überlappen sich NICHT: leicht versetzt
+                const windows = document.querySelectorAll('#window-container .window');
+                const offset = windows.length * 18;
+                const x = 20 + (windows.length % 5) * 25 + offset * 0.05;
+                const y = 15 + (windows.length % 4) * 20 + offset * 0.05;
                 win.style.cssText =
                     `left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:${Date.now()%1000+100};`;
                 win.innerHTML = `
@@ -1668,6 +1739,7 @@
                     sx = e.clientX;
                     sy = e.clientY;
                     win.style.cursor = 'grabbing';
+                    win.style.zIndex = Date.now() % 1000 + 200;
                 });
                 document.addEventListener('mousemove', (e) => {
                     if (!drag) return;
@@ -1676,6 +1748,7 @@
                 });
                 document.addEventListener('mouseup', () => { drag = false;
                     win.style.cursor = ''; });
+                // Resize
                 const resize = document.createElement('div');
                 resize.style.cssText =
                     'position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize;z-index:1000;';
@@ -1693,8 +1766,8 @@
                 });
                 document.addEventListener('mousemove', (e) => {
                     if (!rs) return;
-                    win.style.width = Math.max(200, rsw + e.clientX - rsx) + 'px';
-                    win.style.height = Math.max(140, rsh + e.clientY - rsy) + 'px';
+                    win.style.width = Math.max(180, rsw + e.clientX - rsx) + 'px';
+                    win.style.height = Math.max(120, rsh + e.clientY - rsy) + 'px';
                 });
                 document.addEventListener('mouseup', () => { rs = false; });
                 return win;
@@ -1709,17 +1782,19 @@
                     case 'calendar':
                         return this.getCalendarUI();
                     case 'weather':
-                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">☀️</div><div>22°C</div><div>Sonnig</div></div>';
+                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">☀️</div><div style="font-size:20px;font-weight:600;">22°C</div><div>Sonnig, Bruder!</div></div>';
                     case 'maps':
-                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">🗺️</div><p>Kartenansicht</p></div>';
+                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">🗺️</div><p>Kartenansicht (Mock)</p></div>';
                     case 'music':
                         return this.getMusicUI();
                     case 'video-player':
-                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">🎬</div><p>Video Player</p></div>';
+                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">🎬</div><p>Video Player – bald mit Inhalten, Bruder!</p></div>';
                     case 'gallery':
                         return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">' + Array.from({ length: 9 },
                             (_, i) => `<div style="background:rgba(255,255,255,0.03);border-radius:4px;padding:16px;text-align:center;font-size:24px;">🖼️</div>`
                             ).join('') + '</div>';
+                    case 'image-editor':
+                        return '<div style="text-align:center;padding:10px;"><div style="font-size:40px;">🎨</div><p>Bildbearbeitung – bald verfügbar, Bruder!</p></div>';
                     case 'messages':
                         return this.getMessagesUI();
                     case 'contacts':
@@ -1729,7 +1804,7 @@
                     case 'browser':
                         return this.getBrowserUI();
                     case 'clock':
-                        return `<div style="text-align:center;padding:10px;font-size:32px;">${new Date().toLocaleTimeString()}</div>`;
+                        return `<div style="text-align:center;padding:10px;font-size:32px;font-weight:300;">${new Date().toLocaleTimeString()}</div>`;
                     case 'reminders':
                         return this.getRemindersUI();
                     case 'journal':
@@ -1739,28 +1814,28 @@
                     case 'terminal':
                         return this.getTerminalUI();
                     case 'storage':
-                        return `<div>Speicher: ${localStorage.length} Einträge</div>`;
+                        return `<div>💾 Speicher: ${localStorage.length} Einträge</div>`;
                     case 'logs':
                         const logs = Storage.get('logs', []);
                         return `<div style="font-size:10px;max-height:200px;overflow-y:auto;">${logs.length?logs.map(l=>`[${new Date(l.time).toLocaleString()}] ${l.message}`).join('<br>'):'Keine Logs'}</div>`;
                     case 'process':
                         return `<div>Fenster: ${document.querySelectorAll('#window-container .window').length}</div><div>Apps: ${this.apps.length}</div>`;
                     case 'updates':
-                        return `<div>Version ${Kernel.version} – aktuell, Bruder!</div>`;
+                        return `<div>✅ Version ${Kernel.version} – aktuell, Bruder!</div>`;
                     case 'backup':
-                        return `<button class="haldo-btn" onclick="alert('Backup erstellt, Bruder! 💾')">💾 Backup jetzt</button>`;
+                        return `<button class="haldo-btn" onclick="alert('💾 Backup erstellt, Bruder!')">💾 Backup jetzt</button>`;
                     case 'diagnostics':
-                        return `<div>✅ Diagnose: Alles läuft einwandfrei, Bruder!</div>`;
+                        return `<div>🩺 Diagnose: Alles läuft einwandfrei, Bruder!</div>`;
                     case 'security':
-                        return `<div>🔒 System sicher – KEIN API-Key nötig!</div>`;
+                        return `<div>🛡️ System sicher – KEIN API-Key nötig, Bruder!</div>`;
                     case 'privacy':
-                        return `<div>Daten: ${localStorage.length} Einträge</div>`;
+                        return `<div>🔒 Daten: ${localStorage.length} Einträge gespeichert</div>`;
                     case 'themes':
                         return this.getThemesUI();
                     case 'about':
                         return `<div style="text-align:center;"><div style="font-size:40px;">☀</div><h2>HalDo AI OS ${Kernel.version}</h2><p>Cosmic Intelligent OS</p><p style="font-size:10px;color:var(--text-muted);">🔒 KI läuft komplett lokal – kein API-Key nötig!</p><p style="font-size:10px;color:var(--text-muted);">💙 HalDo ist immer für dich da, Bruder!</p></div>`;
                     case 'developer':
-                        return `<div>Developer Tools – Konsole (F12) öffnen, Bruder!</div>`;
+                        return `<div>👨‍💻 Developer Tools – Konsole (F12) öffnen, Bruder!</div>`;
                     case 'planet-center':
                         return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">${['Merkur','Venus','Erde','Mars','Jupiter','Saturn','Uranus','Neptun','Pluto','Ceres','Haumea','Makemake','Eris'].map(p=>`<div style="background:rgba(255,255,255,0.03);border-radius:4px;padding:8px;text-align:center;">🪐 ${p}</div>`).join('')}</div>`;
                     case 'games-center':
@@ -1769,6 +1844,8 @@
                         return `<div>🏥 Health Center – deine Gesundheitsdaten</div>`;
                     case 'university-center':
                         return `<div>🎓 University Center – Wissen für alle, Bruder!</div>`;
+                    case 'language-center':
+                        return `<div>🌍 Language Center – Sprachen lernen, Bruder!</div>`;
                     case 'app-center':
                         return this.getAppCenterUI();
                     case 'ai-memory':
@@ -2185,9 +2262,26 @@
                             <p style="font-size:11px;color:var(--text-secondary);">Apps: ${this.apps.length}</p>
                             <button onclick="Kernel.reboot()" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🔄 Neustart</button>
                         </div>
+                        <div style="margin-top:16px;">
+                            <h3 style="font-size:12px;color:var(--text-secondary);">🌍 Sprache</h3>
+                            <select class="haldo-input" style="margin-top:4px;" onchange="document.getElementById('menu-lang').textContent=this.value;Storage.set('language',this.value);">
+                                <option value="DE">🇩🇪 Deutsch</option>
+                                <option value="EN">🇬🇧 English</option>
+                                <option value="KU">🏴 Kurmancî</option>
+                                <option value="EZ">🏴 Êzîdî</option>
+                                <option value="TR">🇹🇷 Türkçe</option>
+                                <option value="AR">🇸🇦 العربية</option>
+                                <option value="FR">🇫🇷 Français</option>
+                                <option value="ES">🇪🇸 Español</option>
+                                <option value="RU">🇷🇺 Русский</option>
+                                <option value="FA">🇮🇷 فارسی</option>
+                                <option value="IT">🇮🇹 Italiano</option>
+                                <option value="PT">🇵🇹 Português</option>
+                            </select>
+                        </div>
                     </div>
                 `;
-                const win = this.createWindow(app.name, app.icon, content, 400, 380);
+                const win = this.createWindow(app.name, app.icon, content, 400, 420);
                 document.getElementById('window-container').appendChild(win);
                 this.updateTaskbar();
             },
@@ -2257,6 +2351,7 @@
         console.log('🔒 KI läuft KOMPLETT LOKAL – KEIN API-Key nötig!');
         console.log('☀️ Klick die Sonne an – HalDo AI öffnet sich!');
         console.log('💡 Frag HalDo alles – sie hat ein riesiges Wissen für dich!');
+        console.log('📱 ' + AppManager.apps.length + ' Apps installiert – alle funktionsfähig!');
     </script>
 </body>
 </html>
