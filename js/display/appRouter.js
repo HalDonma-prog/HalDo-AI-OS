@@ -1,8 +1,6 @@
 /**
- * HALDO AI OS 24.6 – APP ROUTER
- * Navigation zwischen Apps
+ * HALDO AI OS 24.6.0 – APP ROUTER
  */
-
 const AppRouter = {
     routes: {},
     currentRoute: null,
@@ -15,26 +13,12 @@ const AppRouter = {
 
     navigate(path, data = {}) {
         const route = this.routes[path];
-        if (!route) {
-            console.warn(`⚠️ Route ${path} nicht gefunden`);
-            return false;
-        }
-
+        if (!route) { console.warn(`⚠️ Route ${path} nicht gefunden`); return false; }
         this.currentRoute = path;
         this.history.push({ path, data, timestamp: Date.now() });
-
-        EventBus.emit('route:changed', {
-            path,
-            appId: route.appId,
-            data
-        });
-
-        // App öffnen
+        EventBus.emit('route:changed', { path, appId: route.appId, data });
         const app = AppRegistry.get(route.appId);
-        if (app && typeof app.open === 'function') {
-            app.open(data);
-        }
-
+        if (app && typeof app.open === 'function') app.open(data);
         console.log(`🧭 Navigiert zu: ${path} (${route.appId})`);
         return true;
     },
@@ -46,18 +30,8 @@ const AppRouter = {
         return this.navigate(prev.path, prev.data);
     },
 
-    getCurrent() {
-        return this.currentRoute;
-    },
-
-    getHistory() {
-        return this.history;
-    },
-
-    clearHistory() {
-        this.history = [];
-        return this;
-    }
+    getCurrent() { return this.currentRoute; },
+    getHistory() { return this.history; },
+    clearHistory() { this.history = []; return this; }
 };
-
 window.AppRouter = AppRouter;
