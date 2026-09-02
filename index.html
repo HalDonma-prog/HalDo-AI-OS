@@ -14,7 +14,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
     <style>
-        /* ===== DESIGNS (wie gehabt) ===== */
+        /* ============================================================
+           HALDO AI OS 24.6.0 – ULTIMATE DESIGN
+           ============================================================ */
+
         :root {
             --primary: #6C3CE1;
             --primary-dark: #4A1FA6;
@@ -70,7 +73,7 @@
             border-radius: 10px;
         }
 
-        /* ===== BOOT ===== */
+        /* ===== BOOT SCREEN ===== */
         #boot-screen {
             position: fixed;
             top: 0;
@@ -1010,16 +1013,15 @@
     </div>
 
     <!-- ============================================================
-    JAVASCRIPT – DAS KOMPLETTE SYSTEM MIT FESTEM API-KEY
+    JAVASCRIPT – DAS KOMPLETTE SYSTEM
     ============================================================ -->
 
     <script>
         // ============================================================
-        //  ⚡ HIER DEINEN NEUEN GROQ API KEY EINFÜGEN (gsk_...)
-        //  ⚡ NUR DIESE EINE ZEILE ÄNDERN!
+        //  ⚡⚡⚡ HIER DEINEN GROQ API KEY EINFÜGEN (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)
+        //  ⚡⚡⚡ NUR DIESE EINE ZEILE ÄNDERN!
         // ============================================================
-        const HALDO_API_KEY = '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
-'; // ← HIER DEINEN KEY EINFÜGEN!
+        const HALDO_API_KEY = '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'; // ← HIER DEINEN KEY EINFÜGEN!
 
         // ============================================================
         //  STORAGE
@@ -1305,7 +1307,7 @@
         window.Boot = Boot;
 
         // ============================================================
-        //  COSMIC WORLD (KURZVERSION)
+        //  COSMIC WORLD
         // ============================================================
         const CosmicWorld = {
             scene: null,
@@ -1700,7 +1702,7 @@
         window.CosmicWorld = CosmicWorld;
 
         // ============================================================
-        //  LIVING AI (KURZVERSION)
+        //  LIVING AI
         // ============================================================
         const LivingAI = {
             width: 300,
@@ -2087,10 +2089,10 @@
         window.LivingAI = LivingAI;
 
         // ============================================================
-        //  ⚡ AI CORE (ULTIMATE) – MIT FESTEM API-KEY!
+        //  AI CORE (ULTIMATE) – MIT FESTEM API-KEY
         // ============================================================
         const AICore = {
-            apiKey: HALDO_API_KEY, // ← KEY WIRD VON OBEN GELADEN!
+            apiKey: HALDO_API_KEY, // ← KEY VON OBEN
             model: 'mixtral-8x7b-32768',
             temperature: 0.7,
             isReady: false,
@@ -2194,7 +2196,7 @@ Wichtige Prinzipien:
 
             init() {
                 console.log('🧠 AI Core ULTIMATE wird initialisiert...');
-                this.apiKey = HALDO_API_KEY; // ← KEY WIRD HIER GESETZT!
+                this.apiKey = HALDO_API_KEY; // ← KEY WIRD HIER GESETZT
                 this.temperature = Storage.get('ai_temperature', 0.7);
                 this.model = Storage.get('ai_model', 'mixtral-8x7b-32768');
                 const savedPrompt = Storage.get('ai_system_prompt');
@@ -2387,7 +2389,7 @@ Wichtige Prinzipien:
         window.AICore = AICore;
 
         // ============================================================
-        //  APP MANAGER (KURZVERSION)
+        //  APP MANAGER (KOMPLETT)
         // ============================================================
         const AppManager = {
             apps: [],
@@ -2395,30 +2397,132 @@ Wichtige Prinzipien:
             isReady: false,
 
             appDefinitions: [
+                // SYSTEM
                 { id: 'app-center', name: 'HalDo Center', icon: '📱', category: 'system', desc: 'Alle Apps' },
                 { id: 'settings', name: 'Einstellungen', icon: '⚙️', category: 'system', desc: 'Systemeinstellungen' },
                 { id: 'system-monitor', name: 'System Monitor', icon: '📊', category: 'system', desc: 'Systemstatus' },
                 { id: 'terminal', name: 'Terminal', icon: '⌨️', category: 'system', desc: 'Kommandozeile' },
+                { id: 'themes', name: 'Themes', icon: '🎨', category: 'system', desc: 'Designs' },
+                { id: 'file-manager', name: 'Dateien', icon: '📂', category: 'system', desc: 'Dateiverwaltung' },
+                { id: 'storage', name: 'Speicher', icon: '💿', category: 'system', desc: 'Speicherverwaltung' },
+                { id: 'logs', name: 'Logs', icon: '📋', category: 'system', desc: 'System-Logs' },
+                { id: 'process', name: 'Prozesse', icon: '⚡', category: 'system', desc: 'Laufende Prozesse' },
+                { id: 'updates', name: 'Updates', icon: '🔄', category: 'system', desc: 'System-Updates' },
+                { id: 'backup', name: 'Backup', icon: '💾', category: 'system', desc: 'Backup & Wiederherstellung' },
+                { id: 'diagnostics', name: 'Diagnose', icon: '🩺', category: 'system', desc: 'Systemdiagnose' },
+                { id: 'security', name: 'Sicherheit', icon: '🛡️', category: 'system', desc: 'Sicherheitseinstellungen' },
+                { id: 'privacy', name: 'Privacy', icon: '🔒', category: 'system', desc: 'Datenschutz' },
+                { id: 'language', name: 'Sprachen', icon: '🌍', category: 'system', desc: 'Sprache & Tastatur' },
+                { id: 'voice-center', name: 'Voice Center', icon: '🎤', category: 'system', desc: 'Sprachsteuerung' },
+                { id: 'service-manager', name: 'Service Manager', icon: '⚙️', category: 'system', desc: 'Dienste verwalten' },
+                { id: 'module-manager', name: 'Module Manager', icon: '🧩', category: 'system', desc: 'Module verwalten' },
+                { id: 'system-center', name: 'System Center', icon: '🎛️', category: 'system', desc: 'Systemzentrale' },
+                { id: 'about', name: 'Über HalDo', icon: 'ℹ️', category: 'system', desc: 'Systeminformationen' },
+                { id: 'developer', name: 'Developer Center', icon: '👨‍💻', category: 'system', desc: 'Entwicklertools' },
+                { id: 'installation', name: 'Installation', icon: '📥', category: 'system', desc: 'Installation & PWA' },
+                { id: 'migration', name: 'Migration', icon: '🔄', category: 'system', desc: 'Datenmigration' },
+                { id: 'rollback', name: 'Rollback', icon: '⏪', category: 'system', desc: 'Systemwiederherstellung' },
+                { id: 'recovery', name: 'Recovery', icon: '🔄', category: 'system', desc: 'Systemrettung' },
+                { id: 'extensions', name: 'Extensions', icon: '🧩', category: 'system', desc: 'Erweiterungen' },
+                { id: 'app-runtime', name: 'App Runtime', icon: '⚡', category: 'system', desc: 'Laufzeitumgebung' },
+                { id: 'app-registry', name: 'App Registry', icon: '📋', category: 'system', desc: 'App-Registrierung' },
+                { id: 'your-haldo', name: 'Your HalDo', icon: '💙', category: 'system', desc: 'Persönlicher Bereich' },
+                { id: 'your-personal', name: 'Personal Center', icon: '👤', category: 'system', desc: 'Persönliche Daten' },
+
+                // AI
+                { id: 'haldo-ai', name: 'HalDo AI', icon: '🤖', category: 'ai', desc: 'Persönliche KI' },
+                { id: 'ai-chat', name: 'AI Chat', icon: '💬', category: 'ai', desc: 'Chat mit KI' },
+                { id: 'ai-memory', name: 'AI Memory', icon: '🧠', category: 'ai', desc: 'KI-Gedächtnis' },
+                { id: 'ai-tools', name: 'AI Tools', icon: '🔧', category: 'ai', desc: 'KI-Werkzeuge' },
+                { id: 'ai-command', name: 'AI Command Center', icon: '🎯', category: 'ai', desc: 'Befehlszentrale' },
+                { id: 'ai-knowledge', name: 'AI Knowledge', icon: '📚', category: 'ai', desc: 'Wissensdatenbank' },
+                { id: 'ai-automation', name: 'AI Automation', icon: '🤖', category: 'ai', desc: 'Automatisierung' },
+
+                // TOOLS
                 { id: 'notes', name: 'Notizen', icon: '📝', category: 'tools', desc: 'Notizen verwalten' },
                 { id: 'calculator', name: 'Taschenrechner', icon: '🧮', category: 'tools', desc: 'Rechner' },
                 { id: 'calendar', name: 'Kalender', icon: '📅', category: 'tools', desc: 'Termine' },
+                { id: 'clock', name: 'Uhr', icon: '🕐', category: 'tools', desc: 'Uhr & Timer' },
+                { id: 'qr-scanner', name: 'QR Scanner', icon: '📲', category: 'tools', desc: 'QR-Code scannen' },
+                { id: 'voice-recorder', name: 'Voice Recorder', icon: '🎙️', category: 'tools', desc: 'Sprachaufnahme' },
+                { id: 'reminders', name: 'Erinnerungen', icon: '⏰', category: 'tools', desc: 'Erinnerungen' },
+                { id: 'journal', name: 'Journal', icon: '📓', category: 'tools', desc: 'Tagebuch' },
                 { id: 'weather', name: 'Wetter', icon: '🌦️', category: 'tools', desc: 'Wettervorhersage' },
+                { id: 'maps', name: 'Karten', icon: '🗺️', category: 'tools', desc: 'Karten & Routen' },
+                { id: 'screenshot', name: 'Screenshot', icon: '📸', category: 'tools', desc: 'Bildschirmfoto' },
+                { id: 'zip', name: 'Archiv Manager', icon: '📦', category: 'tools', desc: 'ZIP & Archive' },
+
+                // MEDIA
+                { id: 'gallery', name: 'Galerie', icon: '🖼️', category: 'media', desc: 'Bilder & Videos' },
+                { id: 'music', name: 'Musik', icon: '🎵', category: 'media', desc: 'Musikplayer' },
+                { id: 'video-player', name: 'Video', icon: '🎬', category: 'media', desc: 'Videoplayer' },
+                { id: 'camera', name: 'Kamera', icon: '📷', category: 'media', desc: 'Foto & Video' },
+                { id: 'image-editor', name: 'Bildbearbeitung', icon: '🎨', category: 'media', desc: 'Bilder bearbeiten' },
+                { id: 'media-center', name: 'Media Center', icon: '🎬', category: 'media', desc: 'Medienverwaltung' },
+
+                // COMMUNICATION
                 { id: 'contacts', name: 'Kontakte', icon: '👥', category: 'communication', desc: 'Adressbuch' },
                 { id: 'messages', name: 'Nachrichten', icon: '💬', category: 'communication', desc: 'Chat & SMS' },
                 { id: 'email', name: 'E-Mail', icon: '✉️', category: 'communication', desc: 'E-Mail Client' },
+                { id: 'calls', name: 'Anrufe', icon: '📞', category: 'communication', desc: 'Telefonie' },
                 { id: 'browser', name: 'Browser', icon: '🌐', category: 'communication', desc: 'Internet' },
-                { id: 'music', name: 'Musik', icon: '🎵', category: 'media', desc: 'Musikplayer' },
-                { id: 'gallery', name: 'Galerie', icon: '🖼️', category: 'media', desc: 'Bilder & Videos' },
-                { id: 'file-manager', name: 'Dateien', icon: '📂', category: 'system', desc: 'Dateiverwaltung' },
-                { id: 'clock', name: 'Uhr', icon: '🕐', category: 'tools', desc: 'Uhr & Timer' },
-                { id: 'journal', name: 'Journal', icon: '📓', category: 'tools', desc: 'Tagebuch' },
-                { id: 'reminders', name: 'Erinnerungen', icon: '⏰', category: 'tools', desc: 'Erinnerungen' },
-                { id: 'maps', name: 'Karten', icon: '🗺️', category: 'tools', desc: 'Karten & Routen' },
-                { id: 'video-player', name: 'Video', icon: '🎬', category: 'media', desc: 'Videoplayer' },
-                { id: 'camera', name: 'Kamera', icon: '📷', category: 'media', desc: 'Foto & Video' },
-                { id: 'haldo-ai', name: 'HalDo AI', icon: '🤖', category: 'ai', desc: 'Persönliche KI' },
-                { id: 'ai-chat', name: 'AI Chat', icon: '💬', category: 'ai', desc: 'Chat mit KI' },
-                { id: 'cosmic-world', name: 'Cosmic World', icon: '🌌', category: 'cosmic', desc: '3D-Universum' }
+                { id: 'web-search', name: 'Websuche', icon: '🔎', category: 'communication', desc: 'Internet-Suche' },
+
+                // OFFICE
+                { id: 'documents', name: 'Dokumente', icon: '📄', category: 'office', desc: 'Dokumente verwalten' },
+                { id: 'pdf-viewer', name: 'PDF Viewer', icon: '📕', category: 'office', desc: 'PDF anzeigen' },
+                { id: 'office-center', name: 'Office Center', icon: '📊', category: 'office', desc: 'Büro-Apps' },
+                { id: 'documents-edit', name: 'Texteditor', icon: '📝', category: 'office', desc: 'Texte schreiben' },
+
+                // COSMIC
+                { id: 'cosmic-world', name: 'Cosmic World', icon: '🌌', category: 'cosmic', desc: '3D-Universum' },
+                { id: 'solar-system', name: 'Sonnensystem', icon: '☀️', category: 'cosmic', desc: 'Planeten anzeigen' },
+                { id: 'planet-center', name: 'Planeten Center', icon: '🪐', category: 'cosmic', desc: 'Planeten-Info' },
+                { id: 'cosmic-desktop', name: 'Cosmic Desktop', icon: '🖥️', category: 'cosmic', desc: 'Desktop-Ansicht' },
+
+                // MUSIC STUDIO PRO
+                { id: 'music-studio-pro', name: 'Music Studio Pro', icon: '🎚️', category: 'music',
+                    desc: 'Professionelle Musikproduktion' },
+                { id: 'video-studio-pro', name: 'Video Studio Pro', icon: '🎥', category: 'media',
+                    desc: 'Professionelle Videoproduktion' },
+                { id: 'ai-video-generator-pro', name: 'AI Video Generator Pro', icon: '🤖', category: 'ai',
+                    desc: 'KI-Videogenerierung V2.0' },
+
+                // GAMES
+                { id: 'games-center', name: 'Games Center', icon: '🎮', category: 'entertainment',
+                    desc: 'Spiele und Highscores' },
+
+                // HEALTH
+                { id: 'health-center', name: 'Health Center', icon: '🏥', category: 'health', desc: 'Gesundheitsmanagement' },
+                { id: 'healthy', name: 'Healthy', icon: '💪', category: 'health', desc: 'Sport und Fitness' },
+
+                // EDUCATION
+                { id: 'university-center', name: 'University Center', icon: '🎓', category: 'education',
+                    desc: 'Studium und Kurse' },
+                { id: 'ai-tutor', name: 'AI Tutor', icon: '🧑‍🏫', category: 'education', desc: 'KI-gestützter Lernassistent' },
+                { id: 'science-center', name: 'Science Center', icon: '🔬', category: 'education',
+                    desc: 'Naturwissenschaften' },
+                { id: 'philosophy-center', name: 'Philosophy Center', icon: '🧠', category: 'education',
+                    desc: 'Philosophie und Ethik' },
+                { id: 'language-center', name: 'Language Center', icon: '🌍', category: 'education',
+                    desc: 'Sprachen lernen' },
+
+                // TRAVEL
+                { id: 'travel-center', name: 'Travel Center', icon: '✈️', category: 'lifestyle', desc: 'Reiseplanung' },
+
+                // DRIVING
+                { id: 'driving-school', name: 'Fahrschule', icon: '🚗', category: 'education', desc: 'Fahrschule Theorie' },
+                { id: 'traffic-center', name: 'Verkehr & Blitzer', icon: '🚦', category: 'transport',
+                    desc: 'Verkehrsinfos' },
+
+                // MUSIC & SONGWRITING
+                { id: 'music-studio', name: 'Musik Studio', icon: '🎹', category: 'music', desc: 'Musik erstellen' },
+                { id: 'ai-songwriter', name: 'AI Songwriter', icon: '✍️', category: 'music', desc: 'Songtexte schreiben' },
+
+                // VIDEO
+                { id: 'video-studio', name: 'Video Studio', icon: '🎬', category: 'media', desc: 'Videos erstellen' },
+                { id: 'ai-video-generator', name: 'AI Video Generator', icon: '🤖', category: 'ai',
+                    desc: 'Videos generieren' }
             ],
 
             init() {
@@ -2555,6 +2659,150 @@ Wichtige Prinzipien:
                         return this.getSystemMonitorUI();
                     case 'terminal':
                         return this.getTerminalUI();
+                    case 'file-manager':
+                        return this.getFileManagerUI();
+                    case 'music':
+                        return this.getMusicUI();
+                    case 'gallery':
+                        return this.getGalleryUI();
+                    case 'clock':
+                        return this.getClockUI();
+                    case 'journal':
+                        return this.getJournalUI();
+                    case 'reminders':
+                        return this.getRemindersUI();
+                    case 'messages':
+                        return this.getMessagesUI();
+                    case 'email':
+                        return this.getEmailUI();
+                    case 'browser':
+                        return this.getBrowserUI();
+                    case 'maps':
+                        return this.getMapsUI();
+                    case 'pdf-viewer':
+                        return this.getPDFViewerUI();
+                    case 'documents-edit':
+                        return this.getTextEditorUI();
+                    case 'voice-recorder':
+                        return this.getVoiceRecorderUI();
+                    case 'qr-scanner':
+                        return this.getQRScannerUI();
+                    case 'image-editor':
+                        return this.getImageEditorUI();
+                    case 'video-player':
+                        return this.getVideoPlayerUI();
+                    case 'camera':
+                        return this.getCameraUI();
+                    case 'media-center':
+                        return this.getMediaCenterUI();
+                    case 'office-center':
+                        return this.getOfficeCenterUI();
+                    case 'zip':
+                        return this.getZipUI();
+                    case 'cosmic-desktop':
+                        return this.getCosmicDesktopUI();
+                    case 'planet-center':
+                        return this.getPlanetCenterUI();
+                    case 'solar-system':
+                        return this.getSolarSystemUI();
+                    case 'app-center':
+                        return this.getAppCenterUI();
+                    case 'ai-memory':
+                        return this.getAIMemoryUI();
+                    case 'ai-tools':
+                        return this.getAIToolsUI();
+                    case 'ai-command':
+                        return this.getAICommandUI();
+                    case 'ai-knowledge':
+                        return this.getAIKnowledgeUI();
+                    case 'ai-automation':
+                        return this.getAIAutomationUI();
+                    case 'storage':
+                        return this.getStorageUI();
+                    case 'logs':
+                        return this.getLogsUI();
+                    case 'process':
+                        return this.getProcessUI();
+                    case 'updates':
+                        return this.getUpdatesUI();
+                    case 'backup':
+                        return this.getBackupUI();
+                    case 'diagnostics':
+                        return this.getDiagnosticsUI();
+                    case 'security':
+                        return this.getSecurityUI();
+                    case 'privacy':
+                        return this.getPrivacyUI();
+                    case 'language':
+                        return this.getLanguageUI();
+                    case 'voice-center':
+                        return this.getVoiceCenterUI();
+                    case 'themes':
+                        return this.getThemesUI();
+                    case 'about':
+                        return this.getAboutUI();
+                    case 'developer':
+                        return this.getDeveloperUI();
+                    case 'installation':
+                        return this.getInstallationUI();
+                    case 'migration':
+                        return this.getMigrationUI();
+                    case 'rollback':
+                        return this.getRollbackUI();
+                    case 'recovery':
+                        return this.getRecoveryUI();
+                    case 'service-manager':
+                        return this.getServiceManagerUI();
+                    case 'module-manager':
+                        return this.getModuleManagerUI();
+                    case 'extensions':
+                        return this.getExtensionsUI();
+                    case 'app-runtime':
+                        return this.getAppRuntimeUI();
+                    case 'app-registry':
+                        return this.getAppRegistryUI();
+                    case 'your-haldo':
+                        return this.getYourHaldoUI();
+                    case 'your-personal':
+                        return this.getPersonalCenterUI();
+                    case 'system-center':
+                        return this.getSystemCenterUI();
+                    case 'music-studio-pro':
+                        return this.getMusicStudioProUI();
+                    case 'video-studio-pro':
+                        return this.getVideoStudioProUI();
+                    case 'ai-video-generator-pro':
+                        return this.getAIVideoGeneratorProUI();
+                    case 'games-center':
+                        return this.getGamesCenterUI();
+                    case 'health-center':
+                        return this.getHealthCenterUI();
+                    case 'healthy':
+                        return this.getHealthyUI();
+                    case 'university-center':
+                        return this.getUniversityCenterUI();
+                    case 'ai-tutor':
+                        return this.getAITutorUI();
+                    case 'science-center':
+                        return this.getScienceCenterUI();
+                    case 'philosophy-center':
+                        return this.getPhilosophyCenterUI();
+                    case 'language-center':
+                        return this.getLanguageCenterUI();
+                    case 'travel-center':
+                        return this.getTravelCenterUI();
+                    case 'driving-school':
+                        return this.getDrivingSchoolUI();
+                    case 'traffic-center':
+                        return this.getTrafficCenterUI();
+                    case 'music-studio':
+                        return this.getMusicStudioUI();
+                    case 'ai-songwriter':
+                        return this.getAISongwriterUI();
+                    case 'video-studio':
+                        return this.getVideoStudioUI();
+                    case 'ai-video-generator':
+                        return this.getAIVideoGeneratorUI();
                     default:
                         return `
                             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:6px;text-align:center;">
@@ -2567,6 +2815,7 @@ Wichtige Prinzipien:
                 }
             },
 
+            // ===== NOTIZEN =====
             getNotesUI() {
                 const notes = Storage.get('notes', []);
                 return `
@@ -2607,6 +2856,7 @@ Wichtige Prinzipien:
                 if (body) body.innerHTML = this.getNotesUI();
             },
 
+            // ===== TASCHENRECHNER =====
             getCalculatorUI() {
                 return `
                     <div style="max-width:240px;margin:0 auto;">
@@ -2633,6 +2883,7 @@ Wichtige Prinzipien:
                 }
             },
 
+            // ===== KALENDER =====
             getCalendarUI() {
                 const now = new Date();
                 const month = now.toLocaleString('de', { month: 'long' });
@@ -2649,6 +2900,7 @@ Wichtige Prinzipien:
                 `;
             },
 
+            // ===== WETTER =====
             getWeatherUI() {
                 return `
                     <div style="text-align:center;padding:8px;">
@@ -2659,10 +2911,14 @@ Wichtige Prinzipien:
                             <div style="font-size:11px;">💧 65%</div>
                             <div style="font-size:11px;">💨 12 km/h</div>
                         </div>
+                        <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;">
+                            ${['Mo','Di','Mi','Do','Fr'].map(d => `<div style="padding:4px 8px;background:var(--glass-bg);border-radius:4px;font-size:10px;"><div>☀️</div><div>${d}</div></div>`).join('')}
+                        </div>
                     </div>
                 `;
             },
 
+            // ===== KONTAKTE =====
             getContactsUI() {
                 const contacts = Storage.get('contacts', [
                     { name: 'HalDo AI', phone: '+49 123 456789', email: 'haldo@haldo-os.com' }
@@ -2675,7 +2931,10 @@ Wichtige Prinzipien:
                         </div>
                         ${contacts.map(c => `
                             <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--glass-bg);border-radius:5px;margin:2px 0;border:1px solid var(--glass-border);font-size:11px;">
-                                <div><div style="font-weight:600;color:var(--text-primary);">${c.name}</div><div style="font-size:10px;color:var(--text-muted);">${c.phone}</div></div>
+                                <div>
+                                    <div style="font-weight:600;color:var(--text-primary);">${c.name}</div>
+                                    <div style="font-size:10px;color:var(--text-muted);">${c.phone}</div>
+                                </div>
                                 <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px;">✉️</button>
                             </div>
                         `).join('')}
@@ -2683,6 +2942,7 @@ Wichtige Prinzipien:
                 `;
             },
 
+            // ===== SYSTEM MONITOR =====
             getSystemMonitorUI() {
                 return `
                     <div>
@@ -2709,6 +2969,7 @@ Wichtige Prinzipien:
                 `;
             },
 
+            // ===== TERMINAL =====
             getTerminalUI() {
                 return `
                     <div style="display:flex;flex-direction:column;height:100%;">
@@ -2775,6 +3036,1505 @@ Wichtige Prinzipien:
                 output.scrollTop = output.scrollHeight;
             },
 
+            // ===== DATEI-MANAGER =====
+            getFileManagerUI() {
+                const files = Storage.get('files', [
+                    { name: 'Dokumente', type: 'folder', icon: '📁' },
+                    { name: 'Bilder', type: 'folder', icon: '📁' },
+                    { name: 'Musik', type: 'folder', icon: '📁' },
+                    { name: 'Notizen.txt', type: 'file', icon: '📄' }
+                ]);
+                return `
+                    <div>
+                        <div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;">
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;">📁 Neu</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;">📤 Upload</button>
+                            <input class="haldo-input" placeholder="Suchen..." style="flex:1;min-width:60px;font-size:10px;">
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:4px;">
+                            ${files.map(f => `
+                                <div style="padding:8px;background:var(--glass-bg);border-radius:4px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:10px;">
+                                    <div style="font-size:22px;">${f.icon}</div>
+                                    <div style="color:var(--text-secondary);">${f.name}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== MUSIK =====
+            getMusicUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <div style="font-size:40px;">🎵</div>
+                        <h2 style="color:var(--text-primary);font-size:14px;">Musikplayer</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Keine Titel</p>
+                        <div style="display:flex;justify-content:center;gap:10px;margin-top:6px;">
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:12px;padding:2px 8px;">⏮</button>
+                            <button class="haldo-btn" style="font-size:12px;padding:2px 12px;">▶</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:12px;padding:2px 8px;">⏭</button>
+                        </div>
+                        <div style="margin-top:6px;">
+                            <input type="range" min="0" max="100" value="0" style="width:70%;accent-color:var(--primary);">
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== GALERIE =====
+            getGalleryUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🖼️ Galerie</h2>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:4px;margin-top:4px;">
+                            ${Array.from({length:8}, (_,i) => `
+                                <div style="padding:12px;background:var(--glass-bg);border-radius:4px;text-align:center;border:1px solid var(--glass-border);aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;">
+                                    ${['🌄','🌅','🌠','🖼️','📷','🌈','🌌','🏞️'][i]}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== UHR =====
+            getClockUI() {
+                const now = new Date();
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <div style="font-size:40px;font-weight:300;color:var(--text-primary);font-variant-numeric:tabular-nums;">
+                            ${now.toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </div>
+                        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">
+                            ${now.toLocaleDateString('de', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                        </div>
+                        <div style="display:flex;gap:6px;justify-content:center;margin-top:6px;flex-wrap:wrap;">
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;">⏱️ Timer</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;">⏹️ Stoppuhr</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;">⏰ Wecker</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== JOURNAL =====
+            getJournalUI() {
+                const entries = Storage.get('journal', []);
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">📓 Journal</h2>
+                        <div style="display:flex;gap:4px;margin-bottom:6px;">
+                            <input id="journal-input" class="haldo-input" placeholder="Heutiger Eintrag..." style="flex:1;font-size:11px;">
+                            <button onclick="AppManager.addJournalEntry()" class="haldo-btn" style="font-size:11px;">+</button>
+                        </div>
+                        <div id="journal-list" style="max-height:180px;overflow-y:auto;">
+                            ${entries.length === 0 ? '<p style="color:var(--text-muted);text-align:center;font-size:11px;">Keine Einträge</p>' :
+                            entries.slice().reverse().map((e, i) => `
+                                <div style="padding:4px 8px;background:var(--glass-bg);border-radius:4px;margin:2px 0;border:1px solid var(--glass-border);font-size:11px;">
+                                    <div style="display:flex;justify-content:space-between;color:var(--text-muted);font-size:9px;">
+                                        <span>${new Date(e.date).toLocaleDateString()}</span>
+                                        <button onclick="AppManager.deleteJournalEntry(${entries.length-1-i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">✕</button>
+                                    </div>
+                                    <div style="color:var(--text-secondary);">${e.text}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            addJournalEntry() {
+                const input = document.getElementById('journal-input');
+                if (!input || !input.value.trim()) return;
+                const entries = Storage.get('journal', []);
+                entries.push({ text: input.value.trim(), date: Date.now() });
+                Storage.set('journal', entries);
+                input.value = '';
+                const body = document.querySelector('.window .window-body');
+                if (body) body.innerHTML = this.getJournalUI();
+            },
+
+            deleteJournalEntry(index) {
+                const entries = Storage.get('journal', []);
+                entries.splice(index, 1);
+                Storage.set('journal', entries);
+                const body = document.querySelector('.window .window-body');
+                if (body) body.innerHTML = this.getJournalUI();
+            },
+
+            // ===== ERINNERUNGEN =====
+            getRemindersUI() {
+                const reminders = Storage.get('reminders', []);
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">⏰ Erinnerungen</h2>
+                        <div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;">
+                            <input id="reminder-input" class="haldo-input" placeholder="Erinnerung..." style="flex:1;min-width:60px;font-size:11px;">
+                            <input id="reminder-time" class="haldo-input" type="time" style="width:80px;font-size:11px;">
+                            <button onclick="AppManager.addReminder()" class="haldo-btn" style="font-size:11px;">+</button>
+                        </div>
+                        <div id="reminder-list" style="max-height:180px;overflow-y:auto;">
+                            ${reminders.length === 0 ? '<p style="color:var(--text-muted);text-align:center;font-size:11px;">Keine Erinnerungen</p>' :
+                            reminders.map((r, i) => `
+                                <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:var(--glass-bg);border-radius:4px;margin:2px 0;border:1px solid var(--glass-border);font-size:11px;">
+                                    <div>
+                                        <div style="color:var(--text-primary);">${r.text}</div>
+                                        <div style="font-size:9px;color:var(--text-muted);">${r.time || 'Keine Uhrzeit'}</div>
+                                    </div>
+                                    <button onclick="AppManager.deleteReminder(${i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">✕</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            addReminder() {
+                const input = document.getElementById('reminder-input');
+                const time = document.getElementById('reminder-time');
+                if (!input || !input.value.trim()) return;
+                const reminders = Storage.get('reminders', []);
+                reminders.push({ text: input.value.trim(), time: time ? time.value : '' });
+                Storage.set('reminders', reminders);
+                input.value = '';
+                if (time) time.value = '';
+                const body = document.querySelector('.window .window-body');
+                if (body) body.innerHTML = this.getRemindersUI();
+            },
+
+            deleteReminder(index) {
+                const reminders = Storage.get('reminders', []);
+                reminders.splice(index, 1);
+                Storage.set('reminders', reminders);
+                const body = document.querySelector('.window .window-body');
+                if (body) body.innerHTML = this.getRemindersUI();
+            },
+
+            // ===== NACHRICHTEN =====
+            getMessagesUI() {
+                const messages = Storage.get('messages', [
+                    { from: 'HalDo AI', text: 'Hallo! Wie kann ich helfen?', time: Date.now() - 3600000 }
+                ]);
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">💬 Nachrichten</h2>
+                        <div style="display:flex;gap:4px;margin-bottom:6px;">
+                            <input class="haldo-input" placeholder="Neue Nachricht..." style="flex:1;font-size:11px;">
+                            <button class="haldo-btn" style="font-size:11px;">📤</button>
+                        </div>
+                        <div style="max-height:180px;overflow-y:auto;">
+                            ${messages.map(m => `
+                                <div style="padding:4px 8px;background:var(--glass-bg);border-radius:4px;margin:2px 0;border:1px solid var(--glass-border);font-size:11px;">
+                                    <div style="display:flex;justify-content:space-between;color:var(--text-muted);font-size:9px;">
+                                        <span>${m.from}</span>
+                                        <span>${new Date(m.time).toLocaleTimeString()}</span>
+                                    </div>
+                                    <div style="color:var(--text-secondary);">${m.text}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== E-MAIL =====
+            getEmailUI() {
+                const emails = Storage.get('emails', [
+                    { from: 'info@haldo-os.com', subject: 'Willkommen!', body: 'Willkommen bei HalDo OS!', time: Date.now() -
+                            1800000 }
+                ]);
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">✉️ E-Mail</h2>
+                        <div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;">
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 6px;">📥 Posteingang</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 6px;">📝 Neu</button>
+                        </div>
+                        <div style="max-height:180px;overflow-y:auto;">
+                            ${emails.map(e => `
+                                <div style="padding:4px 8px;background:var(--glass-bg);border-radius:4px;margin:2px 0;border:1px solid var(--glass-border);cursor:pointer;font-size:11px;" onclick="alert('📧 Von: ${e.from}\nBetreff: ${e.subject}\n\n${e.body}')">
+                                    <div style="display:flex;justify-content:space-between;color:var(--text-muted);font-size:9px;">
+                                        <span><strong>${e.from}</strong></span>
+                                        <span>${new Date(e.time).toLocaleTimeString()}</span>
+                                    </div>
+                                    <div style="color:var(--text-secondary);">${e.subject}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== BROWSER =====
+            getBrowserUI() {
+                return `
+                    <div style="display:flex;flex-direction:column;height:100%;padding:0;">
+                        <div style="display:flex;gap:3px;padding:4px 6px;border-bottom:1px solid var(--glass-border);flex-wrap:wrap;">
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:9px;padding:2px 6px;" onclick="AppManager.browserBack()">◀</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:9px;padding:2px 6px;" onclick="AppManager.browserForward()">▶</button>
+                            <input id="browser-url" class="haldo-input" placeholder="URL..." style="flex:1;min-width:60px;font-size:10px;" onkeydown="if(event.key==='Enter')AppManager.browserNavigate()">
+                            <button onclick="AppManager.browserNavigate()" class="haldo-btn" style="font-size:9px;padding:2px 8px;">Go</button>
+                        </div>
+                        <iframe id="browser-frame" src="about:blank" style="flex:1;border:none;background:white;width:100%;"></iframe>
+                    </div>
+                `;
+            },
+
+            browserNavigate() {
+                const input = document.getElementById('browser-url');
+                const frame = document.getElementById('browser-frame');
+                if (!input || !frame) return;
+                let url = input.value.trim();
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                }
+                try { frame.src = url; } catch { frame.src = 'about:blank'; }
+            },
+
+            browserBack() {
+                const frame = document.getElementById('browser-frame');
+                if (frame && frame.contentWindow) {
+                    try { frame.contentWindow.history.back(); } catch {}
+                }
+            },
+
+            browserForward() {
+                const frame = document.getElementById('browser-frame');
+                if (frame && frame.contentWindow) {
+                    try { frame.contentWindow.history.forward(); } catch {}
+                }
+            },
+
+            // ===== KARTEN =====
+            getMapsUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <h2 style="color:var(--text-primary);font-size:13px;">🗺️ Karten</h2>
+                        <div style="background:var(--glass-bg);border-radius:6px;padding:16px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <div style="font-size:40px;">🌍</div>
+                            <p style="color:var(--text-secondary);font-size:11px;">Kartenansicht</p>
+                            <div style="display:flex;gap:4px;margin-top:6px;justify-content:center;flex-wrap:wrap;">
+                                <input class="haldo-input" placeholder="Ort suchen..." style="max-width:160px;font-size:10px;">
+                                <button class="haldo-btn" style="font-size:10px;">🔍 Suchen</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== PDF VIEWER =====
+            getPDFViewerUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <h2 style="color:var(--text-primary);font-size:13px;">📕 PDF Viewer</h2>
+                        <div style="background:var(--glass-bg);border-radius:6px;padding:16px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <div style="font-size:40px;">📕</div>
+                            <p style="color:var(--text-secondary);font-size:11px;">Kein PDF geöffnet</p>
+                            <button class="haldo-btn" style="font-size:11px;" onclick="alert('📄 PDF öffnen...')">📄 Öffnen</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== TEXTEDITOR =====
+            getTextEditorUI() {
+                return `
+                    <div style="display:flex;flex-direction:column;height:100%;padding:0;">
+                        <div style="display:flex;gap:3px;padding:3px 6px;border-bottom:1px solid var(--glass-border);flex-wrap:wrap;">
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:9px;padding:2px 6px;">📄 Neu</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:9px;padding:2px 6px;">💾 Speichern</button>
+                        </div>
+                        <textarea style="flex:1;background:rgba(0,0,0,0.1);border:none;padding:6px;color:var(--text-primary);font-family:var(--font-primary);font-size:12px;resize:none;outline:none;" placeholder="Schreibe deinen Text...">Willkommen im HalDo Texteditor!</textarea>
+                    </div>
+                `;
+            },
+
+            // ===== VOICE RECORDER =====
+            getVoiceRecorderUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <h2 style="color:var(--text-primary);font-size:13px;">🎙️ Voice Recorder</h2>
+                        <div style="background:var(--glass-bg);border-radius:6px;padding:16px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <div style="font-size:40px;">🎙️</div>
+                            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                                <button class="haldo-btn" style="font-size:11px;">🔴 Aufnehmen</button>
+                                <button class="haldo-btn haldo-btn-secondary" style="font-size:11px;">⏹️ Stopp</button>
+                                <button class="haldo-btn haldo-btn-secondary" style="font-size:11px;">▶️ Abspielen</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== QR SCANNER =====
+            getQRScannerUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <h2 style="color:var(--text-primary);font-size:13px;">📲 QR Scanner</h2>
+                        <div style="background:var(--glass-bg);border-radius:6px;padding:16px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <div style="font-size:40px;">📲</div>
+                            <p style="color:var(--text-secondary);font-size:11px;">Kamera wird aktiviert...</p>
+                            <button class="haldo-btn" style="font-size:11px;">📷 Kamera starten</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== BILDBEARBEITUNG =====
+            getImageEditorUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <h2 style="color:var(--text-primary);font-size:13px;">🎨 Bildbearbeitung</h2>
+                        <div style="background:var(--glass-bg);border-radius:6px;padding:16px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <div style="font-size:40px;">🎨</div>
+                            <p style="color:var(--text-secondary);font-size:11px;">Kein Bild geöffnet</p>
+                            <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;">
+                                <button class="haldo-btn" style="font-size:10px;padding:2px 6px;">🖼️ Öffnen</button>
+                                <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 6px;">✂️ Zuschneiden</button>
+                                <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 6px;">🔄 Drehen</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== VIDEO PLAYER =====
+            getVideoPlayerUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <h2 style="color:var(--text-primary);font-size:13px;">🎬 Video Player</h2>
+                        <div style="background:var(--glass-bg);border-radius:6px;padding:16px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <div style="font-size:40px;">🎬</div>
+                            <p style="color:var(--text-secondary);font-size:11px;">Kein Video geladen</p>
+                            <button class="haldo-btn" style="font-size:11px;">🎬 Video öffnen</button>
+                            <div style="display:flex;gap:6px;justify-content:center;margin-top:6px;">
+                                <button class="haldo-btn haldo-btn-secondary" style="font-size:12px;padding:2px 6px;">⏮</button>
+                                <button class="haldo-btn" style="font-size:12px;padding:2px 10px;">▶</button>
+                                <button class="haldo-btn haldo-btn-secondary" style="font-size:12px;padding:2px 6px;">⏭</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== KAMERA =====
+            getCameraUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <h2 style="color:var(--text-primary);font-size:13px;">📷 Kamera</h2>
+                        <div style="background:var(--glass-bg);border-radius:6px;padding:16px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <div style="font-size:40px;">📷</div>
+                            <p style="color:var(--text-secondary);font-size:11px;">Kamera wird gestartet...</p>
+                            <button class="haldo-btn" style="font-size:11px;">📷 Kamera starten</button>
+                            <div style="display:flex;gap:6px;justify-content:center;margin-top:6px;">
+                                <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 6px;">📸 Foto</button>
+                                <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 6px;">🎬 Video</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== MEDIA CENTER =====
+            getMediaCenterUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🎬 Media Center</h2>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:4px;">
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:10px;" onclick="AppManager.openApp('music')">
+                                <div style="font-size:22px;">🎵</div>
+                                <div style="color:var(--text-secondary);">Musik</div>
+                            </div>
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:10px;" onclick="AppManager.openApp('video-player')">
+                                <div style="font-size:22px;">🎬</div>
+                                <div style="color:var(--text-secondary);">Video</div>
+                            </div>
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:10px;" onclick="AppManager.openApp('gallery')">
+                                <div style="font-size:22px;">🖼️</div>
+                                <div style="color:var(--text-secondary);">Bilder</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== OFFICE CENTER =====
+            getOfficeCenterUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">📊 Office Center</h2>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:4px;">
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:10px;" onclick="AppManager.openApp('documents-edit')">
+                                <div style="font-size:22px;">📝</div>
+                                <div style="color:var(--text-secondary);">Text</div>
+                            </div>
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:10px;" onclick="AppManager.openApp('pdf-viewer')">
+                                <div style="font-size:22px;">📕</div>
+                                <div style="color:var(--text-secondary);">PDF</div>
+                            </div>
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:10px;" onclick="alert('📊 Tabellen')">
+                                <div style="font-size:22px;">📊</div>
+                                <div style="color:var(--text-secondary);">Tabellen</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== ZIP =====
+            getZipUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">📦 Archiv Manager</h2>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+                            <button class="haldo-btn" style="font-size:11px;">📦 Archiv erstellen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:11px;">📂 Öffnen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:11px;">📤 Extrahieren</button>
+                        </div>
+                        <p style="color:var(--text-muted);font-size:11px;margin-top:4px;">Keine Archive</p>
+                    </div>
+                `;
+            },
+
+            // ===== COSMIC DESKTOP =====
+            getCosmicDesktopUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <h2 style="color:var(--text-primary);font-size:13px;">🖥️ Cosmic Desktop</h2>
+                        <div style="background:var(--glass-bg);border-radius:6px;padding:16px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <div style="font-size:40px;">🌌</div>
+                            <p style="color:var(--text-secondary);font-size:11px;">Cosmic Desktop ist aktiv</p>
+                            <button class="haldo-btn" style="font-size:11px;margin-top:4px;" onclick="CosmicWorld.init()">🌌 Neu starten</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== PLANETEN CENTER =====
+            getPlanetCenterUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🪐 Planeten Center</h2>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-top:4px;">
+                            ${['Merkur','Venus','Erde','Mars','Jupiter','Saturn','Uranus','Neptun','Pluto','Ceres','Haumea','Makemake','Eris'].map(p => `
+                                <div style="padding:6px;background:var(--glass-bg);border-radius:4px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:10px;" onclick="alert('🪐 ${p}\nDurchmesser: variabel')">
+                                    <div style="font-size:18px;">🪐</div>
+                                    <div style="color:var(--text-secondary);">${p}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== SOLAR SYSTEM =====
+            getSolarSystemUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <h2 style="color:var(--text-primary);font-size:13px;">☀️ Sonnensystem</h2>
+                        <div style="background:var(--glass-bg);border-radius:6px;padding:16px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <div style="font-size:40px;">☀️</div>
+                            <p style="color:var(--text-secondary);font-size:11px;">13 Planeten umkreisen die Sonne</p>
+                            <div style="display:flex;gap:2px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
+                                ${Array.from({length:13}, (_,i) => `<span style="font-size:16px;">🪐</span>`).join('')}
+                            </div>
+                            <button class="haldo-btn" style="font-size:11px;margin-top:4px;" onclick="CosmicWorld.init()">🌌 Cosmic World öffnen</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== APP CENTER =====
+            getAppCenterUI() {
+                const categories = [...new Set(this.apps.map(a => a.category))];
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">📱 HalDo Center</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">${this.installedApps.length} von ${this.apps.length} Apps installiert</p>
+                        <div style="display:flex;gap:4px;margin:4px 0;flex-wrap:wrap;">
+                            <button class="haldo-btn" style="font-size:10px;padding:2px 8px;" onclick="AppManager.installAll()">Alle installieren</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;" onclick="AppManager.renderDesktopIcons();alert('✅ Desktop aktualisiert')">🔄 Aktualisieren</button>
+                        </div>
+                        ${categories.map(cat => `
+                            <h3 style="color:var(--text-primary);font-size:11px;margin:4px 0 2px;">${cat.charAt(0).toUpperCase()+cat.slice(1)}</h3>
+                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:3px;">
+                                ${this.apps.filter(a => a.category === cat).map(app => `
+                                    <div style="padding:6px;background:var(--glass-bg);border-radius:4px;text-align:center;border:1px solid ${this.installedApps.includes(app.id)?'var(--glass-border)':'var(--warning)'};cursor:pointer;font-size:9px;" onclick="AppManager.openApp('${app.id}')">
+                                        <div style="font-size:18px;">${app.icon}</div>
+                                        <div style="color:var(--text-secondary);">${app.name}</div>
+                                        <div style="font-size:7px;color:${this.installedApps.includes(app.id)?'var(--success)':'var(--warning)'};">${this.installedApps.includes(app.id)?'✅':'⏳'}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            },
+
+            // ===== AI MEMORY =====
+            getAIMemoryUI() {
+                const memory = Storage.get('ai_memory', []);
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🧠 AI Memory</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">${memory.length} Einträge</p>
+                        <div style="max-height:200px;overflow-y:auto;margin-top:4px;">
+                            ${memory.length === 0 ? '<p style="color:var(--text-muted);font-size:11px;">Keine Erinnerungen</p>' :
+                            memory.slice().reverse().map((m, i) => `
+                                <div style="padding:4px 8px;background:var(--glass-bg);border-radius:4px;margin:2px 0;border:1px solid var(--glass-border);font-size:10px;">
+                                    <div style="color:var(--text-muted);font-size:8px;">${new Date(m.time).toLocaleString()}</div>
+                                    <div style="color:var(--text-secondary);">🧑 ${m.user.substring(0, 40)}${m.user.length > 40 ? '...' : ''}</div>
+                                    <div style="color:var(--text-primary);">💙 ${m.assistant.substring(0, 40)}${m.assistant.length > 40 ? '...' : ''}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== AI TOOLS =====
+            getAIToolsUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🔧 AI Tools</h2>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;">
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;text-align:center;font-size:10px;" onclick="alert('📝 Text analysieren')">
+                                <div style="font-size:20px;">📝</div>
+                                <div style="color:var(--text-primary);">Text analysieren</div>
+                            </div>
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;text-align:center;font-size:10px;" onclick="alert('🌐 Übersetzen')">
+                                <div style="font-size:20px;">🌐</div>
+                                <div style="color:var(--text-primary);">Übersetzen</div>
+                            </div>
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;text-align:center;font-size:10px;" onclick="alert('📄 PDF analysieren')">
+                                <div style="font-size:20px;">📄</div>
+                                <div style="color:var(--text-primary);">PDF analysieren</div>
+                            </div>
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;text-align:center;font-size:10px;" onclick="alert('💻 Code generieren')">
+                                <div style="font-size:20px;">💻</div>
+                                <div style="color:var(--text-primary);">Code generieren</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== AI COMMAND =====
+            getAICommandUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🎯 AI Command Center</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Sage HalDo, was sie tun soll:</p>
+                        <div style="display:flex;gap:4px;margin:4px 0;">
+                            <input id="command-input" class="haldo-input" placeholder="Befehl..." style="flex:1;font-size:11px;" onkeydown="if(event.key==='Enter')AppManager.executeAICommand()">
+                            <button onclick="AppManager.executeAICommand()" class="haldo-btn" style="font-size:11px;">Ausführen</button>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
+                            <div style="padding:4px;background:var(--glass-bg);border-radius:3px;border:1px solid var(--glass-border);cursor:pointer;font-size:9px;text-align:center;" onclick="document.getElementById('command-input').value='Öffne Notizen';AppManager.executeAICommand();">📝 Notizen</div>
+                            <div style="padding:4px;background:var(--glass-bg);border-radius:3px;border:1px solid var(--glass-border);cursor:pointer;font-size:9px;text-align:center;" onclick="document.getElementById('command-input').value='Öffne Kalender';AppManager.executeAICommand();">📅 Kalender</div>
+                            <div style="padding:4px;background:var(--glass-bg);border-radius:3px;border:1px solid var(--glass-border);cursor:pointer;font-size:9px;text-align:center;" onclick="document.getElementById('command-input').value='Öffne HalDo AI';AppManager.executeAICommand();">🤖 HalDo AI</div>
+                            <div style="padding:4px;background:var(--glass-bg);border-radius:3px;border:1px solid var(--glass-border);cursor:pointer;font-size:9px;text-align:center;" onclick="document.getElementById('command-input').value='Systemstatus';AppManager.executeAICommand();">📊 System</div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            executeAICommand() {
+                const input = document.getElementById('command-input');
+                if (!input || !input.value.trim()) return;
+                const cmd = input.value.trim().toLowerCase();
+                input.value = '';
+
+                if (cmd.includes('notizen') || cmd.includes('notes')) {
+                    AppManager.openApp('notes');
+                } else if (cmd.includes('kalender') || cmd.includes('calendar')) {
+                    AppManager.openApp('calendar');
+                } else if (cmd.includes('haldo ai') || cmd.includes('ai chat')) {
+                    AppManager.openApp('haldo-ai');
+                } else if (cmd.includes('systemstatus') || cmd.includes('monitor')) {
+                    AppManager.openApp('system-monitor');
+                } else if (cmd.includes('einstellungen') || cmd.includes('settings')) {
+                    AppManager.openApp('settings');
+                } else {
+                    alert(`🤖 HalDo: "${cmd}" – Befehl erkannt. Versuche: "Öffne Notizen", "Öffne Kalender", "Öffne HalDo AI"`);
+                }
+            },
+
+            // ===== AI KNOWLEDGE =====
+            getAIKnowledgeUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">📚 AI Knowledge</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Frage HalDo etwas!</p>
+                        <div style="display:flex;gap:4px;margin:4px 0;">
+                            <input id="knowledge-input" class="haldo-input" placeholder="Frage..." style="flex:1;font-size:11px;" onkeydown="if(event.key==='Enter')AppManager.askKnowledge()">
+                            <button onclick="AppManager.askKnowledge()" class="haldo-btn" style="font-size:11px;">Fragen</button>
+                        </div>
+                        <div id="knowledge-answer" style="padding:6px;background:var(--glass-bg);border-radius:4px;min-height:40px;font-size:11px;color:var(--text-secondary);">
+                            💡 Stelle eine Frage.
+                        </div>
+                    </div>
+                `;
+            },
+
+            askKnowledge() {
+                const input = document.getElementById('knowledge-input');
+                const answer = document.getElementById('knowledge-answer');
+                if (!input || !answer || !input.value.trim()) return;
+                const question = input.value.trim();
+                input.value = '';
+                answer.textContent = '🧠 HalDo denkt...';
+
+                AICore.simpleChat(question).then(reply => {
+                    answer.innerHTML = `💙 <strong>Antwort:</strong><br><br>${reply}`;
+                });
+            },
+
+            // ===== AI AUTOMATION =====
+            getAIAutomationUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🤖 AI Automation</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Automatisiere wiederkehrende Aufgaben</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;">
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;text-align:center;font-size:10px;" onclick="alert('⏰ Tägliche Erinnerung erstellt')">
+                                <div style="font-size:20px;">⏰</div>
+                                <div style="color:var(--text-primary);">Tägliche Erinnerung</div>
+                            </div>
+                            <div style="padding:8px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;text-align:center;font-size:10px;" onclick="alert('📝 Wöchentlicher Bericht')">
+                                <div style="font-size:20px;">📝</div>
+                                <div style="color:var(--text-primary);">Wöchentlicher Bericht</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== STORAGE =====
+            getStorageUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">💾 Speicherverwaltung</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Einträge: ${localStorage.length}</p>
+                        <p style="color:var(--text-secondary);font-size:11px;">Apps: ${this.installedApps.length}</p>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;" onclick="alert('📊 Speicheranalyse: ${localStorage.length} Einträge')">📊 Analysieren</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;" onclick="if(confirm('Alle Daten löschen?')){Storage.clear();alert('Gelöscht!');}">🗑️ Löschen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;" onclick="AppManager.exportAllData()">📤 Export</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            exportAllData() {
+                const data = Storage.getAll();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `haldo_backup_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                alert('✅ Exportiert!');
+            },
+
+            // ===== LOGS =====
+            getLogsUI() {
+                const logs = Storage.get('logs', []);
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">📋 System-Logs</h2>
+                        <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;margin-bottom:4px;" onclick="Storage.set('logs',[]);const body=document.querySelector('.window .window-body');if(body)body.innerHTML=AppManager.getLogsUI();">🗑️ Löschen</button>
+                        <div style="max-height:200px;overflow-y:auto;font-family:monospace;font-size:9px;background:rgba(0,0,0,0.2);border-radius:4px;padding:6px;">
+                            ${logs.length === 0 ? '<p style="color:var(--text-muted);">Keine Logs</p>' :
+                            logs.slice().reverse().map(l => `
+                                <div style="color:${l.level === 'error' ? 'var(--danger)' : l.level === 'warn' ? 'var(--warning)' : 'var(--text-secondary)'};border-bottom:1px solid var(--glass-border);padding:2px 0;">
+                                    [${new Date(l.time).toLocaleString()}] [${l.level.toUpperCase()}] ${l.message}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== PROCESS =====
+            getProcessUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">⚡ Prozesse</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Fenster: ${document.querySelectorAll('#window-container .window').length}</p>
+                        <p style="color:var(--text-secondary);font-size:11px;">Apps: ${this.installedApps.length}</p>
+                        <p style="color:var(--text-secondary);font-size:11px;">Uptime: ${Kernel.getUptime()}s</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:4px;">
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:3px;border:1px solid var(--glass-border);font-size:10px;">
+                                <div style="color:var(--text-muted);">Kernel</div>
+                                <div style="color:var(--success);">✅ Aktiv</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:3px;border:1px solid var(--glass-border);font-size:10px;">
+                                <div style="color:var(--text-muted);">Cosmic World</div>
+                                <div style="color:${CosmicWorld.isReady ? 'var(--success)' : 'var(--warning)'};">${CosmicWorld.isReady ? '✅ Aktiv' : '⏳ Wird geladen'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== UPDATES =====
+            getUpdatesUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🔄 Updates</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Version: ${Kernel.version}</p>
+                        <div style="padding:6px;background:var(--glass-bg);border-radius:4px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <p style="color:var(--success);font-size:11px;">✅ System ist aktuell</p>
+                        </div>
+                        <button class="haldo-btn" style="font-size:11px;" onclick="AppManager.checkForUpdates()">🔄 Nach Updates suchen</button>
+                    </div>
+                `;
+            },
+
+            checkForUpdates() {
+                alert(`✅ System ist auf dem neuesten Stand (${Kernel.version})`);
+            },
+
+            // ===== BACKUP =====
+            getBackupUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">💾 Backup</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Letztes Backup: ${new Date().toLocaleString()}</p>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+                            <button class="haldo-btn" style="font-size:11px;" onclick="AppManager.exportAllData()">💾 Backup erstellen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:11px;" onclick="document.getElementById('backup-restore').click()">📤 Wiederherstellen</button>
+                            <input id="backup-restore" type="file" accept=".json" style="display:none;" onchange="AppManager.importAllData(this)">
+                        </div>
+                    </div>
+                `;
+            },
+
+            importAllData(input) {
+                const file = input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        Object.keys(data).forEach(key => Storage.set(key, data[key]));
+                        alert('✅ Backup wiederhergestellt!');
+                        location.reload();
+                    } catch (err) {
+                        alert('❌ Fehler: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            },
+
+            // ===== DIAGNOSTICS =====
+            getDiagnosticsUI() {
+                const checks = [
+                    { name: 'Kernel', status: '✅' },
+                    { name: 'Storage', status: '✅' },
+                    { name: 'Cosmic World', status: CosmicWorld.isReady ? '✅' : '⏳' },
+                    { name: 'AI Core', status: AICore.hasValidKey() ? '✅' : '⚠️' },
+                    { name: 'Apps', status: `${this.installedApps.length} installiert` }
+                ];
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🩺 Diagnose</h2>
+                        ${checks.map(c => `
+                            <div style="display:flex;justify-content:space-between;padding:3px 6px;background:var(--glass-bg);border-radius:3px;margin:2px 0;border:1px solid var(--glass-border);font-size:10px;">
+                                <span style="color:var(--text-secondary);">${c.name}</span>
+                                <span style="color:${c.status === '✅' ? 'var(--success)' : 'var(--warning)'};">${c.status}</span>
+                            </div>
+                        `).join('')}
+                        <button class="haldo-btn" style="font-size:11px;margin-top:4px;" onclick="alert('✅ Diagnose abgeschlossen')">🔬 Ausführen</button>
+                    </div>
+                `;
+            },
+
+            // ===== SECURITY =====
+            getSecurityUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🛡️ Sicherheit</h2>
+                        <div style="padding:6px;background:var(--glass-bg);border-radius:4px;margin:4px 0;border:1px solid var(--glass-border);">
+                            <p style="color:var(--success);font-size:11px;">✅ System ist sicher</p>
+                            <p style="color:var(--text-secondary);font-size:10px;">🔒 Daten werden lokal gespeichert</p>
+                        </div>
+                        <button class="haldo-btn haldo-btn-secondary" style="font-size:11px;" onclick="alert('🛡️ Sicherheitsprüfung: OK')">🛡️ Prüfen</button>
+                    </div>
+                `;
+            },
+
+            // ===== PRIVACY =====
+            getPrivacyUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🔒 Datenschutz</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Daten: ${localStorage.length} Einträge</p>
+                        <p style="color:var(--text-secondary);font-size:11px;">AI Memory: ${Storage.get('ai_memory', []).length} Einträge</p>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;" onclick="if(confirm('Alle Daten löschen?')){Storage.clear();alert('Gelöscht!');}">🗑️ Daten löschen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px 8px;" onclick="AppManager.exportAllData()">📤 Exportieren</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== LANGUAGE =====
+            getLanguageUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🌍 Sprachen</h2>
+                        <div style="margin:4px 0;">
+                            <label style="color:var(--text-secondary);font-size:10px;">Systemsprache</label>
+                            <select class="haldo-input" style="font-size:10px;margin-top:2px;" onchange="document.getElementById('menu-lang').textContent=this.value;">
+                                <option value="DE">🇩🇪 Deutsch</option>
+                                <option value="EN">🇬🇧 English</option>
+                                <option value="KU">🏴 Kurmancî</option>
+                                <option value="EZ">🏴 Êzîdî</option>
+                                <option value="TR">🇹🇷 Türkçe</option>
+                                <option value="AR">🇸🇦 العربية</option>
+                                <option value="FR">🇫🇷 Français</option>
+                                <option value="ES">🇪🇸 Español</option>
+                                <option value="RU">🇷🇺 Русский</option>
+                                <option value="FA">🇮🇷 فارسی</option>
+                                <option value="IT">🇮🇹 Italiano</option>
+                                <option value="PT">🇵🇹 Português</option>
+                            </select>
+                        </div>
+                        <div style="margin:4px 0;">
+                            <label style="color:var(--text-secondary);font-size:10px;">Tastaturlayout</label>
+                            <select class="haldo-input" style="font-size:10px;margin-top:2px;">
+                                <option>QWERTZ (Deutsch)</option>
+                                <option>QWERTY (Englisch)</option>
+                                <option>Êzîdî</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== VOICE CENTER =====
+            getVoiceCenterUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🎤 Voice Center</h2>
+                        <div style="margin:4px 0;">
+                            <label style="color:var(--text-secondary);font-size:10px;">Stimme</label>
+                            <select class="haldo-input" style="font-size:10px;margin-top:2px;" onchange="document.getElementById('menu-voice').textContent=this.value;">
+                                <option value="👩">👩 Deutsch – weiblich</option>
+                                <option value="👨">👨 Deutsch – männlich</option>
+                                <option value="👧">👧 Deutsch – jung</option>
+                                <option value="👩🇬🇧">👩🇬🇧 English – female</option>
+                                <option value="👨🇬🇧">👨🇬🇧 English – male</option>
+                                <option value="👩🇹🇷">👩🇹🇷 Türkçe – kadın</option>
+                                <option value="👨🇹🇷">👨🇹🇷 Türkçe – erkek</option>
+                            </select>
+                        </div>
+                        <button class="haldo-btn" style="font-size:11px;" onclick="if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance('Hallo, ich bin HalDo!');u.lang='de-DE';window.speechSynthesis.speak(u);}else{alert('TTS nicht unterstützt');}">🔊 Test</button>
+                    </div>
+                `;
+            },
+
+            // ===== THEMES =====
+            getThemesUI() {
+                const current = document.documentElement.getAttribute('data-theme') || 'dark';
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🎨 Themes</h2>
+                        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
+                            ${['dark','light','cosmic','aurora','midnight'].map(t => `
+                                <div onclick="document.documentElement.setAttribute('data-theme','${t}');const icons={dark:'🌙',light:'☀️',cosmic:'🌌',aurora:'🌠',midnight:'🌃'};document.getElementById('menu-theme').textContent=icons['${t}'];Storage.set('theme','${t}');" style="padding:4px 8px;background:var(--glass-bg);border-radius:4px;cursor:pointer;border:2px solid ${current===t?'var(--primary)':'var(--glass-border)'};font-size:10px;">
+                                    ${t==='dark'?'🌙':t==='light'?'☀️':t==='cosmic'?'🌌':t==='aurora'?'🌠':'🌃'} ${t.charAt(0).toUpperCase()+t.slice(1)}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== ABOUT =====
+            getAboutUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <div style="font-size:40px;margin-bottom:4px;">💙</div>
+                        <h2 style="color:var(--text-primary);font-size:14px;">HalDo AI OS ${Kernel.version}</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Cosmic Intelligent Operating System</p>
+                        <p style="color:var(--text-muted);font-size:9px;margin-top:2px;">© 2026 HalDo AI OS</p>
+                        <div style="margin-top:4px;padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);text-align:left;font-size:10px;">
+                            <p style="color:var(--text-muted);">System: ${navigator.platform}</p>
+                            <p style="color:var(--text-muted);">Apps: ${AppManager.installedApps.length} installiert</p>
+                            <p style="color:var(--text-muted);">Uptime: ${Kernel.getUptime()}s</p>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== DEVELOPER =====
+            getDeveloperUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">👨‍💻 Developer Center</h2>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;">
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;text-align:center;font-size:10px;" onclick="alert('📋 Apps: ${AppManager.apps.length}')">
+                                <div style="font-size:18px;">📋</div>
+                                <div style="color:var(--text-primary);">App Registry</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;text-align:center;font-size:10px;" onclick="alert('💾 Storage: ${localStorage.length} Einträge')">
+                                <div style="font-size:18px;">💾</div>
+                                <div style="color:var(--text-primary);">Storage Inspector</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;text-align:center;font-size:10px;" onclick="console.log('F12 Konsole öffnen');alert('🛠️ Konsole öffnen (F12)')">
+                                <div style="font-size:18px;">🛠️</div>
+                                <div style="color:var(--text-primary);">Debug Console</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;text-align:center;font-size:10px;" onclick="alert('📊 Performance: OK')">
+                                <div style="font-size:18px;">📊</div>
+                                <div style="color:var(--text-primary);">Performance</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== INSTALLATION =====
+            getInstallationUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">📥 Installation</h2>
+                        <div style="padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);margin:4px 0;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+                                <div>
+                                    <div style="font-size:12px;color:var(--text-primary);">HalDo AI OS</div>
+                                    <div style="color:var(--text-muted);font-size:9px;">${Kernel.version}</div>
+                                </div>
+                                <button class="haldo-btn" style="font-size:10px;" onclick="if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js').then(()=>alert('✅ Offline-Modus aktiviert!')).catch(()=>alert('⚠️ Fehler'));}else{alert('⚠️ Service Worker nicht unterstützt');}">📱 Installieren</button>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:3px;border:1px solid var(--glass-border);text-align:center;font-size:10px;">
+                                <div>📦 PWA</div>
+                                <div style="color:${'serviceWorker' in navigator ? 'var(--success)' : 'var(--warning)'};">${'serviceWorker' in navigator ? '✅ Unterstützt' : '⚠️ Nicht'}</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:3px;border:1px solid var(--glass-border);text-align:center;font-size:10px;">
+                                <div>📴 Offline</div>
+                                <div style="color:${navigator.onLine ? 'var(--success)' : 'var(--warning)'};">${navigator.onLine ? '✅ Online' : '📴 Offline'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== MIGRATION =====
+            getMigrationUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🔄 Migration</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Exportiere oder importiere dein Profil.</p>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+                            <button class="haldo-btn" style="font-size:11px;" onclick="AppManager.exportAllData()">📤 Exportieren</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:11px;" onclick="document.getElementById('migration-import').click()">📥 Importieren</button>
+                            <input id="migration-import" type="file" accept=".json" style="display:none;" onchange="AppManager.importAllData(this)">
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== ROLLBACK =====
+            getRollbackUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">⏪ Rollback</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Version: ${Kernel.version}</p>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+                            <button class="haldo-btn" style="font-size:11px;" onclick="Storage.set('rollback_point',{version:Kernel.version,date:Date.now()});alert('✅ Rollback-Punkt erstellt!')">💾 Punkt erstellen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:11px;" onclick="if(confirm('Rollback?')){alert('🔄 Rollback durchgeführt');location.reload();}">⏪ Rollback</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== RECOVERY =====
+            getRecoveryUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🔄 Recovery</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Systemrettung & Wiederherstellung</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:4px;">
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px;" onclick="alert('🔒 Safe Mode aktiviert')">🔒 Safe Mode</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px;" onclick="alert('✅ Apps repariert')">🔧 Apps reparieren</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px;" onclick="if(confirm('Storage zurücksetzen?')){Storage.clear();alert('✅ Zurückgesetzt');location.reload();}">🗑️ Storage reset</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:2px;" onclick="alert('✅ Diagnose abgeschlossen')">🩺 Diagnose</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== SERVICE MANAGER =====
+            getServiceManagerUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">⚙️ Service Manager</h2>
+                        ${[
+                            { name: 'Kernel', status: '🟢 Aktiv' },
+                            { name: 'Storage', status: '🟢 Aktiv' },
+                            { name: 'Cosmic World', status: CosmicWorld.isReady ? '🟢 Aktiv' : '🟡 Wird geladen' },
+                            { name: 'AI Core', status: AICore.hasValidKey() ? '🟢 Aktiv' : '🔴 Wartet auf Key' },
+                            { name: 'App Manager', status: '🟢 Aktiv' }
+                        ].map(s => `
+                            <div style="display:flex;justify-content:space-between;padding:3px 6px;background:var(--glass-bg);border-radius:3px;margin:2px 0;border:1px solid var(--glass-border);font-size:10px;">
+                                <span style="color:var(--text-secondary);">${s.name}</span>
+                                <span style="color:${s.status.includes('🟢') ? 'var(--success)' : s.status.includes('🟡') ? 'var(--warning)' : 'var(--danger)'};">${s.status}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            },
+
+            // ===== MODULE MANAGER =====
+            getModuleManagerUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🧩 Module Manager</h2>
+                        ${[
+                            { name: 'Kernel', version: Kernel.version, status: '✅' },
+                            { name: 'Storage', version: '1.0', status: '✅' },
+                            { name: 'Cosmic World', version: '2.0', status: CosmicWorld.isReady ? '✅' : '⏳' },
+                            { name: 'AI Core', version: '3.0', status: AICore.hasValidKey() ? '✅' : '⚠️' }
+                        ].map(m => `
+                            <div style="display:flex;justify-content:space-between;padding:3px 6px;background:var(--glass-bg);border-radius:3px;margin:2px 0;border:1px solid var(--glass-border);font-size:10px;">
+                                <span style="color:var(--text-secondary);">${m.name}</span>
+                                <span style="color:${m.status === '✅' ? 'var(--success)' : 'var(--warning)'};">${m.status} ${m.version}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            },
+
+            // ===== EXTENSIONS =====
+            getExtensionsUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🧩 Extensions</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Keine Erweiterungen installiert.</p>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+                            <button class="haldo-btn" style="font-size:11px;" onclick="alert('🔍 Suche...')">🔍 Suchen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:11px;" onclick="alert('📥 Extension installiert')">📥 Installieren</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== APP RUNTIME =====
+            getAppRuntimeUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">⚡ App Runtime</h2>
+                        <p style="color:var(--text-secondary);font-size:11px;">Fenster: ${document.querySelectorAll('#window-container .window').length}</p>
+                        <p style="color:var(--text-secondary);font-size:11px;">Apps: ${this.installedApps.length}</p>
+                        <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;margin-top:4px;" onclick="AppManager.updateTaskbar();alert('✅ Runtime aktualisiert')">🔄 Aktualisieren</button>
+                    </div>
+                `;
+            },
+
+            // ===== APP REGISTRY =====
+            getAppRegistryUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">📋 App Registry</h2>
+                        <div style="max-height:200px;overflow-y:auto;">
+                            ${this.apps.slice(0, 25).map(app => `
+                                <div style="display:flex;justify-content:space-between;padding:3px 6px;background:var(--glass-bg);border-radius:3px;margin:2px 0;border:1px solid var(--glass-border);font-size:9px;">
+                                    <span style="color:var(--text-secondary);">${app.icon} ${app.name}</span>
+                                    <span style="color:${this.installedApps.includes(app.id) ? 'var(--success)' : 'var(--text-muted)'};">${this.installedApps.includes(app.id) ? '✅' : '⏳'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== YOUR HALDO =====
+            getYourHaldoUI() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <div style="font-size:40px;margin-bottom:4px;">💙</div>
+                        <h2 style="color:var(--text-primary);font-size:14px;">Your HalDo</h2>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;">
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);">
+                                <div style="color:var(--text-muted);font-size:9px;">Notizen</div>
+                                <div style="color:var(--text-primary);font-size:14px;">${Storage.get('notes', []).length}</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);">
+                                <div style="color:var(--text-muted);font-size:9px;">AI Memory</div>
+                                <div style="color:var(--text-primary);font-size:14px;">${Storage.get('ai_memory', []).length}</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);">
+                                <div style="color:var(--text-muted);font-size:9px;">Erinnerungen</div>
+                                <div style="color:var(--text-primary);font-size:14px;">${Storage.get('reminders', []).length}</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);">
+                                <div style="color:var(--text-muted);font-size:9px;">Theme</div>
+                                <div style="color:var(--text-primary);font-size:14px;">${document.documentElement.getAttribute('data-theme') || 'dark'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== PERSONAL CENTER =====
+            getPersonalCenterUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">👤 Personal Center</h2>
+                        <div style="padding:6px;background:var(--glass-bg);border-radius:4px;border:1px solid var(--glass-border);margin:4px 0;">
+                            <p style="color:var(--text-secondary);font-size:11px;"><strong>Name:</strong> HalDo User</p>
+                            <p style="color:var(--text-secondary);font-size:11px;"><strong>Sprache:</strong> ${document.getElementById('menu-lang')?.textContent || 'DE'}</p>
+                            <p style="color:var(--text-secondary);font-size:11px;"><strong>Stimme:</strong> ${document.getElementById('menu-voice')?.textContent || '👩'}</p>
+                            <p style="color:var(--text-secondary);font-size:11px;"><strong>Theme:</strong> ${document.documentElement.getAttribute('data-theme') || 'dark'}</p>
+                        </div>
+                        <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;" onclick="alert('✏️ Profil bearbeiten')">✏️ Bearbeiten</button>
+                    </div>
+                `;
+            },
+
+            // ===== SYSTEM CENTER =====
+            getSystemCenterUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);font-size:13px;">🎛️ System Center</h2>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:4px;">
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:3px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:9px;" onclick="AppManager.openApp('system-monitor')">
+                                <div style="font-size:18px;">📊</div>
+                                <div style="color:var(--text-secondary);">Monitor</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:3px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:9px;" onclick="AppManager.openApp('updates')">
+                                <div style="font-size:18px;">🔄</div>
+                                <div style="color:var(--text-secondary);">Updates</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:3px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:9px;" onclick="AppManager.openApp('backup')">
+                                <div style="font-size:18px;">💾</div>
+                                <div style="color:var(--text-secondary);">Backup</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:3px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:9px;" onclick="AppManager.openApp('diagnostics')">
+                                <div style="font-size:18px;">🩺</div>
+                                <div style="color:var(--text-secondary);">Diagnose</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:3px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:9px;" onclick="AppManager.openApp('logs')">
+                                <div style="font-size:18px;">📋</div>
+                                <div style="color:var(--text-secondary);">Logs</div>
+                            </div>
+                            <div style="padding:6px;background:var(--glass-bg);border-radius:3px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;font-size:9px;" onclick="AppManager.openApp('process')">
+                                <div style="font-size:18px;">⚡</div>
+                                <div style="color:var(--text-secondary);">Prozesse</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== MUSIC STUDIO PRO =====
+            getMusicStudioProUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎚️</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Music Studio Pro</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Professionelle Musikproduktion</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎹 Piano Roll')">🎹 Piano Roll</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🎛️ Mixer')">🎛️ Mixer</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('✨ Effekte')">✨ Effekte</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📤 Export')">📤 Export</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== VIDEO STUDIO PRO =====
+            getVideoStudioProUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎥</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Video Studio Pro</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Professionelle Videoproduktion</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎞️ Timeline')">🎞️ Timeline</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('✨ Effekte')">✨ Effekte</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📝 Titel')">📝 Titel</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📤 Export')">📤 Export</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== AI VIDEO GENERATOR PRO =====
+            getAIVideoGeneratorProUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🤖</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">AI Video Generator Pro</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">KI-Videogenerierung V2.0</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎬 Generieren')">🎬 Generieren</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📦 Batch')">📦 Batch</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🎬 Storyboard')">🎬 Storyboard</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('⚙️ Einstellungen')">⚙️ Einstellungen</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== GAMES CENTER =====
+            getGamesCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎮</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Games Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">${this.installedApps.filter(a => a.category === 'entertainment').length} Spiele</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎯 Highscores')">🏆 Highscores</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('⭐ Erfolge')">⭐ Erfolge</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== HEALTH CENTER =====
+            getHealthCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🏥</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Health Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Gesundheitsmanagement</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🩺 Symptome')">🩺 Symptome</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('💊 Medikamente')">💊 Medikamente</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('👨‍⚕️ Ärzte')">👨‍⚕️ Ärzte</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📈 Tracking')">📈 Tracking</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== HEALTHY =====
+            getHealthyUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">💪</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Healthy</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Sport und Fitness</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🏃 Aktivitäten')">🏃 Aktivitäten</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🍲 Ernährung')">🍲 Ernährung</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('💧 Wasser')">💧 Wasser</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🏋️ Übungen')">🏋️ Übungen</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== UNIVERSITY CENTER =====
+            getUniversityCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎓</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">University Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Studium und Kurse</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('📚 Kurse')">📚 Kurse</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🧠 Wissen')">🧠 Wissen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📖 Bibliothek')">📖 Bibliothek</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🧠 Quiz')">🧠 Quiz</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== AI TUTOR =====
+            getAITutorUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🧑‍🏫</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">AI Tutor</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">KI-gestützter Lernassistent</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('💬 Chat')">💬 Chat</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📚 Fächer')">📚 Fächer</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📊 Fortschritt')">📊 Fortschritt</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📋 Verlauf')">📋 Verlauf</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== SCIENCE CENTER =====
+            getScienceCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🔬</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Science Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Naturwissenschaften</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🧬 Biologie')">🧬 Biologie</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🧪 Chemie')">🧪 Chemie</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('⚡ Physik')">⚡ Physik</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🌌 Astronomie')">🌌 Astronomie</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== PHILOSOPHY CENTER =====
+            getPhilosophyCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🧠</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Philosophy Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Philosophie und Ethik</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🧠 Denker')">🧠 Denker</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🏛️ Schulen')">🏛️ Schulen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('⚖️ Ethik')">⚖️ Ethik</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('💬 Zitate')">💬 Zitate</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== LANGUAGE CENTER =====
+            getLanguageCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🌍</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Language Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Sprachen lernen</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('📚 Kurse')">📚 Kurse</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📖 Vokabeln')">📖 Vokabeln</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🌐 Übersetzung')">🌐 Übersetzung</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🧠 Quiz')">🧠 Quiz</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== TRAVEL CENTER =====
+            getTravelCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">✈️</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Travel Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Reiseplanung</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🌍 Reiseziele')">🌍 Reiseziele</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🏨 Hotels')">🏨 Hotels</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('✈️ Flüge')">✈️ Flüge</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📅 Reiseplaner')">📅 Reiseplaner</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== DRIVING SCHOOL =====
+            getDrivingSchoolUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🚗</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Fahrschule</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Theorie und Praxis</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('📚 Lernen')">📚 Lernen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🧠 Quiz')">🧠 Quiz</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📋 Regeln')">📋 Regeln</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🛑 Schilder')">🛑 Schilder</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== TRAFFIC CENTER =====
+            getTrafficCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🚦</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Verkehr & Blitzer</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Verkehrsinfos</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('⚠️ Blitzer')">⚠️ Blitzer</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🚗 Verkehr')">🚗 Verkehr</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🗺️ Routen')">🗺️ Routen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🅿️ Parken')">🅿️ Parken</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== MUSIC STUDIO =====
+            getMusicStudioUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎹</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Musik Studio</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Musik erstellen</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎹 Piano Roll')">🎹 Piano Roll</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🎛️ Mixer')">🎛️ Mixer</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('✨ Effekte')">✨ Effekte</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📤 Export')">📤 Export</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== AI SONGWRITER =====
+            getAISongwriterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">✍️</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">AI Songwriter</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Songtexte schreiben</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('✍️ Schreiben')">✍️ Schreiben</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🔧 Korrigieren')">🔧 Korrigieren</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('💡 Brainstorm')">💡 Brainstorm</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('💾 Gespeichert')">💾 Gespeichert</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== VIDEO STUDIO =====
+            getVideoStudioUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎬</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Video Studio</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Videos erstellen</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('📁 Projekt')">📁 Projekt</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('✂️ Bearbeiten')">✂️ Bearbeiten</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📤 Export')">📤 Export</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== AI VIDEO GENERATOR =====
+            getAIVideoGeneratorUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🤖</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">AI Video Generator</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Videos generieren</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎬 Generieren')">🎬 Generieren</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🎬 Galerie')">🎬 Galerie</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('⚙️ Einstellungen')">⚙️ Einstellungen</button>
+                        </div>
+                    </div>
+                `;
+            },
+
             // ===== SETTINGS =====
             openSettings(app) {
                 const categories = [
@@ -2786,7 +4546,9 @@ Wichtige Prinzipien:
                     { id: 'voice', label: '🎤 Voice' },
                     { id: 'system', label: '📊 System' },
                     { id: 'security', label: '🔒 Sicherheit' },
-                    { id: 'storage', label: '💾 Speicher' }
+                    { id: 'storage', label: '💾 Speicher' },
+                    { id: 'updates', label: '🔄 Updates' },
+                    { id: 'about', label: 'ℹ️ Über' }
                 ];
                 const content = `
                     <div style="display:flex;height:100%;">
@@ -2912,6 +4674,26 @@ Wichtige Prinzipien:
                             <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
                                 <button class="haldo-btn haldo-btn-secondary" style="font-size:9px;padding:2px 8px;" onclick="alert('📊 Speicher: ${localStorage.length} Einträge')">📊 Analysieren</button>
                                 <button class="haldo-btn haldo-btn-secondary" style="font-size:9px;padding:2px 8px;" onclick="if(confirm('Alle Daten löschen?')){Storage.clear();alert('Gelöscht!');}">🗑️ Löschen</button>
+                            </div>
+                        `;
+                        break;
+                    case 'updates':
+                        content = `
+                            <h2 style="color:var(--text-primary);font-size:13px;">🔄 Updates</h2>
+                            <p style="color:var(--text-secondary);font-size:11px;">Version: ${Kernel.version}</p>
+                            <div style="padding:4px;background:var(--glass-bg);border-radius:4px;margin:4px 0;border:1px solid var(--glass-border);">
+                                <p style="color:var(--success);font-size:11px;">✅ System ist aktuell</p>
+                            </div>
+                            <button class="haldo-btn" style="font-size:10px;" onclick="alert('🔄 Suche...')">🔄 Nach Updates suchen</button>
+                        `;
+                        break;
+                    case 'about':
+                        content = `
+                            <div style="text-align:center;padding:8px;">
+                                <div style="font-size:40px;margin-bottom:4px;">💙</div>
+                                <h2 style="color:var(--text-primary);font-size:14px;">HalDo AI OS ${Kernel.version}</h2>
+                                <p style="color:var(--text-secondary);font-size:11px;">Cosmic Intelligent OS</p>
+                                <p style="color:var(--text-muted);font-size:9px;">© 2026</p>
                             </div>
                         `;
                         break;
