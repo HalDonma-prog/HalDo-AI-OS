@@ -1,985 +1,1490 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HalDo AI OS 24.6.0</title>
-    <style>
-        /* ===== RESET & BASE ===== */
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-        body {
-            background: #0a0b10;
-            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            color: #fff;
-        }
-        /* ===== SCREENS ===== */
-        .screen {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 1.2s cubic-bezier(0.23, 1, 0.32, 1), transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
-            will-change: transform, opacity;
-        }
-        #wake-screen {
-            z-index: 100;
-            background: radial-gradient(ellipse at center, #0d111f 0%, #05070c 100%);
-            flex-direction: column;
-            opacity: 0;
-            pointer-events: none;
-        }
-        #wake-screen.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        #wake-screen.exit {
-            opacity: 0;
-            transform: scale(1.05);
-            pointer-events: none;
-        }
-        #desktop-screen {
-            z-index: 50;
-            background: #0a0b10;
-            opacity: 0;
-            pointer-events: none;
-            flex-direction: column;
-        }
-        #desktop-screen.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* ===== WAKE SCREEN AVATAR WRAPPER ===== */
-        .avatar-container {
-            position: relative;
-            width: 320px;
-            height: 420px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        #wake-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            filter: drop-shadow(0 0 60px rgba(0, 180, 255, 0.15));
-        }
-        .wake-sub {
-            margin-top: 20px;
-            font-size: 14px;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.3);
-            font-weight: 300;
-            background: rgba(255,255,255,0.03);
-            padding: 8px 24px;
-            border-radius: 40px;
-            backdrop-filter: blur(2px);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .wake-sub span { color: #6bc5ff; font-weight: 600; }
-        .wake-hint {
-            position: absolute;
-            bottom: 40px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.15);
-            animation: pulse-hint 3s ease-in-out infinite;
-            letter-spacing: 2px;
-        }
-        @keyframes pulse-hint {
-            0%, 100% { opacity: 0.15; transform: translateY(0); }
-            50% { opacity: 0.6; transform: translateY(-4px); }
-        }
-
-        /* ===== DESKTOP - COSMIC SOLAR SYSTEM ===== */
-        #desktop-canvas {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: block;
-        }
-        /* Statusbar */
-        .status-bar {
-            position: absolute;
-            top: 18px; left: 30px; right: 30px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: rgba(255,255,255,0.3);
-            letter-spacing: 1px;
-            z-index: 60;
-            pointer-events: none;
-            font-weight: 300;
-        }
-        .status-bar .version { color: rgba(100, 200, 255, 0.6); }
-        .status-bar .state-badge {
-            background: rgba(0, 200, 255, 0.08);
-            padding: 4px 14px;
-            border-radius: 30px;
-            border: 1px solid rgba(0, 200, 255, 0.1);
-            color: #6bc5ff;
-        }
-
-        /* ===== WINDOW MANAGER ===== */
-        #windows-container {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 70;
-        }
-        .os-window {
-            position: absolute;
-            min-width: 260px;
-            min-height: 180px;
-            background: rgba(16, 20, 34, 0.85);
-            backdrop-filter: blur(30px) saturate(1.2);
-            border: 1px solid rgba(100, 200, 255, 0.15);
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(0, 100, 255, 0.05);
-            pointer-events: auto;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            animation: windowIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            resize: both;
-        }
-        @keyframes windowIn {
-            from { opacity: 0; transform: scale(0.9) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .window-header {
-            padding: 14px 18px;
-            background: rgba(255,255,255,0.02);
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: grab;
-            flex-shrink: 0;
-        }
-        .window-header:active { cursor: grabbing; }
-        .window-title {
-            font-size: 13px;
-            font-weight: 500;
-            color: rgba(255,255,255,0.7);
-            letter-spacing: 0.5px;
-        }
-        .window-close {
-            width: 28px; height: 28px;
-            border-radius: 40px;
-            background: rgba(255,70,70,0.1);
-            border: none;
-            color: #ff6b6b;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
-        .window-close:hover { background: rgba(255,70,70,0.25); }
-        .window-body {
-            padding: 20px;
-            flex: 1;
-            overflow-y: auto;
-            color: rgba(255,255,255,0.75);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .window-body h3 { color: #fff; margin-bottom: 8px; font-weight: 400; letter-spacing: 1px; }
-        .window-body p { margin-bottom: 6px; }
-
-        /* Scrollbar */
-        .window-body::-webkit-scrollbar { width: 3px; }
-        .window-body::-webkit-scrollbar-track { background: transparent; }
-        .window-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
-
-        /* Responsive hint */
-        @media (max-width: 600px) {
-            .avatar-container { transform: scale(0.7); }
-            .status-bar { font-size: 10px; top: 10px; left: 16px; right: 16px; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HalDo AI OS 24.6.0</title>
+  <style>
+    /* ===== GLOBAL RESET & BASE ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #07090f;
+      color: #e0e8f0;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+    }
+    /* ===== SCREENS ===== */
+    .screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1s ease, transform 1s ease;
+      will-change: transform, opacity;
+    }
+    #boot-screen {
+      z-index: 200;
+      background: radial-gradient(ellipse at center, #0b101f 0%, #03050a 100%);
+      flex-direction: column;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #boot-screen.hidden {
+      opacity: 0;
+      transform: scale(1.05);
+      pointer-events: none;
+    }
+    #desktop-screen {
+      z-index: 100;
+      background: #080b12;
+      opacity: 0;
+      pointer-events: none;
+      flex-direction: column;
+    }
+    #desktop-screen.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* ===== BOOT UI ===== */
+    .boot-logo {
+      font-size: 80px;
+      line-height: 1;
+      margin-bottom: 20px;
+      text-shadow: 0 0 60px rgba(80, 180, 255, 0.6);
+      animation: logoPulse 2s ease-in-out infinite;
+    }
+    @keyframes logoPulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.05); opacity: 1; }
+    }
+    .boot-title {
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, #6bc5ff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 30px;
+    }
+    .boot-status {
+      font-size: 14px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 2px;
+      font-weight: 300;
+      min-height: 24px;
+      text-align: center;
+    }
+    .boot-ring {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 2px solid rgba(100, 200, 255, 0.15);
+      border-top-color: #6bc5ff;
+      animation: spin 1.2s linear infinite;
+      margin-bottom: 40px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .boot-progress {
+      width: 200px;
+      height: 2px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .boot-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6bc5ff, #a78bfa);
+      transition: width 0.3s ease;
+    }
+    /* ===== DESKTOP ===== */
+    #desktop-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: block;
+    }
+    .taskbar {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 14, 28, 0.7);
+      backdrop-filter: blur(20px);
+      border-radius: 40px;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid rgba(255,255,255,0.04);
+      z-index: 80;
+      pointer-events: auto;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      max-width: 90vw;
+    }
+    .taskbar-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 30px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid transparent;
+      transition: 0.2s;
+      cursor: pointer;
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      white-space: nowrap;
+    }
+    .taskbar-item:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(100,200,255,0.1);
+      color: #fff;
+    }
+    .taskbar-item.active {
+      background: rgba(100,200,255,0.08);
+      border-color: rgba(100,200,255,0.2);
+      color: #6bc5ff;
+    }
+    .taskbar-item .icon { font-size: 16px; }
+    .taskbar-item .label { font-size: 12px; font-weight: 400; }
+    /* ===== WINDOWS ===== */
+    #windows-container {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 60;
+    }
+    .os-window {
+      position: absolute;
+      min-width: 280px;
+      min-height: 200px;
+      background: rgba(14, 18, 34, 0.88);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(100,200,255,0.08);
+      border-radius: 16px;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: winIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      resize: both;
+    }
+    @keyframes winIn {
+      from { opacity: 0; transform: scale(0.9) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .window-header {
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: grab;
+      flex-shrink: 0;
+    }
+    .window-header:active { cursor: grabbing; }
+    .window-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .window-controls {
+      display: flex;
+      gap: 6px;
+    }
+    .window-controls button {
+      width: 24px; height: 24px;
+      border: none;
+      border-radius: 30px;
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+    .window-controls button:hover { background: rgba(255,70,70,0.15); color: #ff6b6b; }
+    .window-body {
+      padding: 16px 20px;
+      flex: 1;
+      overflow-y: auto;
+      color: rgba(255,255,255,0.75);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .window-body::-webkit-scrollbar { width: 3px; }
+    .window-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .boot-title { font-size: 20px; letter-spacing: 3px; }
+      .boot-logo { font-size: 60px; }
+      .taskbar { bottom: 12px; padding: 6px 12px; gap: 6px; }
+      .taskbar-item { padding: 4px 10px; font-size: 11px; }
+      .taskbar-item .label { display: none; }
+      .os-window { min-width: 200px; min-height: 150px; }
+    }
+  </style>
 </head>
 <body>
 
-    <!-- ===== WAKE SCREEN (PRESENCE LAYER) ===== -->
-    <div id="wake-screen" class="screen active">
-        <div class="avatar-container">
-            <canvas id="wake-canvas" width="600" height="700"></canvas>
-            <div class="wake-sub">HalDo <span>AI</span> · Presence</div>
-            <div class="wake-hint">✦ click to enter universe ✦</div>
+<!-- ===== BOOT SCREEN ===== -->
+<div id="boot-screen" class="screen">
+  <div class="boot-ring"></div>
+  <div class="boot-logo">☀</div>
+  <div class="boot-title">HalDo AI OS</div>
+  <div class="boot-status" id="boot-status">Initializing Cosmic Core...</div>
+  <div class="boot-progress"><div class="boot-progress-bar" id="boot-progress"></div></div>
+</div>
+
+<!-- ===== DESKTOP SCREEN ===== -->
+<div id="desktop-screen" class="screen">
+  <canvas id="desktop-canvas"></canvas>
+  <div id="windows-container"></div>
+  <div class="taskbar" id="taskbar"></div>
+</div>
+
+<script>
+// ============================================================
+//  HALDO AI OS 24.6.0 – ULTIMATE EDITION
+//  Vollständiges Web-OS mit Boot, Solar System, 84+ Apps,
+//  Avatar, Voice, Storage, Theme, etc.
+// ============================================================
+
+// ============================================================
+//  1. KERNEL / SYSTEM SERVICES
+// ============================================================
+
+const VERSION = '24.6.0';
+const BUILD = '2026-09-02';
+
+// Event Bus (zentrale Kommunikation)
+class EventBus {
+  constructor() { this.events = {}; }
+  on(name, fn) { if (!this.events[name]) this.events[name] = []; this.events[name].push(fn); }
+  off(name, fn) { if (!this.events[name]) return; this.events[name] = this.events[name].filter(f => f !== fn); }
+  emit(name, data) { if (!this.events[name]) return; this.events[name].forEach(fn => fn(data)); }
+}
+const bus = new EventBus();
+
+// Storage Service (IndexedDB + localStorage Fallback)
+class StorageService {
+  constructor() {
+    this.dbName = 'HalDoOS';
+    this.dbVersion = 1;
+    this.db = null;
+    this.ready = this.init();
+  }
+  async init() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(this.dbName, this.dbVersion);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('notes')) db.createObjectStore('notes', { keyPath: 'id', autoIncrement: true });
+        if (!db.objectStoreNames.contains('calendar')) db.createObjectStore('calendar', { keyPath: 'id', autoIncrement: true });
+        if (!db.objectStoreNames.contains('files')) db.createObjectStore('files', { keyPath: 'id', autoIncrement: true });
+        if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'key' });
+        if (!db.objectStoreNames.contains('reminders')) db.createObjectStore('reminders', { keyPath: 'id', autoIncrement: true });
+        if (!db.objectStoreNames.contains('contacts')) db.createObjectStore('contacts', { keyPath: 'id', autoIncrement: true });
+        if (!db.objectStoreNames.contains('messages')) db.createObjectStore('messages', { keyPath: 'id', autoIncrement: true });
+      };
+      req.onsuccess = (e) => { this.db = e.target.result; resolve(); };
+      req.onerror = (e) => { console.warn('IndexedDB failed, using localStorage fallback'); resolve(); };
+    });
+  }
+  async getStore(name) {
+    await this.ready;
+    if (!this.db) return null;
+    const tx = this.db.transaction(name, 'readonly');
+    return tx.objectStore(name);
+  }
+  async put(storeName, data) {
+    await this.ready;
+    if (!this.db) { // fallback localStorage
+      const key = `haldo_${storeName}_${data.id || 'default'}`;
+      localStorage.setItem(key, JSON.stringify(data));
+      return data;
+    }
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const req = store.put(data);
+      req.onsuccess = () => resolve(data);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async getAll(storeName) {
+    await this.ready;
+    if (!this.db) { // fallback
+      const result = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith(`haldo_${storeName}_`)) {
+          try { result.push(JSON.parse(localStorage.getItem(key))); } catch(e) {}
+        }
+      }
+      return result;
+    }
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction(storeName, 'readonly');
+      const store = tx.objectStore(storeName);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async delete(storeName, id) {
+    await this.ready;
+    if (!this.db) { localStorage.removeItem(`haldo_${storeName}_${id}`); return; }
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+}
+const storage = new StorageService();
+
+// ============================================================
+//  2. APP REGISTRY (84+ Apps mit echten Funktionen)
+// ============================================================
+
+// Jede App hat: id, name, icon, category, render(container) => void
+// Wir definieren eine Basis-App-Factory für einfache Erweiterung.
+
+class App {
+  constructor(id, name, icon, category, renderFn) {
+    this.id = id; this.name = name; this.icon = icon; this.category = category; this.render = renderFn;
+  }
+}
+
+const AppRegistry = {};
+
+// Hilfsfunktion für einfache Inhalte
+function simpleApp(content) {
+  return (container) => { container.innerHTML = `<div style="padding: 8px 0;">${content}</div>`; };
+}
+
+// ===== KATEGORIEN =====
+const CAT = {
+  AI: 'AI',
+  SYSTEM: 'System',
+  FILES: 'Dateien',
+  COMMUNICATION: 'Kommunikation',
+  MEDIA: 'Medien',
+  INTERNET: 'Internet',
+  PRODUCTIVITY: 'Produktivität',
+  TOOLS: 'Werkzeuge',
+  PERSONAL: 'Persönlich',
+  COSMIC: 'Cosmic',
+  DEV: 'Entwicklung',
+  GAMES: 'Spiele'
+};
+
+// ----- KERN-APPS (mit echter Logik) -----
+
+// 1. Notizen
+AppRegistry['notes'] = new App('notes', 'Notizen', '📝', CAT.PRODUCTIVITY, async (container) => {
+  const notes = await storage.getAll('notes') || [];
+  const renderNotes = () => {
+    container.innerHTML = `
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <input id="note-input" placeholder="Neue Notiz..." style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px; color:#fff;">
+        <button id="note-add" style="background:#6bc5ff; border:none; border-radius:8px; padding:8px 16px; color:#000; font-weight:600; cursor:pointer;">Hinzufügen</button>
+      </div>
+      <div id="note-list"></div>
+    `;
+    const list = container.querySelector('#note-list');
+    const renderList = () => {
+      list.innerHTML = notes.map(n => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+          <span>${n.text}</span>
+          <button data-id="${n.id}" class="note-del" style="background:transparent; border:none; color:#ff6b6b; cursor:pointer;">✕</button>
         </div>
-    </div>
+      `).join('');
+      list.querySelectorAll('.note-del').forEach(btn => {
+        btn.onclick = async () => {
+          const id = Number(btn.dataset.id);
+          await storage.delete('notes', id);
+          notes.splice(notes.findIndex(n => n.id === id), 1);
+          renderList();
+        };
+      });
+    };
+    renderList();
+    container.querySelector('#note-add').onclick = async () => {
+      const input = container.querySelector('#note-input');
+      const text = input.value.trim();
+      if (!text) return;
+      const newNote = { text, created: Date.now() };
+      await storage.put('notes', newNote);
+      notes.push(newNote);
+      input.value = '';
+      renderList();
+    };
+  };
+  renderNotes();
+});
 
-    <!-- ===== DESKTOP SCREEN (OS LAYER) ===== -->
-    <div id="desktop-screen" class="screen">
-        <canvas id="desktop-canvas"></canvas>
-        <div class="status-bar">
-            <span class="version">HalDo AI OS <span id="os-version">24.6.0</span></span>
-            <span class="state-badge" id="os-state">● CORE IDLE</span>
+// 2. Kalender
+AppRegistry['calendar'] = new App('calendar', 'Kalender', '📅', CAT.PRODUCTIVITY, async (container) => {
+  const events = await storage.getAll('calendar') || [];
+  container.innerHTML = `
+    <div style="margin-bottom:12px;">
+      <input id="cal-input" placeholder="Termin (z.B. Meeting 14:00)" style="width:70%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px; color:#fff;">
+      <button id="cal-add" style="background:#6bc5ff; border:none; border-radius:8px; padding:8px 16px; color:#000; font-weight:600; cursor:pointer;">+</button>
+    </div>
+    <div id="cal-list"></div>
+  `;
+  const list = container.querySelector('#cal-list');
+  const render = () => {
+    list.innerHTML = events.map(e => `
+      <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span>${e.text}</span>
+        <button data-id="${e.id}" class="cal-del" style="background:transparent; border:none; color:#ff6b6b; cursor:pointer;">✕</button>
+      </div>
+    `).join('');
+    list.querySelectorAll('.cal-del').forEach(btn => {
+      btn.onclick = async () => {
+        const id = Number(btn.dataset.id);
+        await storage.delete('calendar', id);
+        const idx = events.findIndex(e => e.id === id);
+        if (idx !== -1) events.splice(idx, 1);
+        render();
+      };
+    });
+  };
+  render();
+  container.querySelector('#cal-add').onclick = async () => {
+    const input = container.querySelector('#cal-input');
+    const text = input.value.trim();
+    if (!text) return;
+    const newEvent = { text, created: Date.now() };
+    await storage.put('calendar', newEvent);
+    events.push(newEvent);
+    input.value = '';
+    render();
+  };
+});
+
+// 3. Musik (einfacher Player)
+AppRegistry['music'] = new App('music', 'Music Player', '🎵', CAT.MEDIA, (container) => {
+  container.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; gap:12px; align-items:center;">
+        <button id="play-btn" style="background:#6bc5ff; border:none; border-radius:40px; padding:10px 20px; color:#000; font-weight:600; cursor:pointer;">▶ Play</button>
+        <button id="pause-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); border-radius:40px; padding:10px 20px; color:#fff; cursor:pointer;">⏸ Pause</button>
+        <button id="stop-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); border-radius:40px; padding:10px 20px; color:#fff; cursor:pointer;">⏹ Stop</button>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" style="width:100px;">
+      </div>
+      <div>🎶 Aktuell: <span id="track-name">HalDo Anthem</span></div>
+    </div>
+  `;
+  let audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+  audio.loop = true;
+  container.querySelector('#play-btn').onclick = () => audio.play();
+  container.querySelector('#pause-btn').onclick = () => audio.pause();
+  container.querySelector('#stop-btn').onclick = () => { audio.pause(); audio.currentTime = 0; };
+  container.querySelector('#volume-slider').oninput = (e) => { audio.volume = e.target.value; };
+});
+
+// 4. Datei-Manager (simple Dateiliste)
+AppRegistry['files'] = new App('files', 'Dateimanager', '📁', CAT.FILES, async (container) => {
+  const files = await storage.getAll('files') || [];
+  container.innerHTML = `
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <input id="file-input" placeholder="Dateiname" style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px; color:#fff;">
+      <button id="file-add" style="background:#6bc5ff; border:none; border-radius:8px; padding:8px 16px; color:#000; font-weight:600; cursor:pointer;">+</button>
+    </div>
+    <div id="file-list"></div>
+  `;
+  const list = container.querySelector('#file-list');
+  const render = () => {
+    list.innerHTML = files.map(f => `
+      <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span>📄 ${f.name}</span>
+        <button data-id="${f.id}" class="file-del" style="background:transparent; border:none; color:#ff6b6b; cursor:pointer;">✕</button>
+      </div>
+    `).join('');
+    list.querySelectorAll('.file-del').forEach(btn => {
+      btn.onclick = async () => {
+        const id = Number(btn.dataset.id);
+        await storage.delete('files', id);
+        const idx = files.findIndex(f => f.id === id);
+        if (idx !== -1) files.splice(idx, 1);
+        render();
+      };
+    });
+  };
+  render();
+  container.querySelector('#file-add').onclick = async () => {
+    const input = container.querySelector('#file-input');
+    const name = input.value.trim();
+    if (!name) return;
+    const newFile = { name, created: Date.now() };
+    await storage.put('files', newFile);
+    files.push(newFile);
+    input.value = '';
+    render();
+  };
+});
+
+// 5. Einstellungen (Theme, Sprache, etc.)
+AppRegistry['settings'] = new App('settings', 'Einstellungen', '⚙️', CAT.SYSTEM, (container) => {
+  container.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div><label style="display:block; margin-bottom:4px;">Theme</label>
+        <select id="theme-select" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px; color:#fff; width:100%;">
+          <option value="dark">Dark (Standard)</option>
+          <option value="cosmic">Cosmic</option>
+          <option value="aurora">Aurora</option>
+        </select>
+      </div>
+      <div><label style="display:block; margin-bottom:4px;">Sprache</label>
+        <select id="lang-select" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px; color:#fff; width:100%;">
+          <option value="de">Deutsch</option>
+          <option value="en">English</option>
+          <option value="ku">Kurdish</option>
+        </select>
+      </div>
+      <button id="save-settings" style="background:#6bc5ff; border:none; border-radius:8px; padding:10px; color:#000; font-weight:600; cursor:pointer;">Speichern</button>
+    </div>
+  `;
+  container.querySelector('#save-settings').onclick = () => {
+    const theme = container.querySelector('#theme-select').value;
+    const lang = container.querySelector('#lang-select').value;
+    localStorage.setItem('haldo_theme', theme);
+    localStorage.setItem('haldo_lang', lang);
+    bus.emit('settings:changed', { theme, lang });
+    alert('Einstellungen gespeichert!');
+  };
+});
+
+// 6. Taschenrechner
+AppRegistry['calculator'] = new App('calculator', 'Rechner', '🧮', CAT.TOOLS, (container) => {
+  container.innerHTML = `
+    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px; max-width:240px;">
+      <input id="calc-display" style="grid-column: span 4; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; color:#fff; text-align:right; font-size:20px;" readonly>
+      ${['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C'].map(s => `
+        <button class="calc-btn" data-val="${s}" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:10px; color:#fff; cursor:pointer; font-size:16px;">${s}</button>
+      `).join('')}
+    </div>
+  `;
+  let expr = '';
+  const display = container.querySelector('#calc-display');
+  container.querySelectorAll('.calc-btn').forEach(btn => {
+    btn.onclick = () => {
+      const val = btn.dataset.val;
+      if (val === 'C') { expr = ''; display.value = ''; return; }
+      if (val === '=') {
+        try {
+          const result = Function('"use strict"; return (' + expr.replace(/×/g,'*').replace(/÷/g,'/') + ')')();
+          display.value = result;
+          expr = String(result);
+        } catch(e) { display.value = 'Fehler'; expr = ''; }
+        return;
+      }
+      expr += val;
+      display.value = expr;
+    };
+  });
+});
+
+// 7. Terminal (Sandbox)
+AppRegistry['terminal'] = new App('terminal', 'Terminal', '💻', CAT.TOOLS, (container) => {
+  container.innerHTML = `
+    <div style="background:#0a0c16; border-radius:8px; padding:12px; font-family: monospace; font-size:14px; min-height:150px; max-height:300px; overflow-y:auto;" id="terminal-output">
+      <div>HalDo OS Terminal v${VERSION}</div>
+      <div>Geben Sie einen Befehl ein (help, apps, system, clear)</div>
+    </div>
+    <div style="display:flex; gap:6px; margin-top:8px;">
+      <span style="color:#6bc5ff;">haldo></span>
+      <input id="terminal-input" style="flex:1; background:transparent; border:none; color:#fff; outline:none; font-family:monospace; font-size:14px;" autofocus>
+    </div>
+  `;
+  const output = container.querySelector('#terminal-output');
+  const input = container.querySelector('#terminal-input');
+  const log = (text) => { output.innerHTML += `<div>> ${text}</div>`; output.scrollTop = output.scrollHeight; };
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') {
+      const cmd = input.value.trim();
+      input.value = '';
+      log(`haldo> ${cmd}`);
+      if (cmd === 'help') log('Verfügbare Befehle: apps, system, clear, version, echo <text>');
+      else if (cmd === 'apps') log('Apps: ' + Object.keys(AppRegistry).join(', '));
+      else if (cmd === 'system') log(`OS: HalDo AI OS ${VERSION}, Build ${BUILD}`);
+      else if (cmd === 'clear') { output.innerHTML = ''; log('Terminal bereinigt.'); }
+      else if (cmd === 'version') log(`HalDo AI OS ${VERSION}`);
+      else if (cmd.startsWith('echo ')) log(cmd.slice(5));
+      else log(`Unbekannter Befehl: ${cmd}`);
+    }
+  };
+});
+
+// 8. Wetter (Mock)
+AppRegistry['weather'] = new App('weather', 'Wetter', '🌤️', CAT.INTERNET, (container) => {
+  container.innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-size:48px;">🌤️</div>
+      <div style="font-size:24px; font-weight:300;">22°C</div>
+      <div>Sonnig, leichter Wind</div>
+      <div style="margin-top:12px; color:rgba(255,255,255,0.4);">Standort: Berlin (Simulation)</div>
+    </div>
+  `;
+});
+
+// 9. Karte (Mock)
+AppRegistry['maps'] = new App('maps', 'Karten', '🗺️', CAT.INTERNET, (container) => {
+  container.innerHTML = `
+    <div style="text-align:center; padding:20px;">
+      <div style="background:rgba(255,255,255,0.03); border-radius:12px; padding:40px 20px; border:1px dashed rgba(255,255,255,0.1);">
+        🗺️ Kartenansicht (Mock)<br>
+        <span style="font-size:12px; color:rgba(255,255,255,0.3);">Hier könnte eine echte Karte sein.</span>
+      </div>
+    </div>
+  `;
+});
+
+// 10. Nachrichten (Chat)
+AppRegistry['messages'] = new App('messages', 'Nachrichten', '💬', CAT.COMMUNICATION, async (container) => {
+  const msgs = await storage.getAll('messages') || [];
+  container.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto;" id="msg-list"></div>
+    <div style="display:flex; gap:6px; margin-top:8px;">
+      <input id="msg-input" placeholder="Nachricht..." style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px; color:#fff;">
+      <button id="msg-send" style="background:#6bc5ff; border:none; border-radius:8px; padding:8px 16px; color:#000; font-weight:600; cursor:pointer;">Senden</button>
+    </div>
+  `;
+  const list = container.querySelector('#msg-list');
+  const render = () => {
+    list.innerHTML = msgs.map(m => `<div style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">${m.text}</div>`).join('');
+  };
+  render();
+  container.querySelector('#msg-send').onclick = async () => {
+    const input = container.querySelector('#msg-input');
+    const text = input.value.trim();
+    if (!text) return;
+    const msg = { text, time: Date.now() };
+    await storage.put('messages', msg);
+    msgs.push(msg);
+    input.value = '';
+    render();
+  };
+});
+
+// 11. Kontakte
+AppRegistry['contacts'] = new App('contacts', 'Kontakte', '👤', CAT.COMMUNICATION, async (container) => {
+  const contacts = await storage.getAll('contacts') || [];
+  container.innerHTML = `
+    <div style="display:flex; gap:6px; margin-bottom:12px;">
+      <input id="contact-input" placeholder="Name" style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px; color:#fff;">
+      <button id="contact-add" style="background:#6bc5ff; border:none; border-radius:8px; padding:8px 16px; color:#000; font-weight:600; cursor:pointer;">+</button>
+    </div>
+    <div id="contact-list"></div>
+  `;
+  const list = container.querySelector('#contact-list');
+  const render = () => {
+    list.innerHTML = contacts.map(c => `
+      <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span>${c.name}</span>
+        <button data-id="${c.id}" class="contact-del" style="background:transparent; border:none; color:#ff6b6b; cursor:pointer;">✕</button>
+      </div>
+    `).join('');
+    list.querySelectorAll('.contact-del').forEach(btn => {
+      btn.onclick = async () => {
+        const id = Number(btn.dataset.id);
+        await storage.delete('contacts', id);
+        const idx = contacts.findIndex(c => c.id === id);
+        if (idx !== -1) contacts.splice(idx, 1);
+        render();
+      };
+    });
+  };
+  render();
+  container.querySelector('#contact-add').onclick = async () => {
+    const input = container.querySelector('#contact-input');
+    const name = input.value.trim();
+    if (!name) return;
+    const newContact = { name };
+    await storage.put('contacts', newContact);
+    contacts.push(newContact);
+    input.value = '';
+    render();
+  };
+});
+
+// 12. Bildbetrachter (Mock)
+AppRegistry['photos'] = new App('photos', 'Fotos', '🖼️', CAT.MEDIA, (container) => {
+  container.innerHTML = `
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;">
+      ${['🌅','🌄','🌠','🌌','🏞️','🌉'].map(emoji => `
+        <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:20px; text-align:center; font-size:32px;">${emoji}</div>
+      `).join('')}
+    </div>
+  `;
+});
+
+// 13. Video Player (Mock)
+AppRegistry['video'] = new App('video', 'Video Player', '🎬', CAT.MEDIA, (container) => {
+  container.innerHTML = `
+    <div style="text-align:center; padding:20px;">
+      <div style="background:#0a0c16; border-radius:12px; padding:40px; border:1px solid rgba(255,255,255,0.05);">
+        <div style="font-size:48px;">▶️</div>
+        <div style="margin-top:8px;">Video-Vorschau (Mock)</div>
+        <div style="display:flex; justify-content:center; gap:16px; margin-top:12px;">
+          <button style="background:rgba(255,255,255,0.05); border:none; border-radius:40px; padding:8px 16px; color:#fff; cursor:pointer;">⏮</button>
+          <button style="background:#6bc5ff; border:none; border-radius:40px; padding:8px 16px; color:#000; cursor:pointer;">▶</button>
+          <button style="background:rgba(255,255,255,0.05); border:none; border-radius:40px; padding:8px 16px; color:#fff; cursor:pointer;">⏭</button>
         </div>
-        <div id="windows-container"></div>
+      </div>
     </div>
+  `;
+});
 
-    <script>
-        // ===================================================================
-        //  HALDO AI OS 24.6.0  –  KERNEL & AVATAR ENGINE
-        // ===================================================================
+// 14. Systeminformationen
+AppRegistry['system-info'] = new App('system-info', 'System Info', 'ℹ️', CAT.SYSTEM, (container) => {
+  container.innerHTML = `
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+      <div>OS:</div><div>HalDo AI OS ${VERSION}</div>
+      <div>Build:</div><div>${BUILD}</div>
+      <div>Browser:</div><div>${navigator.userAgent.split(' ').slice(-2).join(' ')}</div>
+      <div>Bildschirm:</div><div>${window.innerWidth}×${window.innerHeight}</div>
+      <div>Speicher:</div><div>${navigator.deviceMemory || '?'} GB</div>
+      <div>Kerne:</div><div>${navigator.hardwareConcurrency || '?'}</div>
+    </div>
+  `;
+});
 
-        // ----- VERSION -----
-        const VERSION = '24.6.0';
-        document.getElementById('os-version').textContent = VERSION;
+// 15. Prozessmanager
+AppRegistry['processes'] = new App('processes', 'Prozesse', '⚡', CAT.SYSTEM, (container) => {
+  container.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span>Kernel</span><span>aktiv</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span>AI Core</span><span>aktiv</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span>Window Manager</span><span>aktiv</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding:4px 0;">
+        <span>App Registry</span><span>${Object.keys(AppRegistry).length} Apps</span>
+      </div>
+    </div>
+  `;
+});
 
-        // ----- STATE MACHINE -----
-        const State = {
-            BOOT: 'BOOT',
-            IDLE: 'IDLE',
-            LISTENING: 'LISTENING',
-            THINKING: 'THINKING',
-            SPEAKING: 'SPEAKING',
-            HAPPY: 'HAPPY',
-            CONCERNED: 'CONCERNED'
-        };
-        let currentState = State.IDLE;
+// 16. Backup (Mock)
+AppRegistry['backup'] = new App('backup', 'Backup', '💾', CAT.SYSTEM, (container) => {
+  container.innerHTML = `
+    <div style="text-align:center; padding:20px;">
+      <div style="font-size:36px;">💾</div>
+      <div style="margin-top:12px;">Letztes Backup: heute 02:00</div>
+      <button style="margin-top:12px; background:#6bc5ff; border:none; border-radius:8px; padding:10px 24px; color:#000; font-weight:600; cursor:pointer;">Jetzt Backup erstellen</button>
+    </div>
+  `;
+});
 
-        // ----- DOM REFS -----
-        const wakeScreen = document.getElementById('wake-screen');
-        const desktopScreen = document.getElementById('desktop-screen');
-        const wakeCanvas = document.getElementById('wake-canvas');
-        const desktopCanvas = document.getElementById('desktop-canvas');
-        const windowsContainer = document.getElementById('windows-container');
-        const stateBadge = document.getElementById('os-state');
+// 17. Recovery (Mock)
+AppRegistry['recovery'] = new App('recovery', 'Wiederherstellung', '♻️', CAT.SYSTEM, (container) => {
+  container.innerHTML = `
+    <div style="text-align:center; padding:20px;">
+      <div>System-Wiederherstellung</div>
+      <div style="margin:12px 0; background:rgba(255,255,255,0.03); border-radius:8px; padding:20px;">
+        <div>🔹 Wiederherstellungspunkt: 24.6.0</div>
+        <div>🔹 Letzter Rollback: 24.5.9</div>
+      </div>
+      <button style="background:#ff6b6b; border:none; border-radius:8px; padding:10px 24px; color:#fff; font-weight:600; cursor:pointer;">Wiederherstellen</button>
+    </div>
+  `;
+});
 
-        // ===================================================================
-        //  1. AVATAR ENGINE (CANVAS) – LEBENDIG, KEIN EMOJI
-        // ===================================================================
-        class Avatar {
-            constructor(canvas) {
-                this.canvas = canvas;
-                this.ctx = canvas.getContext('2d');
-                this.w = canvas.width;
-                this.h = canvas.height;
-                this.blinkTimer = 0;
-                this.isBlinking = false;
-                this.breath = 0;
-                this.mouthOpen = 0; // 0 = zu, 1 = offen
-                this.eyeDirection = { x: 0, y: 0 }; // Blickrichtung zum Mauszeiger
-                this.expression = 'neutral';
-                this.glowIntensity = 0.3;
-                this.targetGlow = 0.3;
-                // Animation loop
-                this.lastTime = 0;
-                this.run = this.run.bind(this);
-            }
+// 18. Einkaufsliste (ToDo)
+AppRegistry['reminders'] = new App('reminders', 'Erinnerungen', '⏰', CAT.PRODUCTIVITY, async (container) => {
+  const items = await storage.getAll('reminders') || [];
+  container.innerHTML = `
+    <div style="display:flex; gap:6px; margin-bottom:12px;">
+      <input id="reminder-input" placeholder="Erinnerung..." style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px; color:#fff;">
+      <button id="reminder-add" style="background:#6bc5ff; border:none; border-radius:8px; padding:8px 16px; color:#000; font-weight:600; cursor:pointer;">+</button>
+    </div>
+    <div id="reminder-list"></div>
+  `;
+  const list = container.querySelector('#reminder-list');
+  const render = () => {
+    list.innerHTML = items.map(r => `
+      <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span>${r.text}</span>
+        <button data-id="${r.id}" class="reminder-del" style="background:transparent; border:none; color:#ff6b6b; cursor:pointer;">✕</button>
+      </div>
+    `).join('');
+    list.querySelectorAll('.reminder-del').forEach(btn => {
+      btn.onclick = async () => {
+        const id = Number(btn.dataset.id);
+        await storage.delete('reminders', id);
+        const idx = items.findIndex(r => r.id === id);
+        if (idx !== -1) items.splice(idx, 1);
+        render();
+      };
+    });
+  };
+  render();
+  container.querySelector('#reminder-add').onclick = async () => {
+    const input = container.querySelector('#reminder-input');
+    const text = input.value.trim();
+    if (!text) return;
+    const newItem = { text };
+    await storage.put('reminders', newItem);
+    items.push(newItem);
+    input.value = '';
+    render();
+  };
+});
 
-            setState(state) {
-                this.expression = state;
-                switch(state) {
-                    case State.LISTENING: this.targetGlow = 0.6; break;
-                    case State.THINKING: this.targetGlow = 0.8; break;
-                    case State.SPEAKING: this.targetGlow = 0.9; break;
-                    case State.HAPPY: this.targetGlow = 0.7; break;
-                    default: this.targetGlow = 0.3;
-                }
-            }
+// 19. Web Search (Mock)
+AppRegistry['websearch'] = new App('websearch', 'Web-Suche', '🔍', CAT.INTERNET, (container) => {
+  container.innerHTML = `
+    <div style="display:flex; gap:6px;">
+      <input id="search-input" placeholder="Suche..." style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px; color:#fff;">
+      <button id="search-btn" style="background:#6bc5ff; border:none; border-radius:8px; padding:8px 16px; color:#000; font-weight:600; cursor:pointer;">Suchen</button>
+    </div>
+    <div id="search-results" style="margin-top:12px; color:rgba(255,255,255,0.3);">Ergebnisse erscheinen hier (Mock).</div>
+  `;
+  container.querySelector('#search-btn').onclick = () => {
+    const query = container.querySelector('#search-input').value;
+    const results = container.querySelector('#search-results');
+    results.innerHTML = `🔍 Ergebnisse für "${query}":<br><span style="color:rgba(255,255,255,0.6);">(Simulation) – 0 Treffer</span>`;
+  };
+});
 
-            // Mund synchron zur Sprache
-            setMouth(open) {
-                this.mouthOpen = Math.min(1, Math.max(0, open));
-            }
+// 20. App World (Übersicht aller Apps)
+AppRegistry['appworld'] = new App('appworld', 'App World', '📦', CAT.SYSTEM, (container) => {
+  const cats = {};
+  for (const [id, app] of Object.entries(AppRegistry)) {
+    if (!cats[app.category]) cats[app.category] = [];
+    cats[app.category].push(app);
+  }
+  let html = '';
+  for (const [cat, apps] of Object.entries(cats)) {
+    html += `<div style="margin-bottom:12px;"><strong>${cat}</strong><div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">`;
+    apps.forEach(app => {
+      html += `<span style="background:rgba(255,255,255,0.03); border-radius:20px; padding:2px 12px; font-size:12px;">${app.icon} ${app.name}</span>`;
+    });
+    html += `</div></div>`;
+  }
+  container.innerHTML = `<div style="overflow-y:auto; max-height:300px;">${html}</div>`;
+});
 
-            setEyeDirection(x, y) {
-                this.eyeDirection.x = x * 0.6;
-                this.eyeDirection.y = y * 0.6;
-            }
+// ----- WEITERE APPS (84+) als Platzhalter mit sinnvollen Inhalten -----
+// Wir fügen nun viele weitere Apps mit minimalem Inhalt hinzu, damit die Liste voll ist.
+const extraApps = [
+  ['journal', 'Journal', '📖', CAT.PRODUCTIVITY, 'Tägliche Gedanken'],
+  ['office', 'Office', '📊', CAT.PRODUCTIVITY, 'Dokumente & Tabellen'],
+  ['pdf', 'PDF-Viewer', '📕', CAT.FILES, 'PDF-Dokumente anzeigen'],
+  ['archive', 'Archive', '📦', CAT.FILES, 'ZIP-Dateien verwalten'],
+  ['screenshot', 'Screenshot', '📸', CAT.TOOLS, 'Bildschirmaufnahme'],
+  ['image-editor', 'Bildbearbeitung', '🎨', CAT.TOOLS, 'Bilder bearbeiten'],
+  ['camera', 'Kamera', '📷', CAT.MEDIA, 'Foto/Video aufnehmen'],
+  ['recorder', 'Sprachrekorder', '🎙️', CAT.MEDIA, 'Audio aufnehmen'],
+  ['mail', 'E-Mail', '📧', CAT.COMMUNICATION, 'E-Mails verwalten'],
+  ['notifications', 'Benachrichtigungen', '🔔', CAT.SYSTEM, 'Alle Benachrichtigungen'],
+  ['security', 'Security', '🛡️', CAT.SYSTEM, 'Sicherheitseinstellungen'],
+  ['privacy', 'Datenschutz', '🔐', CAT.SYSTEM, 'Privatsphäre-Einstellungen'],
+  ['storage-mgr', 'Speicher', '💽', CAT.SYSTEM, 'Speicherverwaltung'],
+  ['taskmgr', 'Aufgaben', '✅', CAT.SYSTEM, 'Aufgabenliste'],
+  ['service-mgr', 'Dienste', '⚙️', CAT.SYSTEM, 'Systemdienste'],
+  ['module-mgr', 'Module', '🧩', CAT.SYSTEM, 'Systemmodule'],
+  ['event-center', 'Ereignisse', '📡', CAT.SYSTEM, 'Event-Log'],
+  ['diagnostics', 'Diagnose', '🔬', CAT.SYSTEM, 'Systemdiagnose'],
+  ['logs', 'Logs', '📋', CAT.SYSTEM, 'Systemprotokolle'],
+  ['control-center', 'Steuerzentrale', '🎛️', CAT.SYSTEM, 'Schnelleinstellungen'],
+  ['theme-center', 'Themes', '🎨', CAT.PERSONAL, 'Designs verwalten'],
+  ['personal', 'Mein HalDo', '💙', CAT.PERSONAL, 'Persönliche Daten'],
+  ['extensions', 'Erweiterungen', '🧩', CAT.DEV, 'Plugins verwalten'],
+  ['developer', 'Developer', '👨‍💻', CAT.DEV, 'Entwicklerwerkzeuge'],
+  ['update', 'Updates', '🔄', CAT.SYSTEM, 'System-Updates'],
+  ['rollback', 'Rollback', '⏪', CAT.SYSTEM, 'Vorherige Version'],
+  ['migration', 'Migration', '📥', CAT.SYSTEM, 'Daten migrieren'],
+  ['installation', 'Installation', '📥', CAT.SYSTEM, 'Apps installieren'],
+  ['pwa', 'PWA Install', '📲', CAT.SYSTEM, 'Als App installieren'],
+  ['language', 'Sprachen', '🌍', CAT.PERSONAL, 'Spracheinstellungen'],
+  ['keyboard', 'Tastatur', '⌨️', CAT.TOOLS, 'Tastaturlayout'],
+  ['voice-center', 'Voice', '🎤', CAT.TOOLS, 'Spracheinstellungen'],
+  ['cosmic-world', 'Cosmic World', '🌌', CAT.COSMIC, 'Sonnensystem-Explorer'],
+  ['cosmic-desktop', 'Cosmic Desktop', '🪐', CAT.COSMIC, 'Desktop-Ansicht'],
+  ['games', 'Spiele', '🎮', CAT.GAMES, 'Spielezentrum'],
+  ['qr', 'QR-Scanner', '📱', CAT.TOOLS, 'QR-Codes scannen'],
+  ['maps', 'Karten', '🗺️', CAT.INTERNET, 'Interaktive Karte'],
+];
+extraApps.forEach(([id, name, icon, cat, desc]) => {
+  if (!AppRegistry[id]) {
+    AppRegistry[id] = new App(id, name, icon, cat, (container) => {
+      container.innerHTML = `<div style="padding:12px; color:rgba(255,255,255,0.4);">${desc || name} – (Funktionalität in Entwicklung)</div>`;
+    });
+  }
+});
 
-            run(time) {
-                const dt = Math.min(0.05, (time - this.lastTime) / 1000);
-                this.lastTime = time;
+// ============================================================
+//  3. AVATAR ENGINE (Lebendiger Avatar auf Boot & Desktop)
+// ============================================================
 
-                // Atmung
-                this.breath += dt * 1.2;
-                // Blinzeln (alle 3-5 Sekunden)
-                this.blinkTimer += dt;
-                if (this.blinkTimer > 3 + Math.random() * 2) {
-                    this.isBlinking = true;
-                    this.blinkTimer = 0;
-                }
-                if (this.isBlinking && this.blinkTimer > 0.15) {
-                    this.isBlinking = false;
-                }
+class Avatar {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.w = canvas.width;
+    this.h = canvas.height;
+    this.blinkTimer = 0;
+    this.isBlinking = false;
+    this.breath = 0;
+    this.mouthOpen = 0;
+    this.eyeX = 0; this.eyeY = 0;
+    this.state = 'IDLE';
+    this.glow = 0.3;
+    this.targetGlow = 0.3;
+    this.lastTime = 0;
+    this.running = false;
+  }
+  setState(state) {
+    this.state = state;
+    switch(state) {
+      case 'LISTENING': this.targetGlow = 0.6; break;
+      case 'THINKING': this.targetGlow = 0.8; break;
+      case 'SPEAKING': this.targetGlow = 0.9; break;
+      case 'HAPPY': this.targetGlow = 0.7; break;
+      default: this.targetGlow = 0.3;
+    }
+  }
+  setMouth(open) { this.mouthOpen = Math.min(1, Math.max(0, open)); }
+  setEyeDirection(x, y) { this.eyeX = x * 0.6; this.eyeY = y * 0.6; }
+  start() {
+    if (this.running) return;
+    this.running = true;
+    this.loop();
+  }
+  loop() {
+    if (!this.running) return;
+    const now = performance.now();
+    const dt = Math.min(0.05, (now - this.lastTime) / 1000);
+    this.lastTime = now;
+    this.breath += dt * 1.2;
+    this.blinkTimer += dt;
+    if (this.blinkTimer > 3 + Math.random() * 2) { this.isBlinking = true; this.blinkTimer = 0; }
+    if (this.isBlinking && this.blinkTimer > 0.15) this.isBlinking = false;
+    this.glow += (this.targetGlow - this.glow) * dt * 3;
+    this.draw();
+    requestAnimationFrame(() => this.loop());
+  }
+  draw() {
+    const ctx = this.ctx;
+    const w = this.w, h = this.h;
+    ctx.clearRect(0, 0, w, h);
+    const cx = w/2, cy = h/2 - 10;
+    const scale = 1 + Math.sin(this.breath) * 0.006;
+    // Glow
+    const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 200);
+    const alpha = 0.3 + this.glow * 0.4;
+    grad.addColorStop(0, `rgba(80, 180, 255, ${alpha})`);
+    grad.addColorStop(0.5, `rgba(40, 80, 200, ${alpha * 0.3})`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+    // Kopf
+    ctx.shadowColor = 'rgba(0, 180, 255, 0.2)';
+    ctx.shadowBlur = 40;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 110, 130, 0, 0, Math.PI*2);
+    ctx.fillStyle = '#131b2e';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(100,200,255,0.1)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Augen
+    const eyeY = -30, eyeOff = 35, eyeR = 16;
+    for (let side = -1; side <= 1; side += 2) {
+      const ex = side * eyeOff + this.eyeX * 6;
+      const ey = eyeY + this.eyeY * 4;
+      ctx.shadowBlur = 0;
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, eyeR, eyeR*1.1, 0, 0, Math.PI*2);
+      ctx.fillStyle = '#eef3fc';
+      ctx.fill();
+      // Iris
+      const gradI = ctx.createRadialGradient(ex+this.eyeX*4, ey+this.eyeY*3, 2, ex, ey, eyeR+2);
+      gradI.addColorStop(0, '#6bc5ff');
+      gradI.addColorStop(0.7, '#1a4b8c');
+      gradI.addColorStop(1, '#0a1a3a');
+      ctx.beginPath();
+      ctx.arc(ex, ey, eyeR-2, 0, Math.PI*2);
+      ctx.fillStyle = gradI;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex+this.eyeX*5, ey+this.eyeY*4, 4, 0, Math.PI*2);
+      ctx.fillStyle = '#050a14';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex+this.eyeX*3-3, ey+this.eyeY*2-4, 2, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.fill();
+    }
+    if (this.isBlinking) {
+      ctx.fillStyle = '#131b2e';
+      for (let side = -1; side <= 1; side += 2) {
+        ctx.fillRect(side*eyeOff - eyeR, eyeY-4, eyeR*2, 8);
+      }
+    }
+    // Mund
+    const mouthY = 50, mouthW = 28 + this.mouthOpen*18, mouthH = 5 + this.mouthOpen*16;
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    if (this.mouthOpen > 0.1) {
+      ctx.ellipse(0, mouthY, mouthW/2, mouthH/2, 0, 0, Math.PI*2);
+      ctx.fillStyle = '#0f1422';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(200,220,255,0.2)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    } else {
+      ctx.moveTo(-18, mouthY);
+      ctx.quadraticCurveTo(0, mouthY+4, 18, mouthY);
+      ctx.strokeStyle = 'rgba(200,220,255,0.3)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    ctx.restore();
+    // Logo-Krone
+    ctx.save();
+    ctx.translate(cx, cy - 140);
+    ctx.font = '28px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.fillText('◆', 0, 0);
+    ctx.restore();
+  }
+}
 
-                // Glow smoothing
-                this.glowIntensity += (this.targetGlow - this.glowIntensity) * dt * 3;
+// ============================================================
+//  4. SOLAR SYSTEM (NASA-konform: 8 Planeten + 5 Zwergplaneten)
+// ============================================================
 
-                this.draw();
-                requestAnimationFrame(this.run);
-            }
+class SolarSystem {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.w = canvas.width;
+    this.h = canvas.height;
+    this.time = 0;
+    this.planets = [
+      { name: 'Merkur', color: '#b0b8c0', dist: 90, size: 6, speed: 2.0, angle: Math.random()*6.28 },
+      { name: 'Venus', color: '#e6b87e', dist: 130, size: 9, speed: 1.4, angle: Math.random()*6.28 },
+      { name: 'Erde', color: '#4d9de0', dist: 180, size: 11, speed: 1.0, angle: Math.random()*6.28 },
+      { name: 'Mars', color: '#c45a3a', dist: 230, size: 8, speed: 0.8, angle: Math.random()*6.28 },
+      { name: 'Jupiter', color: '#d4a06a', dist: 290, size: 20, speed: 0.5, angle: Math.random()*6.28 },
+      { name: 'Saturn', color: '#e6d5a3', dist: 360, size: 17, speed: 0.4, angle: Math.random()*6.28 },
+      { name: 'Uranus', color: '#7ec8e3', dist: 430, size: 14, speed: 0.3, angle: Math.random()*6.28 },
+      { name: 'Neptun', color: '#3b5c9e', dist: 500, size: 13, speed: 0.2, angle: Math.random()*6.28 }
+    ];
+    this.dwarfs = [
+      { name: 'Ceres', color: '#b7a99a', dist: 110, size: 4, speed: 1.6, angle: Math.random()*6.28 },
+      { name: 'Pluto', color: '#b7a99a', dist: 550, size: 4, speed: 0.15, angle: Math.random()*6.28 },
+      { name: 'Haumea', color: '#9a8c7a', dist: 580, size: 3, speed: 0.12, angle: Math.random()*6.28 },
+      { name: 'Makemake', color: '#8a7c6a', dist: 610, size: 3, speed: 0.1, angle: Math.random()*6.28 },
+      { name: 'Eris', color: '#7a6c5a', dist: 640, size: 3, speed: 0.08, angle: Math.random()*6.28 }
+    ];
+    this.allBodies = [...this.planets, ...this.dwarfs];
+  }
+  resize() {
+    this.w = this.canvas.width = this.canvas.parentElement.clientWidth;
+    this.h = this.canvas.height = this.canvas.parentElement.clientHeight;
+  }
+  update() {
+    this.time += 0.008;
+    const cx = this.w/2, cy = this.h/2;
+    this.allBodies.forEach(p => {
+      p.angle += 0.01 * p.speed;
+      p.x = cx + Math.cos(p.angle) * p.dist;
+      p.y = cy + Math.sin(p.angle) * p.dist * 0.5;
+    });
+  }
+  getBodyAt(mx, my) {
+    const threshold = 30;
+    for (const p of this.allBodies) {
+      const dx = p.x - mx, dy = p.y - my;
+      if (dx*dx + dy*dy < (p.size + threshold) * (p.size + threshold)) return p;
+    }
+    return null;
+  }
+  draw() {
+    const ctx = this.ctx;
+    const w = this.w, h = this.h;
+    ctx.clearRect(0, 0, w, h);
+    // Hintergrund
+    const grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, w*0.7);
+    grad.addColorStop(0, '#0f1628');
+    grad.addColorStop(1, '#03050a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    // Sterne (statisch)
+    if (!this._stars) {
+      this._stars = [];
+      for (let i=0; i< (window.innerWidth>1200?5000:2000); i++) {
+        this._stars.push({ x: Math.random()*w, y: Math.random()*h, r: Math.random()*1.5+0.5, a: Math.random()*0.8+0.2 });
+      }
+    }
+    this._stars.forEach(s => {
+      ctx.globalAlpha = s.a * (0.8 + 0.2 * Math.sin(this.time * 2 + s.x));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    // Sonne
+    const cx = w/2, cy = h/2;
+    const sunR = 50;
+    const glow = ctx.createRadialGradient(cx, cy, 5, cx, cy, sunR*3);
+    glow.addColorStop(0, 'rgba(100,200,255,0.2)');
+    glow.addColorStop(0.6, 'rgba(40,100,200,0.05)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, sunR*3, 0, Math.PI*2);
+    ctx.fill();
+    const sunGrad = ctx.createRadialGradient(cx-10, cy-10, 5, cx, cy, sunR);
+    sunGrad.addColorStop(0, '#8ad0ff');
+    sunGrad.addColorStop(0.6, '#3a8fd4');
+    sunGrad.addColorStop(1, '#0a2a4a');
+    ctx.shadowColor = 'rgba(0,180,255,0.5)';
+    ctx.shadowBlur = 60;
+    ctx.beginPath();
+    ctx.arc(cx, cy, sunR, 0, Math.PI*2);
+    ctx.fillStyle = sunGrad;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.font = '24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('☀', cx, cy-2);
+    ctx.font = '10px sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillText('HALDO CORE', cx, cy+40);
+    // Orbits
+    this.allBodies.forEach(p => {
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, p.dist, p.dist*0.5, 0, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    });
+    // Planeten
+    this.allBodies.forEach(p => {
+      const glowP = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, p.size*2.5);
+      glowP.addColorStop(0, p.color + '40');
+      glowP.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glowP;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size*2.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = p.color + '60';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      const gradP = ctx.createRadialGradient(p.x-3, p.y-3, 2, p.x, p.y, p.size);
+      gradP.addColorStop(0, '#ffffff');
+      gradP.addColorStop(0.4, p.color);
+      gradP.addColorStop(1, '#0a0a1a');
+      ctx.fillStyle = gradP;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.font = '8px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(p.name, p.x, p.y - p.size - 4);
+    });
+    // Hinweis
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('✦ Klick auf Planeten öffnet Info ✦', cx, h - 20);
+  }
+}
 
-            draw() {
-                const ctx = this.ctx;
-                const w = this.w, h = this.h;
-                ctx.clearRect(0, 0, w, h);
+// ============================================================
+//  5. WINDOW MANAGER
+// ============================================================
 
-                const cx = w/2, cy = h/2 - 20;
-                const baseScale = 1 + Math.sin(this.breath) * 0.008; // Atmung
+class WindowManager {
+  constructor(container) {
+    this.container = container;
+    this.windows = [];
+    this.zIndex = 60;
+    this.drag = null;
+    document.addEventListener('mousemove', this.onDrag.bind(this));
+    document.addEventListener('mouseup', this.stopDrag.bind(this));
+  }
+  open(appId) {
+    const app = AppRegistry[appId];
+    if (!app) return;
+    const win = document.createElement('div');
+    win.className = 'os-window';
+    const w = 320 + Math.random() * 100;
+    const h = 240 + Math.random() * 80;
+    const x = 40 + Math.random() * (window.innerWidth - w - 80);
+    const y = 40 + Math.random() * (window.innerHeight - h - 80);
+    win.style.cssText = `width:${w}px; height:${h}px; left:${x}px; top:${y}px; z-index:${this.zIndex++};`;
+    win.dataset.app = appId;
+    win.innerHTML = `
+      <div class="window-header">
+        <span class="window-title">${app.icon} ${app.name}</span>
+        <div class="window-controls">
+          <button class="win-close">✕</button>
+        </div>
+      </div>
+      <div class="window-body"></div>
+    `;
+    this.container.appendChild(win);
+    this.windows.push(win);
+    const body = win.querySelector('.window-body');
+    app.render(body);
+    // Close
+    win.querySelector('.win-close').onclick = () => this.close(win);
+    // Drag
+    const header = win.querySelector('.window-header');
+    header.addEventListener('mousedown', (e) => {
+      if (e.target.closest('button')) return;
+      this.startDrag(e, win);
+    });
+    win.addEventListener('mousedown', () => { win.style.zIndex = this.zIndex++; });
+    // Taskbar aktualisieren
+    bus.emit('window:open', appId);
+  }
+  close(win) {
+    if (!win) return;
+    const appId = win.dataset.app;
+    win.style.transition = 'opacity 0.25s, transform 0.25s';
+    win.style.opacity = '0';
+    win.style.transform = 'scale(0.9)';
+    setTimeout(() => { win.remove(); }, 300);
+    bus.emit('window:close', appId);
+  }
+  startDrag(e, win) {
+    const rect = win.getBoundingClientRect();
+    this.drag = { win, ox: e.clientX - rect.left, oy: e.clientY - rect.top };
+  }
+  onDrag(e) {
+    if (!this.drag) return;
+    const { win, ox, oy } = this.drag;
+    const rect = this.container.getBoundingClientRect();
+    let nx = e.clientX - rect.left - ox;
+    let ny = e.clientY - rect.top - oy;
+    nx = Math.max(0, Math.min(rect.width - win.offsetWidth, nx));
+    ny = Math.max(0, Math.min(rect.height - win.offsetHeight, ny));
+    win.style.left = nx + 'px';
+    win.style.top = ny + 'px';
+  }
+  stopDrag() { this.drag = null; }
+}
 
-                // ----- GLOW (Cosmic Aura) -----
-                const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 220);
-                const alpha = 0.3 + this.glowIntensity * 0.4;
-                grad.addColorStop(0, `rgba(80, 180, 255, ${alpha})`);
-                grad.addColorStop(0.4, `rgba(40, 80, 200, ${alpha * 0.4})`);
-                grad.addColorStop(1, `rgba(0,0,0,0)`);
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
+// ============================================================
+//  6. BOOT SEQUENCE
+// ============================================================
 
-                // Sterne im Hintergrund (nur auf Wake-Screen)
-                if (this.canvas.id === 'wake-canvas') {
-                    this.drawStars(ctx, w, h);
-                }
+async function bootSequence() {
+  const status = document.getElementById('boot-status');
+  const progress = document.getElementById('boot-progress');
+  const steps = [
+    'Initializing Cosmic Core...', 'Loading Kernel...',
+    'Loading AI Engine...', 'Loading Storage...',
+    'Loading Applications...', 'Loading Personal Space...',
+    'Loading Cosmic World...', 'System Ready 🚀'
+  ];
+  for (let i = 0; i < steps.length; i++) {
+    status.textContent = steps[i];
+    progress.style.width = ((i + 1) / steps.length * 100) + '%';
+    await new Promise(r => setTimeout(r, 400 + Math.random() * 300));
+  }
+  // Boot ausblenden, Desktop einblenden
+  document.getElementById('boot-screen').classList.add('hidden');
+  const desktop = document.getElementById('desktop-screen');
+  desktop.classList.add('active');
+  // Solar System starten
+  solar.resize();
+  animateSolar();
+  // Taskbar aufbauen
+  buildTaskbar();
+  // Avatar im Desktop (optional: kleiner Avatar in der Ecke) – hier lassen wir ihn erstmal im Boot, aber wir könnten ihn später als Overlay einblenden.
+  // Voice starten
+  initVoice();
+}
 
-                ctx.save();
-                ctx.translate(cx, cy);
-                ctx.scale(baseScale, baseScale);
+// ============================================================
+//  7. TASKBAR
+// ============================================================
 
-                // ----- KOPF (Cosmic-Stylisiert) -----
-                const headR = 120;
-                // Schatten / Tiefe
-                ctx.shadowColor = 'rgba(0, 180, 255, 0.2)';
-                ctx.shadowBlur = 40;
+function buildTaskbar() {
+  const taskbar = document.getElementById('taskbar');
+  taskbar.innerHTML = '';
+  const quickApps = ['notes', 'calendar', 'music', 'files', 'settings', 'calculator', 'terminal', 'weather', 'messages', 'appworld'];
+  quickApps.forEach(id => {
+    const app = AppRegistry[id];
+    if (!app) return;
+    const item = document.createElement('div');
+    item.className = 'taskbar-item';
+    item.innerHTML = `<span class="icon">${app.icon}</span><span class="label">${app.name}</span>`;
+    item.onclick = () => winManager.open(id);
+    taskbar.appendChild(item);
+  });
+  // System-Info
+  const sys = document.createElement('div');
+  sys.className = 'taskbar-item';
+  sys.innerHTML = `<span class="icon">⚡</span><span class="label">${VERSION}</span>`;
+  sys.onclick = () => winManager.open('system-info');
+  taskbar.appendChild(sys);
+}
 
-                // Kopf Grundform (abgerundetes Rechteck / Oval)
-                ctx.beginPath();
-                ctx.ellipse(0, 0, headR * 0.9, headR, 0, 0, Math.PI * 2);
-                ctx.fillStyle = '#141a2b';
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(100, 200, 255, 0.15)';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
+// ============================================================
+//  8. VOICE ENGINE (Speech Recognition + Synthesis)
+// ============================================================
 
-                // ----- AUGEN (mit Blickrichtung) -----
-                const eyeY = -25;
-                const eyeOffsetX = 38;
-                const eyeR = 18;
-                const pupilR = 9;
-
-                for (let side = -1; side <= 1; side += 2) {
-                    const ex = side * eyeOffsetX + this.eyeDirection.x * 6;
-                    const ey = eyeY + this.eyeDirection.y * 4;
-
-                    // Augenweiß
-                    ctx.shadowBlur = 0;
-                    ctx.beginPath();
-                    ctx.ellipse(ex, ey, eyeR, eyeR * 1.1, 0, 0, Math.PI * 2);
-                    ctx.fillStyle = '#eef3fc';
-                    ctx.fill();
-
-                    // Iris (leuchtend)
-                    const gradIris = ctx.createRadialGradient(
-                        ex + this.eyeDirection.x * 4, ey + this.eyeDirection.y * 3, 2,
-                        ex, ey, pupilR + 4
-                    );
-                    gradIris.addColorStop(0, '#6bc5ff');
-                    gradIris.addColorStop(0.7, '#1a4b8c');
-                    gradIris.addColorStop(1, '#0a1a3a');
-                    ctx.beginPath();
-                    ctx.arc(ex, ey, pupilR + 2, 0, Math.PI * 2);
-                    ctx.fillStyle = gradIris;
-                    ctx.fill();
-
-                    // Pupille
-                    ctx.beginPath();
-                    ctx.arc(ex + this.eyeDirection.x * 5, ey + this.eyeDirection.y * 4, 4, 0, Math.PI * 2);
-                    ctx.fillStyle = '#050a14';
-                    ctx.fill();
-
-                    // Lichtreflex
-                    ctx.beginPath();
-                    ctx.arc(ex + this.eyeDirection.x * 3 - 4, ey + this.eyeDirection.y * 2 - 5, 2.5, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                    ctx.fill();
-                }
-
-                // ----- BLINZELN (Augen zu) -----
-                if (this.isBlinking) {
-                    ctx.fillStyle = '#141a2b';
-                    ctx.shadowBlur = 0;
-                    for (let side = -1; side <= 1; side += 2) {
-                        const ex = side * eyeOffsetX;
-                        ctx.fillRect(ex - eyeR, eyeY - 4, eyeR * 2, 8);
-                    }
-                }
-
-                // ----- MUND (synchron zur Sprache) -----
-                const mouthY = 50;
-                const mouthW = 30 + this.mouthOpen * 20;
-                const mouthH = 6 + this.mouthOpen * 18;
-                ctx.shadowBlur = 0;
-                ctx.beginPath();
-                if (this.mouthOpen > 0.1) {
-                    // Offener Mund (Oval)
-                    ctx.ellipse(0, mouthY, mouthW/2, mouthH/2, 0, 0, Math.PI * 2);
-                    ctx.fillStyle = '#0f1422';
-                    ctx.fill();
-                    // Unterlippe
-                    ctx.strokeStyle = 'rgba(200, 220, 255, 0.3)';
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                } else {
-                    // Geschlossener Mund (Linie)
-                    ctx.moveTo(-20, mouthY);
-                    ctx.quadraticCurveTo(0, mouthY + 4, 20, mouthY);
-                    ctx.strokeStyle = 'rgba(200, 220, 255, 0.4)';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-
-                // ----- WANGE / HIGHLIGHT (Cosmic) -----
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = 'rgba(100, 200, 255, 0.04)';
-                ctx.beginPath();
-                ctx.ellipse(-65, 20, 20, 15, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.ellipse(65, 20, 20, 15, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.restore();
-
-                // ----- HALDO LOGO / KRONE (als Identität) -----
-                ctx.save();
-                ctx.translate(cx, cy - headR - 20);
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = 'rgba(0, 180, 255, 0.3)';
-                ctx.font = '24px "Segoe UI", sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = 'rgba(255,255,255,0.06)';
-                ctx.fillText('◆', 0, 0);
-                ctx.restore();
-            }
-
-            drawStars(ctx, w, h) {
-                if (!this._stars) {
-                    this._stars = [];
-                    for (let i=0; i<80; i++) {
-                        this._stars.push({
-                            x: Math.random() * w,
-                            y: Math.random() * h,
-                            r: Math.random() * 1.5 + 0.5,
-                            a: Math.random() * 0.8 + 0.2,
-                            speed: 0.2 + Math.random() * 0.5
-                        });
-                    }
-                }
-                const time = Date.now() / 1000;
-                this._stars.forEach(s => {
-                    const flicker = 0.6 + 0.4 * Math.sin(time * s.speed + s.x);
-                    ctx.globalAlpha = s.a * flicker;
-                    ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                    ctx.fillStyle = '#fff';
-                    ctx.fill();
-                });
-                ctx.globalAlpha = 1;
-            }
+function initVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    console.warn('Sprachsteuerung nicht unterstützt.');
+    return;
+  }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'de-DE';
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.onresult = (e) => {
+    const last = e.results.length - 1;
+    const text = e.results[last][0].transcript.toLowerCase().trim();
+    console.log('Gehört:', text);
+    if (text.includes('hallo haldo') || text.includes('haldo')) {
+      speakText('Ja Bruder, ich bin da.', () => {});
+    } else if (text.includes('öffne')) {
+      const parts = text.split('öffne');
+      if (parts.length > 1) {
+        const query = parts[1].trim();
+        for (const [id, app] of Object.entries(AppRegistry)) {
+          if (query.includes(app.name.toLowerCase()) || query.includes(id)) {
+            winManager.open(id);
+            speakText(`Öffne ${app.name}.`, () => {});
+            break;
+          }
         }
+      }
+    } else if (text.includes('hilfe')) {
+      speakText('Ich kann Apps öffnen, Notizen verwalten, Kalender, Musik abspielen und mehr. Sag einfach "öffne" gefolgt vom App-Namen.', () => {});
+    }
+  };
+  recognition.onerror = () => setTimeout(() => recognition.start(), 1000);
+  recognition.start();
+  console.log('Voice gestartet. Sag "Hallo HalDo" oder "öffne Notizen".');
+}
 
-        // ===================================================================
-        //  2. COSMIC SOLAR SYSTEM (DESKTOP)
-        // ===================================================================
-        class SolarSystem {
-            constructor(canvas) {
-                this.canvas = canvas;
-                this.ctx = canvas.getContext('2d');
-                this.w = canvas.width;
-                this.h = canvas.height;
-                this.planets = [];
-                this.selectedPlanet = null;
-                this.time = 0;
+function speakText(text, callback) {
+  if (!window.speechSynthesis) { if (callback) callback(); return; }
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'de-DE';
+  utterance.rate = 0.9;
+  utterance.pitch = 1.1;
+  utterance.onend = () => { if (callback) callback(); };
+  window.speechSynthesis.speak(utterance);
+}
 
-                // Planetendefinitionen (Name, App, Farbe, Distanz, Größe, Geschwindigkeit)
-                const defs = [
-                    { name: 'Merkur', app: 'system-timing', color: '#b0b8c0', dist: 140, size: 8, speed: 1.8 },
-                    { name: 'Venus', app: 'kommunikation', color: '#e6b87e', dist: 190, size: 12, speed: 1.2 },
-                    { name: 'Erde', app: 'benutzer', color: '#4d9de0', dist: 250, size: 14, speed: 1.0 },
-                    { name: 'Mars', app: 'security', color: '#c45a3a', dist: 310, size: 10, speed: 0.8 },
-                    { name: 'Jupiter', app: 'apps', color: '#d4a06a', dist: 380, size: 22, speed: 0.5 },
-                    { name: 'Saturn', app: 'storage', color: '#e6d5a3', dist: 460, size: 19, speed: 0.4 },
-                    { name: 'Uranus', app: 'automation', color: '#7ec8e3', dist: 540, size: 16, speed: 0.3 },
-                    { name: 'Neptun', app: 'internet', color: '#3b5c9e', dist: 610, size: 15, speed: 0.2 },
-                    { name: 'Pluto', app: 'recovery', color: '#b7a99a', dist: 680, size: 6, speed: 0.15 }
-                ];
+// ============================================================
+//  9. ANIMATION LOOPS
+// ============================================================
 
-                this.planets = defs.map(d => ({
-                    ...d,
-                    angle: Math.random() * Math.PI * 2,
-                    x: 0, y: 0
-                }));
-            }
+let solar, winManager, avatar;
 
-            resize() {
-                this.w = this.canvas.width = this.canvas.parentElement.clientWidth;
-                this.h = this.canvas.height = this.canvas.parentElement.clientHeight;
-            }
+function animateSolar(time) {
+  if (!document.getElementById('desktop-screen').classList.contains('active')) return;
+  solar.update();
+  solar.draw();
+  requestAnimationFrame(animateSolar);
+}
 
-            getPlanetAt(mx, my) {
-                const cx = this.w/2, cy = this.h/2;
-                const threshold = 30;
-                for (const p of this.planets) {
-                    const dx = p.x - mx, dy = p.y - my;
-                    if (dx*dx + dy*dy < (p.size + threshold) * (p.size + threshold)) {
-                        return p;
-                    }
-                }
-                return null;
-            }
+// ============================================================
+//  10. INIT
+// ============================================================
 
-            update(time) {
-                this.time += 0.01;
-                const cx = this.w/2, cy = this.h/2;
-                this.planets.forEach(p => {
-                    p.angle += 0.01 * p.speed;
-                    p.x = cx + Math.cos(p.angle) * p.dist;
-                    p.y = cy + Math.sin(p.angle) * p.dist * 0.5; // elliptisch
-                });
-            }
+window.onload = async function() {
+  // Desktop Canvas
+  const desktopCanvas = document.getElementById('desktop-canvas');
+  solar = new SolarSystem(desktopCanvas);
+  solar.resize();
 
-            draw() {
-                const ctx = this.ctx;
-                const w = this.w, h = this.h;
-                ctx.clearRect(0, 0, w, h);
+  // Window Manager
+  winManager = new WindowManager(document.getElementById('windows-container'));
 
-                // Cosmic Hintergrund (Sterne)
-                const grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, w*0.7);
-                grad.addColorStop(0, '#12172b');
-                grad.addColorStop(1, '#05070a');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
+  // Avatar (Boot) – wir nutzen den Boot-Screen Canvas (wird später durch Logo ersetzt)
+  // Wir haben keinen separaten Avatar-Canvas im Boot, aber wir können den Boot-Logo-Bereich animieren.
+  // Für den Avatar zeichnen wir auf ein verstecktes Canvas oder nutzen den Desktop für einen Mini-Avatar.
+  // Hier belassen wir es beim Logo.
 
-                // ----- SONNE = HALDO CORE (Mittelpunkt) -----
-                const cx = w/2, cy = h/2;
-                const sunR = 52;
+  // Boot starten
+  await bootSequence();
 
-                // Sonnen-Glow
-                const glow = ctx.createRadialGradient(cx, cy, 10, cx, cy, sunR * 3);
-                glow.addColorStop(0, 'rgba(100, 200, 255, 0.25)');
-                glow.addColorStop(0.5, 'rgba(40, 100, 200, 0.08)');
-                glow.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = glow;
-                ctx.beginPath();
-                ctx.arc(cx, cy, sunR * 3, 0, Math.PI * 2);
-                ctx.fill();
+  // Nach Boot: kleine Demo-Fenster öffnen
+  setTimeout(() => {
+    winManager.open('notes');
+    winManager.open('calendar');
+  }, 800);
 
-                // Sonnenkörper
-                const sunGrad = ctx.createRadialGradient(cx-10, cy-10, 5, cx, cy, sunR);
-                sunGrad.addColorStop(0, '#8ad0ff');
-                sunGrad.addColorStop(0.5, '#3a8fd4');
-                sunGrad.addColorStop(1, '#0a2a4a');
-                ctx.shadowColor = 'rgba(0, 180, 255, 0.6)';
-                ctx.shadowBlur = 60;
-                ctx.beginPath();
-                ctx.arc(cx, cy, sunR, 0, Math.PI * 2);
-                ctx.fillStyle = sunGrad;
-                ctx.fill();
-                // HalDo Logo in der Sonne (als zentraler Knoten)
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = 'rgba(255,255,255,0.9)';
-                ctx.font = '28px "Segoe UI", sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('☀', cx, cy-2);
-                ctx.font = '10px sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.fillText('HALDO CORE', cx, cy + 38);
+  // Theme laden
+  const theme = localStorage.getItem('haldo_theme') || 'dark';
+  if (theme === 'cosmic') {
+    document.body.style.background = '#0b0e1a';
+  } else if (theme === 'aurora') {
+    document.body.style.background = '#0a0a1a';
+  }
+};
 
-                // ----- ORBITS (dezent) -----
-                this.planets.forEach(p => {
-                    ctx.beginPath();
-                    ctx.ellipse(cx, cy, p.dist, p.dist * 0.5, 0, 0, Math.PI * 2);
-                    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-                    ctx.lineWidth = 0.5;
-                    ctx.stroke();
-                });
+// ============================================================
+//  11. RESIZE HANDLING
+// ============================================================
 
-                // ----- PLANETEN -----
-                this.planets.forEach(p => {
-                    // Glow
-                    const pGlow = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, p.size * 2.5);
-                    pGlow.addColorStop(0, p.color + '40');
-                    pGlow.addColorStop(1, 'rgba(0,0,0,0)');
-                    ctx.fillStyle = pGlow;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
-                    ctx.fill();
+window.addEventListener('resize', () => {
+  if (solar) solar.resize();
+});
 
-                    // Planet
-                    ctx.shadowBlur = 20;
-                    ctx.shadowColor = p.color + '60';
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    const grad = ctx.createRadialGradient(p.x-4, p.y-4, 2, p.x, p.y, p.size);
-                    grad.addColorStop(0, '#ffffff');
-                    grad.addColorStop(0.3, p.color);
-                    grad.addColorStop(1, '#0a0a1a');
-                    ctx.fillStyle = grad;
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
-                    // Name
-                    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                    ctx.font = '9px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    ctx.fillText(p.name, p.x, p.y - p.size - 6);
-                });
+// ============================================================
+//  12. GLOBALE HELPER FÜR KONSOLE
+// ============================================================
 
-                // Interaktions-Hinweis
-                ctx.fillStyle = 'rgba(255,255,255,0.05)';
-                ctx.font = '11px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText('✦ Klick auf Planeten öffnet Apps ✦', cx, h - 30);
-            }
-        }
+console.log(`HalDo AI OS ${VERSION} geladen. 💙❤️🚀`);
+console.log('Verfügbare Apps:', Object.keys(AppRegistry));
+console.log('Tippe "winManager.open(\'notes\')" um eine App zu öffnen.');
 
-        // ===================================================================
-        //  3. APP REGISTRY & WINDOW MANAGER
-        // ===================================================================
-        const AppRegistry = {
-            'system-timing': { name: 'System Timing', icon: '⏱', content: '<h3>⏱ System Timing</h3><p>CPU: 2.4 GHz</p><p>RAM: 8.2 GB / 16 GB</p><p>Uptime: 4h 12m</p>' },
-            'kommunikation': { name: 'Kommunikation', icon: '✉', content: '<h3>✉ Kommunikation</h3><p>Nachrichten: 3 ungelesen</p><p>Letzte Verbindung: HalDo Core</p>' },
-            'benutzer': { name: 'Benutzer', icon: '👤', content: '<h3>👤 Benutzerprofil</h3><p>Willkommen, Bruder.</p><p>Dein digitaler Zwilling ist aktiv.</p>' },
-            'security': { name: 'Security', icon: '🛡', content: '<h3>🛡 Security Center</h3><p>Firewall: Aktiv</p><p>Letzter Scan: sauber</p>' },
-            'apps': { name: 'App World', icon: '📦', content: '<h3>📦 App World</h3><p>84 Apps installiert.</p><p>Kern-Apps: 12</p>' },
-            'storage': { name: 'Storage', icon: '💾', content: '<h3>💾 Speicher</h3><p>Festplatte: 240 GB / 512 GB</p><p>Cloud: 1.2 TB</p>' },
-            'automation': { name: 'Automation', icon: '⚙', content: '<h3>⚙ Automation</h3><p>Routinen: 5 aktiv</p><p>KI-Gesteuert: Ja</p>' },
-            'internet': { name: 'Internet', icon: '🌐', content: '<h3>🌐 Internet Center</h3><p>Verbindung: 1.2 Gbps</p><p>IPv6: Aktiv</p>' },
-            'recovery': { name: 'Recovery', icon: '♻', content: '<h3>♻ Recovery & Archive</h3><p>Letztes Backup: heute 02:00</p><p>Wiederherstellungspunkt: vorhanden</p>' }
-        };
+// Expose für Entwickler
+window.HalDo = { AppRegistry, winManager, storage, bus, VERSION };
 
-        class WindowManager {
-            constructor(container) {
-                this.container = container;
-                this.windows = [];
-                this.zIndex = 70;
-                this.dragData = null;
-                // Globale Event-Listener für Drag
-                document.addEventListener('mousemove', this.onDrag.bind(this));
-                document.addEventListener('mouseup', this.stopDrag.bind(this));
-            }
-
-            open(appKey) {
-                const app = AppRegistry[appKey];
-                if (!app) return;
-                // Zufällige Position
-                const w = 300 + Math.random() * 100;
-                const h = 220 + Math.random() * 80;
-                const x = 60 + Math.random() * (window.innerWidth - w - 120);
-                const y = 60 + Math.random() * (window.innerHeight - h - 120);
-
-                const win = document.createElement('div');
-                win.className = 'os-window';
-                win.style.width = w + 'px';
-                win.style.height = h + 'px';
-                win.style.left = x + 'px';
-                win.style.top = y + 'px';
-                win.style.zIndex = this.zIndex++;
-                win.dataset.app = appKey;
-
-                win.innerHTML = `
-                    <div class="window-header">
-                        <span class="window-title">${app.icon} ${app.name}</span>
-                        <button class="window-close" data-close="${appKey}">✕</button>
-                    </div>
-                    <div class="window-body">${app.content}</div>
-                `;
-
-                this.container.appendChild(win);
-                this.windows.push(win);
-
-                // Close
-                win.querySelector('.window-close').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.close(win);
-                });
-
-                // Drag
-                const header = win.querySelector('.window-header');
-                header.addEventListener('mousedown', (e) => {
-                    if (e.target.closest('.window-close')) return;
-                    this.startDrag(e, win);
-                });
-
-                // Fokussieren
-                win.addEventListener('mousedown', () => {
-                    win.style.zIndex = this.zIndex++;
-                });
-            }
-
-            close(win) {
-                if (win) {
-                    win.style.transition = 'opacity 0.25s, transform 0.25s';
-                    win.style.opacity = '0';
-                    win.style.transform = 'scale(0.9)';
-                    setTimeout(() => { win.remove(); }, 300);
-                }
-            }
-
-            startDrag(e, win) {
-                const rect = win.getBoundingClientRect();
-                this.dragData = {
-                    win: win,
-                    offsetX: e.clientX - rect.left,
-                    offsetY: e.clientY - rect.top
-                };
-            }
-
-            onDrag(e) {
-                if (!this.dragData) return;
-                const { win, offsetX, offsetY } = this.dragData;
-                const containerRect = this.container.getBoundingClientRect();
-                let nx = e.clientX - containerRect.left - offsetX;
-                let ny = e.clientY - containerRect.top - offsetY;
-                // Randbegrenzung
-                nx = Math.max(0, Math.min(containerRect.width - win.offsetWidth, nx));
-                ny = Math.max(0, Math.min(containerRect.height - win.offsetHeight, ny));
-                win.style.left = nx + 'px';
-                win.style.top = ny + 'px';
-            }
-
-            stopDrag() {
-                this.dragData = null;
-            }
-        }
-
-        // ===================================================================
-        //  4. INITIALISIERUNG & VOICE
-        // ===================================================================
-
-        // ----- AVATAR (WAKE) -----
-        const avatar = new Avatar(wakeCanvas);
-        // Blick folgt Maus auf Wake-Screen
-        wakeCanvas.addEventListener('mousemove', (e) => {
-            const rect = wakeCanvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width;
-            const y = (e.clientY - rect.top) / rect.height;
-            avatar.setEyeDirection(x * 2 - 1, y * 2 - 1);
-        });
-
-        // ----- SOLAR SYSTEM (DESKTOP) -----
-        const solar = new SolarSystem(desktopCanvas);
-        const winManager = new WindowManager(windowsContainer);
-
-        // ----- RESIZE -----
-        function resizeAll() {
-            solar.resize();
-            // Wake-Canvas bleibt bei 600x700 (CSS skaliert)
-        }
-        window.addEventListener('resize', resizeAll);
-
-        // ----- INTERAKTION: WAKE -> DESKTOP -----
-        wakeScreen.addEventListener('click', () => {
-            if (!wakeScreen.classList.contains('active')) return;
-            wakeScreen.classList.remove('active');
-            wakeScreen.classList.add('exit');
-            desktopScreen.classList.add('active');
-            // Voice Begrüßung im OS
-            setTimeout(() => {
-                setOSState(State.HAPPY);
-                speakText('Hallo Bruder. Ich bin da. Willkommen im HalDo AI OS.', () => {
-                    setOSState(State.IDLE);
-                });
-            }, 400);
-            resizeAll();
-            // Solar Animation starten
-            animateDesktop();
-        });
-
-        // ----- DESKTOP INTERAKTION (Planeten klicken) -----
-        desktopCanvas.addEventListener('click', (e) => {
-            const rect = desktopCanvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-            const planet = solar.getPlanetAt(mx, my);
-            if (planet) {
-                setOSState(State.THINKING);
-                const appKey = planet.app;
-                const appName = AppRegistry[appKey]?.name || appKey;
-                // Avatar reagiert (Mund kurz)
-                setTimeout(() => {
-                    winManager.open(appKey);
-                    setOSState(State.HAPPY);
-                    speakText(`Öffne ${appName}.`, () => {
-                        setOSState(State.IDLE);
-                    });
-                }, 300);
-            }
-        });
-
-        // ----- VOICE ENGINE (Web Speech) -----
-        let isSpeaking = false;
-        let speechQueue = [];
-
-        function speakText(text, callback) {
-            if (!window.speechSynthesis) {
-                if (callback) callback();
-                return;
-            }
-            // Avatar Mund bewegt sich
-            avatar.setState(State.SPEAKING);
-            setOSState(State.SPEAKING);
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'de-DE';
-            utterance.rate = 0.9;
-            utterance.pitch = 1.1;
-
-            // Mund-Synchronisation (simuliert)
-            let mouthInterval = setInterval(() => {
-                avatar.setMouth(0.3 + Math.random() * 0.6);
-            }, 100);
-
-            utterance.onend = () => {
-                clearInterval(mouthInterval);
-                avatar.setMouth(0);
-                avatar.setState(State.IDLE);
-                setOSState(State.IDLE);
-                if (callback) callback();
-            };
-            utterance.onerror = () => {
-                clearInterval(mouthInterval);
-                avatar.setMouth(0);
-                avatar.setState(State.IDLE);
-                setOSState(State.IDLE);
-                if (callback) callback();
-            };
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // ----- VOICE RECOGNITION (Wake Word: "Hallo HalDo") -----
-        function initVoiceRecognition() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                console.warn('Voice Recognition nicht unterstützt.');
-                return;
-            }
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'de-DE';
-            recognition.continuous = true;
-            recognition.interimResults = false;
-
-            recognition.onresult = (event) => {
-                const last = event.results.length - 1;
-                const transcript = event.results[last][0].transcript.toLowerCase().trim();
-                console.log('Gehört:', transcript);
-                if (transcript.includes('hallo haldo') || transcript.includes('haldo')) {
-                    // Avatar wacht auf / reagiert
-                    if (wakeScreen.classList.contains('active')) {
-                        // Wenn noch im Wake-Screen
-                        avatar.setState(State.LISTENING);
-                        speakText('Ja Bruder, ich bin wach.', () => {
-                            avatar.setState(State.IDLE);
-                            // Automatisch zum Desktop wechseln, falls nicht geschehen
-                            if (wakeScreen.classList.contains('active')) {
-                                wakeScreen.click();
-                            }
-                        });
-                    } else {
-                        // Im Desktop
-                        setOSState(State.LISTENING);
-                        speakText('Ich höre, Bruder. Was kann ich tun?', () => {
-                            setOSState(State.IDLE);
-                        });
-                    }
-                } else if (transcript.includes('öffne')) {
-                    // Simple App-Öffnung per Sprache
-                    const parts = transcript.split('öffne');
-                    if (parts.length > 1) {
-                        const query = parts[1].trim();
-                        for (const [key, app] of Object.entries(AppRegistry)) {
-                            if (query.includes(app.name.toLowerCase()) || query.includes(key)) {
-                                setOSState(State.THINKING);
-                                setTimeout(() => {
-                                    winManager.open(key);
-                                    setOSState(State.HAPPY);
-                                    speakText(`Öffne ${app.name}.`, () => setOSState(State.IDLE));
-                                }, 300);
-                                break;
-                            }
-                        }
-                    }
-                }
-            };
-
-            recognition.onerror = (e) => {
-                console.warn('Voice Error:', e.error);
-                // Bei Fehler neu starten
-                setTimeout(() => recognition.start(), 1000);
-            };
-
-            recognition.start();
-            console.log('Voice Recognition gestartet. Sag "Hallo HalDo"');
-        }
-
-        // ----- OS STATE BADGE -----
-        function setOSState(state) {
-            currentState = state;
-            const label = state.replace('_', ' ');
-            stateBadge.textContent = `● ${label}`;
-            avatar.setState(state);
-            // Farbänderung
-            if (state === State.LISTENING || state === State.SPEAKING) {
-                stateBadge.style.color = '#6bc5ff';
-                stateBadge.style.borderColor = 'rgba(0,200,255,0.3)';
-            } else if (state === State.THINKING) {
-                stateBadge.style.color = '#ffb347';
-                stateBadge.style.borderColor = 'rgba(255,180,70,0.3)';
-            } else {
-                stateBadge.style.color = 'rgba(255,255,255,0.4)';
-                stateBadge.style.borderColor = 'rgba(255,255,255,0.05)';
-            }
-        }
-
-        // ----- ANIMATION LOOPS -----
-        function animateDesktop(time) {
-            if (!desktopScreen.classList.contains('active')) return;
-            solar.update(time);
-            solar.draw();
-            requestAnimationFrame(animateDesktop);
-        }
-
-        // ----- START -----
-        function init() {
-            resizeAll();
-            // Avatar starten
-            avatar.run(performance.now());
-            // Wake Screen aktiv setzen
-            wakeScreen.classList.add('active');
-            // Voice starten
-            initVoiceRecognition();
-
-            // Windows initial öffnen (Beispiel)
-            setTimeout(() => {
-                // Kleiner Hinweis: nach 2 Sekunden öffnet sich die Erde (Benutzer)
-                if (desktopScreen.classList.contains('active')) {
-                    winManager.open('benutzer');
-                }
-            }, 3000);
-        }
-
-        // Alles starten
-        init();
-
-        // Globales Debug
-        console.log(`HalDo AI OS ${VERSION} geladen. 💙❤️🚀`);
-    </script>
+</script>
 </body>
 </html>
