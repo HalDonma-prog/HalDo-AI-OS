@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
     <meta name="theme-color" content="#0a0a1a" />
-    <title>HalDo AI OS 24.6.0 Ultimate</title>
+    <meta name="description" content="HalDo AI OS 24.6.0 – Cosmic Intelligent Operating System" />
+    <title>HalDo AI OS 24.6.0</title>
 
     <!-- Three.js für Cosmic World -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
@@ -15,7 +16,7 @@
 
     <style>
         /* ============================================================
-           HALDO AI OS 24.6.0 ULTIMATE – PROFESSIONELLES DESIGN
+           HALDO AI OS 24.6.0 – ULTIMATE DESIGN
            ============================================================ */
 
         :root {
@@ -61,7 +62,6 @@
             user-select: none;
         }
 
-        /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar {
             width: 4px;
             height: 4px;
@@ -74,7 +74,7 @@
             border-radius: 10px;
         }
 
-        /* ===== BOOT ===== */
+        /* ===== BOOT SCREEN ===== */
         #boot-screen {
             position: fixed;
             top: 0;
@@ -281,6 +281,22 @@
             display: block;
             width: 100% !important;
             height: 100% !important;
+        }
+
+        /* ===== LIVING AI AVATAR ÜBER DER SONNE ===== */
+        #living-ai-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            z-index: 10;
+            pointer-events: none;
+            border-radius: 50%;
+            overflow: hidden;
+            background: radial-gradient(circle, rgba(108, 60, 225, 0.15), transparent 70%);
+            display: none;
         }
 
         /* ===== TOP MENU ===== */
@@ -724,24 +740,6 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* ===== LIVING AI AVATAR ===== */
-        #living-ai-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(ellipse at center, rgba(10, 10, 30, 0.8), rgba(0, 0, 0, 0.9));
-            border-radius: var(--radius);
-        }
-        #living-ai-container canvas {
-            width: 100%;
-            height: 100%;
-            max-width: 400px;
-            max-height: 400px;
-            border-radius: var(--radius);
-        }
-
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             :root {
@@ -968,7 +966,9 @@
     <!-- ===== DESKTOP ===== -->
     <div id="desktop" style="display:none;">
 
-        <div id="cosmic-canvas-container"></div>
+        <div id="cosmic-canvas-container">
+            <div id="living-ai-container"></div>
+        </div>
         <div id="desktop-icons"></div>
         <div id="window-container"></div>
 
@@ -1199,6 +1199,16 @@
                 setTimeout(() => { screen.style.display = 'none'; }, 600);
                 document.getElementById('desktop').style.display = 'block';
                 document.querySelector('.floating-btn').style.display = 'flex';
+                // Living AI Avatar anzeigen
+                const avatarContainer = document.getElementById('living-ai-container');
+                if (avatarContainer) {
+                    avatarContainer.style.display = 'block';
+                    setTimeout(() => {
+                        if (typeof LivingAI !== 'undefined') {
+                            LivingAI.init('living-ai-container');
+                        }
+                    }, 500);
+                }
                 this.setupUI();
                 EventBus.emit('system:ready');
             },
@@ -1238,7 +1248,7 @@
 
                 // Language
                 document.getElementById('menu-lang')?.addEventListener('click', () => {
-                    const langs = ['DE', 'EN', 'KU', 'TR', 'AR', 'FR', 'ES', 'RU', 'EZ'];
+                    const langs = ['DE', 'EN', 'KU', 'EZ', 'TR', 'AR', 'FR', 'ES', 'RU', 'FA', 'IT', 'PT'];
                     const current = document.getElementById('menu-lang').textContent;
                     const idx = langs.indexOf(current);
                     const next = langs[(idx + 1) % langs.length];
@@ -1292,7 +1302,7 @@
         window.Boot = Boot;
 
         // ============================================================
-        //  5. COSMIC WORLD (NASA-Planeten)
+        //  5. COSMIC WORLD (V2.0.0) – MIT AVATAR-INTEGRATION
         // ============================================================
         const CosmicWorld = {
             scene: null,
@@ -1337,7 +1347,7 @@
             },
 
             init() {
-                console.log('🌌 Cosmic World wird initialisiert...');
+                console.log('🌌 Cosmic World V2.0.0 wird initialisiert...');
                 let container = document.getElementById('cosmic-canvas-container');
                 if (!container) {
                     container = document.createElement('div');
@@ -1363,14 +1373,13 @@
                 this.isReady = true;
                 window.addEventListener('resize', () => this.onResize());
                 this.container.addEventListener('click', (e) => this.onCosmicClick(e));
-                console.log('✅ Cosmic World ready!');
+                console.log('✅ Cosmic World V2.0.0 ready!');
                 return this;
             },
 
             loadLogo() {
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
-                // Prüfe verschiedene Pfade
                 const paths = ['assets/images/logo.png', 'logo.png', 'HalDo-AI-OS/assets/images/logo.png'];
                 let currentPath = 0;
 
@@ -1717,7 +1726,476 @@
         window.CosmicWorld = CosmicWorld;
 
         // ============================================================
-        //  6. AI CORE
+        //  6. LIVING AI (V2.0.0)
+        // ============================================================
+        const LivingAI = {
+            width: 300,
+            height: 350,
+            isReady: false,
+            isVisible: false,
+            container: null,
+            canvas: null,
+            ctx: null,
+
+            emotion: 'idle',
+            isSpeaking: false,
+            isThinking: false,
+            isListening: false,
+            eyeState: 'open',
+            handWave: 0,
+            breathPhase: 0,
+            blinkTimer: 0,
+            headAngle: { x: 0, y: 0 },
+            bodyAngle: 0,
+
+            emotions: {
+                idle: { label: '💙 Bereit', eyeWidth: 1.0, eyeHeight: 1.0, mouthType: 'neutral', browY: 0, blush: 0.05,
+                    hand: 'rest', headTilt: 0, lightIntensity: 1.0 },
+                waking: { label: '☀️ Erwache', eyeWidth: 1.1, eyeHeight: 1.1, mouthType: 'neutral', browY: -2,
+                    blush: 0.1, hand: 'rest', headTilt: 2, lightIntensity: 1.5 },
+                listening: { label: '🎧 Zuhörend', eyeWidth: 1.0, eyeHeight: 1.0, mouthType: 'listening', browY: 2,
+                    blush: 0.05, hand: 'ear', headTilt: -3, lightIntensity: 1.2 },
+                thinking: { label: '🧠 Denkend', eyeWidth: 0.85, eyeHeight: 0.85, mouthType: 'thinking', browY: -6,
+                    blush: 0, hand: 'chin', headTilt: 5, lightIntensity: 0.8 },
+                speaking: { label: '🗣️ Sprechend', eyeWidth: 0.95, eyeHeight: 0.95, mouthType: 'speaking', browY: 0,
+                    blush: 0.1, hand: 'gesture', headTilt: 0, lightIntensity: 1.3 },
+                happy: { label: '😊 Glücklich', eyeWidth: 0.9, eyeHeight: 0.85, mouthType: 'smile', browY: -4,
+                    blush: 0.2, hand: 'wave', headTilt: -2, lightIntensity: 1.6 },
+                concerned: { label: '🧐 Besorgt', eyeWidth: 0.9, eyeHeight: 0.9, mouthType: 'concerned', browY: 4,
+                    blush: 0, hand: 'rest', headTilt: 3, lightIntensity: 0.9 },
+                excited: { label: '⚡ Aufgeregt', eyeWidth: 1.2, eyeHeight: 1.2, mouthType: 'excited', browY: -6,
+                    blush: 0.15, hand: 'wave', headTilt: -4, lightIntensity: 2.0 },
+                sleeping: { label: '🌙 Ruhend', eyeWidth: 0.5, eyeHeight: 0.1, mouthType: 'neutral', browY: 0,
+                    blush: 0, hand: 'rest', headTilt: 8, lightIntensity: 0.3 }
+            },
+
+            init(containerId = 'living-ai-container') {
+                console.log('👤 Living AI V2.0.0 wird initialisiert...');
+                this.container = document.getElementById(containerId);
+                if (!this.container) {
+                    this.container = document.createElement('div');
+                    this.container.id = containerId;
+                    this.container.style.cssText = `
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 180px;
+                        height: 180px;
+                        z-index: 10;
+                        pointer-events: none;
+                        border-radius: 50%;
+                        overflow: hidden;
+                        background: radial-gradient(circle, rgba(108,60,225,0.15), transparent 70%);
+                    `;
+                    const cosmicContainer = document.getElementById('cosmic-canvas-container');
+                    if (cosmicContainer) {
+                        cosmicContainer.style.position = 'relative';
+                        cosmicContainer.appendChild(this.container);
+                    }
+                }
+
+                this.canvas = document.createElement('canvas');
+                this.canvas.width = this.width;
+                this.canvas.height = this.height;
+                this.canvas.style.cssText = `
+                    width: 100%;
+                    height: 100%;
+                    max-width: ${this.width}px;
+                    max-height: ${this.height}px;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    mix-blend-mode: screen;
+                `;
+                this.container.appendChild(this.canvas);
+                this.ctx = this.canvas.getContext('2d');
+
+                // Event-Listener
+                EventBus.on('ai:processing', (processing) => {
+                    this.isThinking = processing;
+                    this.emotion = processing ? 'thinking' : 'idle';
+                });
+                EventBus.on('ai:response', (data) => {
+                    if (data && data.content) {
+                        this.speak(data.content);
+                        this.emotion = 'happy';
+                        setTimeout(() => {
+                            if (!this.isSpeaking && !this.isThinking) {
+                                this.emotion = 'idle';
+                            }
+                        }, 2000);
+                    }
+                });
+                EventBus.on('voice:speaking', (speaking) => {
+                    this.isSpeaking = speaking;
+                    this.emotion = speaking ? 'speaking' : 'idle';
+                });
+                EventBus.on('voice:listening', (listening) => {
+                    this.isListening = listening;
+                    this.emotion = listening ? 'listening' : 'idle';
+                });
+                EventBus.on('voice:final', (data) => {
+                    if (data && data.text) {
+                        this.emotion = 'thinking';
+                        setTimeout(() => {
+                            if (!this.isSpeaking && !this.isThinking) {
+                                this.emotion = 'idle';
+                            }
+                        }, 1000);
+                    }
+                });
+                EventBus.on('system:ready', () => {
+                    this.wakeUp();
+                });
+
+                this.container.addEventListener('click', () => {
+                    this.wave();
+                    EventBus.emit('living-ai:clicked', { emotion: this.emotion });
+                });
+
+                this.isReady = true;
+                this.isVisible = true;
+                this.animate();
+
+                EventBus.emit('living-ai:ready', { version: '2.0.0' });
+                console.log('✅ Living AI V2.0.0 ready!');
+                return this;
+            },
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                this.breathPhase += 0.02;
+                this.blinkTimer += 0.01;
+                if (this.blinkTimer > 3 + Math.random() * 2) {
+                    this.eyeState = 'closed';
+                    setTimeout(() => { this.eyeState = 'open';
+                        this.blinkTimer = 0; }, 150);
+                }
+                if (this.emotion === 'happy' && Math.random() < 0.01) {
+                    this.handWave = 2;
+                    setTimeout(() => { this.handWave = Math.max(0, this.handWave - 1); }, 500);
+                }
+                this.headAngle.x = Math.sin(this.breathPhase * 0.5) * 2;
+                this.headAngle.y = Math.sin(this.breathPhase * 0.3) * 1.5;
+                this.draw();
+            },
+
+            draw() {
+                const ctx = this.ctx;
+                const w = this.width;
+                const h = this.height;
+                ctx.clearRect(0, 0, w, h);
+
+                const emotionData = this.emotions[this.emotion] || this.emotions.idle;
+                const intensity = emotionData.lightIntensity || 1.0;
+
+                // Lichtkreis
+                const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, 180);
+                grad.addColorStop(0, `rgba(108, 60, 225, ${0.2 * intensity})`);
+                grad.addColorStop(0.3, `rgba(0, 212, 255, ${0.1 * intensity})`);
+                grad.addColorStop(0.7, 'rgba(10, 10, 30, 0.3)');
+                grad.addColorStop(1, 'rgba(5, 5, 15, 0.9)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                // Körper
+                const bodyY = h * 0.75;
+                const bodyW = w * 0.6;
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 20;
+                ctx.beginPath();
+                ctx.ellipse(w / 2 + Math.sin(this.bodyAngle) * 3, bodyY, bodyW / 2, 40, 0, 0, Math.PI * 2);
+                ctx.fillStyle = '#2a1a3a';
+                ctx.fill();
+                ctx.fillStyle = '#3a2a1a';
+                ctx.shadowBlur = 10;
+                ctx.fillRect(w / 2 - 15, h * 0.55, 30, 40);
+                ctx.shadowBlur = 0;
+
+                // Kopf
+                const headX = w / 2 + this.headAngle.x;
+                const headY = h * 0.45 + this.headAngle.y;
+                const headR = 70;
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(headX, headY, headR, 0, Math.PI * 2);
+                ctx.fillStyle = '#e8c9a0';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Wangen
+                if (emotionData.blush > 0) {
+                    ctx.globalAlpha = emotionData.blush;
+                    ctx.fillStyle = '#ff6b8a';
+                    ctx.beginPath();
+                    ctx.arc(headX - 45, headY + 15, 18, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(headX + 45, headY + 15, 18, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+
+                // Augen
+                const eyeY = headY - 10;
+                const eyeSpacing = 28;
+                const eyeR = 14;
+                const eyeW = emotionData.eyeWidth || 1;
+                const eyeH = emotionData.eyeHeight || 1;
+                const isClosed = this.eyeState === 'closed';
+
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = 'rgba(0,0,0,0.1)';
+                ctx.beginPath();
+                ctx.ellipse(headX - eyeSpacing, eyeY, eyeR * eyeW, isClosed ? 2 : eyeR * eyeH, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(headX + eyeSpacing, eyeY, eyeR * eyeW, isClosed ? 2 : eyeR * eyeH, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                if (!isClosed) {
+                    ctx.fillStyle = '#2a1a0a';
+                    const pupilSize = 5;
+                    ctx.beginPath();
+                    ctx.arc(headX - eyeSpacing + 3, eyeY + 1, pupilSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(headX + eyeSpacing + 3, eyeY + 1, pupilSize, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                    ctx.beginPath();
+                    ctx.arc(headX - eyeSpacing + 5, eyeY - 4, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(headX + eyeSpacing + 5, eyeY - 4, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#3a2a1a';
+                    ctx.lineWidth = 2.5;
+                    ctx.lineCap = 'round';
+                    const browYOffset = emotionData.browY || 0;
+                    const browYBase = eyeY - 22;
+                    ctx.beginPath();
+                    ctx.moveTo(headX - eyeSpacing - 12, browYBase + browYOffset);
+                    ctx.quadraticCurveTo(headX - eyeSpacing, browYBase - 6 + browYOffset * 0.5, headX - eyeSpacing + 12,
+                        browYBase + 2 + browYOffset * 0.3);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(headX + eyeSpacing - 12, browYBase + 2 + browYOffset * 0.3);
+                    ctx.quadraticCurveTo(headX + eyeSpacing, browYBase - 6 + browYOffset * 0.5, headX + eyeSpacing + 12,
+                        browYBase + browYOffset);
+                    ctx.stroke();
+                }
+
+                // Nase
+                ctx.strokeStyle = '#c4a080';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(headX, headY + 6);
+                ctx.quadraticCurveTo(headX + 8, headY + 16, headX, headY + 22);
+                ctx.quadraticCurveTo(headX - 8, headY + 16, headX, headY + 6);
+                ctx.stroke();
+                ctx.fillStyle = '#c4a080';
+                ctx.beginPath();
+                ctx.arc(headX - 6, headY + 14, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(headX + 6, headY + 14, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Mund
+                const mouthX = headX;
+                const mouthY = headY + 42;
+                const mouthW = 32;
+                const mouthH = 12;
+                const mouthType = emotionData.mouthType || 'neutral';
+                ctx.shadowBlur = 0;
+
+                switch (mouthType) {
+                    case 'speaking':
+                        const breath = Math.sin(this.breathPhase * 2) * 0.3 + 0.5;
+                        ctx.fillStyle = '#aa3355';
+                        ctx.beginPath();
+                        ctx.ellipse(mouthX, mouthY + 4, mouthW / 2 * (0.6 + breath * 0.4), mouthH / 2 * (0.4 + breath *
+                            0.6), 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#552233';
+                        ctx.beginPath();
+                        ctx.ellipse(mouthX, mouthY + 4, mouthW / 4 * (0.4 + breath * 0.4), mouthH / 3 * (0.2 + breath *
+                            0.5), 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                    case 'smile':
+                        ctx.strokeStyle = '#cc4466';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(mouthX, mouthY - 2, mouthW / 2, 0.1, Math.PI - 0.1);
+                        ctx.stroke();
+                        ctx.fillStyle = '#cc4466';
+                        ctx.beginPath();
+                        ctx.arc(mouthX, mouthY + 8, mouthW / 2.6, 0, Math.PI);
+                        ctx.fill();
+                        break;
+                    case 'thinking':
+                        ctx.strokeStyle = '#cc4466';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(mouthX, mouthY + 6, mouthW / 3, 0.1, Math.PI - 0.1);
+                        ctx.stroke();
+                        break;
+                    case 'concerned':
+                        ctx.strokeStyle = '#cc4466';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(mouthX, mouthY + 10, mouthW / 2.5, 0.2, Math.PI - 0.2);
+                        ctx.stroke();
+                        break;
+                    case 'excited':
+                        ctx.fillStyle = '#aa3355';
+                        ctx.beginPath();
+                        ctx.ellipse(mouthX, mouthY + 2, mouthW / 2, mouthH * 0.9, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#552233';
+                        ctx.beginPath();
+                        ctx.ellipse(mouthX, mouthY + 2, mouthW / 3, mouthH * 0.6, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                    case 'listening':
+                        ctx.fillStyle = '#aa3355';
+                        ctx.beginPath();
+                        ctx.ellipse(mouthX, mouthY + 2, mouthW / 2.8, mouthH / 2, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                    default:
+                        ctx.fillStyle = '#cc4466';
+                        ctx.beginPath();
+                        ctx.ellipse(mouthX, mouthY + 2, mouthW / 2.4, mouthH / 2.5, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = '#aa3355';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.ellipse(mouthX, mouthY + 2, mouthW / 3.4, mouthH / 3.5, 0, 0, Math.PI * 2);
+                        ctx.stroke();
+                        break;
+                }
+
+                // Hände
+                const handType = emotionData.hand || 'rest';
+                switch (handType) {
+                    case 'wave':
+                        if (this.handWave > 0) {
+                            const waveX = headX + 80 + Math.sin(Date.now() * 0.008) * 8;
+                            const waveY = headY - 30 + Math.sin(Date.now() * 0.012) * 6;
+                            ctx.font = '32px sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillStyle = '#e8c9a0';
+                            ctx.shadowBlur = 10;
+                            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                            ctx.fillText('✋', waveX, waveY);
+                            ctx.shadowBlur = 0;
+                        }
+                        break;
+                    case 'chin':
+                        ctx.font = '28px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#e8c9a0';
+                        ctx.fillText('✋', headX + 55, headY + 50);
+                        break;
+                    case 'ear':
+                        ctx.font = '28px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#e8c9a0';
+                        ctx.fillText('✋', headX + 65, headY - 10);
+                        break;
+                    case 'gesture':
+                        const gestureY = headY + 20 + Math.sin(Date.now() * 0.004) * 10;
+                        ctx.font = '28px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#e8c9a0';
+                        ctx.fillText('✋', headX + 70, gestureY);
+                        break;
+                }
+
+                // Status
+                const status = this.isSpeaking ? '🔊' : this.isThinking ? '🧠' : this.isListening ? '🎧' : '●';
+                ctx.fillStyle = this.isSpeaking ? '#00ff88' : this.isThinking ? '#6666ff' : this.isListening ? '#ffaa00' :
+                    '#00ff88';
+                ctx.font = '14px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(status, w - 10, 18);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.25)';
+                ctx.font = '10px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(emotionData.label || 'Idle', w / 2, h - 8);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.font = '9px Inter, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('💙 HalDo AI', 10, h - 8);
+            },
+
+            speak(text) {
+                this.isSpeaking = true;
+                this.emotion = 'speaking';
+                const duration = Math.min(text.length * 20, 3000);
+                setTimeout(() => {
+                    this.isSpeaking = false;
+                    if (!this.isThinking && !this.isListening) {
+                        this.emotion = 'idle';
+                    }
+                }, duration);
+                EventBus.emit('living-ai:speaking', { text, duration });
+            },
+
+            wave() {
+                this.handWave = 2;
+                setTimeout(() => { this.handWave = Math.max(0, this.handWave - 1); }, 500);
+                EventBus.emit('living-ai:wave');
+            },
+
+            wakeUp() {
+                this.emotion = 'waking';
+                setTimeout(() => {
+                    this.emotion = 'idle';
+                    EventBus.emit('living-ai:awake');
+                }, 2000);
+            },
+
+            setEmotion(emotion) {
+                if (this.emotions[emotion]) {
+                    this.emotion = emotion;
+                    EventBus.emit('living-ai:emotion-changed', { emotion });
+                }
+            },
+
+            show() {
+                this.isVisible = true;
+                this.container.style.display = 'flex';
+                EventBus.emit('living-ai:shown');
+            },
+
+            hide() {
+                this.isVisible = false;
+                this.container.style.display = 'none';
+                EventBus.emit('living-ai:hidden');
+            },
+
+            destroy() {
+                this.isReady = false;
+                this.isVisible = false;
+                if (this.container) this.container.innerHTML = '';
+                EventBus.emit('living-ai:destroyed');
+            }
+        };
+        window.LivingAI = LivingAI;
+
+        // ============================================================
+        //  7. AI CORE
         // ============================================================
         const AICore = {
             apiKey: '',
@@ -1741,8 +2219,12 @@
                 return this;
             },
 
+            hasValidKey() {
+                return this.apiKey && this.apiKey.startsWith('gsk_');
+            },
+
             async chat(messages, options = {}) {
-                if (!this.apiKey) {
+                if (!this.hasValidKey()) {
                     return '⚠️ Bitte trage deinen Groq API Key in den Settings ein! (AI & Memory)';
                 }
 
@@ -1789,267 +2271,6 @@
             }
         };
         window.AICore = AICore;
-
-        // ============================================================
-        //  7. LIVING AI (Avatar mit Gesicht, Augen, Mund, Händen)
-        // ============================================================
-        const LivingAI = {
-            canvas: null,
-            ctx: null,
-            width: 300,
-            height: 350,
-            emotion: 'neutral',
-            isSpeaking: false,
-            isThinking: false,
-            eyeState: 'open',
-            handWave: 0,
-
-            init(containerId = 'living-ai-container') {
-                const container = document.getElementById(containerId);
-                if (!container) return false;
-
-                this.canvas = document.createElement('canvas');
-                this.canvas.width = this.width;
-                this.canvas.height = this.height;
-                container.appendChild(this.canvas);
-                this.ctx = this.canvas.getContext('2d');
-
-                this.draw();
-                this.animate();
-
-                // Events
-                EventBus.on('ai:processing', (processing) => {
-                    this.isThinking = processing;
-                    this.emotion = processing ? 'thinking' : 'neutral';
-                });
-                EventBus.on('voice:speaking', (speaking) => {
-                    this.isSpeaking = speaking;
-                    this.emotion = speaking ? 'speaking' : 'neutral';
-                });
-
-                return true;
-            },
-
-            animate() {
-                // Blinken
-                if (Math.random() < 0.004) {
-                    this.eyeState = 'closed';
-                    setTimeout(() => { this.eyeState = 'open'; }, 150);
-                }
-
-                // Handwelle
-                if (this.emotion === 'happy' && Math.random() < 0.01) {
-                    this.handWave = 1;
-                    setTimeout(() => { this.handWave = 0; }, 500);
-                }
-
-                this.draw();
-                requestAnimationFrame(() => this.animate());
-            },
-
-            draw() {
-                const ctx = this.ctx;
-                const w = this.width;
-                const h = this.height;
-
-                ctx.clearRect(0, 0, w, h);
-
-                // Hintergrund
-                const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, 180);
-                grad.addColorStop(0, 'rgba(20, 10, 40, 0.7)');
-                grad.addColorStop(1, 'rgba(5, 5, 15, 0.9)');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-
-                // Hals
-                ctx.fillStyle = '#3a2a1a';
-                ctx.fillRect(w / 2 - 20, h - 30, 40, 30);
-
-                // Kopf
-                const headX = w / 2,
-                    headY = h / 2 - 10,
-                    headR = 70;
-                ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                ctx.shadowBlur = 20;
-                ctx.beginPath();
-                ctx.arc(headX, headY, headR, 0, Math.PI * 2);
-                ctx.fillStyle = '#e8c9a0';
-                ctx.fill();
-                ctx.shadowBlur = 0;
-
-                // Wangen (bei happy)
-                if (this.emotion === 'happy') {
-                    ctx.globalAlpha = 0.15;
-                    ctx.fillStyle = '#ff6b8a';
-                    ctx.beginPath();
-                    ctx.arc(headX - 45, headY + 15, 18, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(headX + 45, headY + 15, 18, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.globalAlpha = 1;
-                }
-
-                // Augen
-                const eyeY = headY - 10;
-                const eyeSpacing = 30;
-                const eyeR = 14;
-                const isClosed = this.eyeState === 'closed';
-
-                // Weiß
-                ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 4;
-                ctx.shadowColor = 'rgba(0,0,0,0.1)';
-
-                // Linkes Auge
-                ctx.beginPath();
-                ctx.ellipse(headX - eyeSpacing, eyeY, eyeR, isClosed ? 2 : eyeR, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Rechtes Auge
-                ctx.beginPath();
-                ctx.ellipse(headX + eyeSpacing, eyeY, eyeR, isClosed ? 2 : eyeR, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-
-                if (!isClosed) {
-                    // Pupillen
-                    ctx.fillStyle = '#2a1a0a';
-                    ctx.beginPath();
-                    ctx.arc(headX - eyeSpacing + 4, eyeY + 2, 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(headX + eyeSpacing + 4, eyeY + 2, 6, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    // Glanz
-                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-                    ctx.beginPath();
-                    ctx.arc(headX - eyeSpacing + 6, eyeY - 4, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(headX + eyeSpacing + 6, eyeY - 4, 3, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    // Augenbrauen
-                    ctx.strokeStyle = '#3a2a1a';
-                    ctx.lineWidth = 3;
-                    ctx.lineCap = 'round';
-                    const browY = eyeY - 24;
-                    ctx.beginPath();
-                    ctx.moveTo(headX - eyeSpacing - 14, browY + (this.emotion === 'thinking' ? -6 : 0));
-                    ctx.quadraticCurveTo(headX - eyeSpacing, browY - 8 + (this.emotion === 'thinking' ? -6 : 0), headX -
-                        eyeSpacing + 14, browY + (this.emotion === 'thinking' ? -2 : 4));
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.moveTo(headX + eyeSpacing - 14, browY + (this.emotion === 'thinking' ? -2 : 4));
-                    ctx.quadraticCurveTo(headX + eyeSpacing, browY - 8 + (this.emotion === 'thinking' ? -6 : 0), headX +
-                        eyeSpacing + 14, browY + (this.emotion === 'thinking' ? -6 : 0));
-                    ctx.stroke();
-                }
-
-                // Nase
-                ctx.strokeStyle = '#c4a080';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(headX, headY + 6);
-                ctx.quadraticCurveTo(headX + 10, headY + 18, headX, headY + 24);
-                ctx.quadraticCurveTo(headX - 10, headY + 18, headX, headY + 6);
-                ctx.stroke();
-
-                // Mund
-                const mouthX = headX,
-                    mouthY = headY + 40;
-                const mouthW = 34,
-                    mouthH = 14;
-
-                if (this.emotion === 'speaking') {
-                    // Sprechender Mund
-                    const breath = Math.sin(Date.now() * 0.01) * 0.3 + 0.5;
-                    ctx.fillStyle = '#aa3355';
-                    ctx.beginPath();
-                    ctx.ellipse(mouthX, mouthY + 4, mouthW / 2, mouthH / 2 * (0.3 + breath * 0.7), 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#552233';
-                    ctx.beginPath();
-                    ctx.ellipse(mouthX, mouthY + 4, mouthW / 4, mouthH / 3 * (0.2 + breath * 0.6), 0, 0, Math.PI * 2);
-                    ctx.fill();
-                } else if (this.emotion === 'happy') {
-                    // Lächeln
-                    ctx.strokeStyle = '#cc4466';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(mouthX, mouthY - 4, mouthW / 2, 0.1, Math.PI - 0.1);
-                    ctx.stroke();
-                    ctx.fillStyle = '#cc4466';
-                    ctx.beginPath();
-                    ctx.arc(mouthX, mouthY + 6, mouthW / 2.8, 0, Math.PI);
-                    ctx.fill();
-                } else if (this.emotion === 'thinking') {
-                    // Nachdenklicher Mund
-                    ctx.strokeStyle = '#cc4466';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(mouthX, mouthY + 6, mouthW / 3, 0.1, Math.PI - 0.1);
-                    ctx.stroke();
-                } else {
-                    // Neutraler Mund
-                    ctx.fillStyle = '#cc4466';
-                    ctx.beginPath();
-                    ctx.ellipse(mouthX, mouthY + 2, mouthW / 2.5, mouthH / 3, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = '#aa3355';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.ellipse(mouthX, mouthY + 2, mouthW / 3.5, mouthH / 4, 0, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-
-                // Hände (Welle)
-                if (this.handWave > 0) {
-                    ctx.font = '36px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillStyle = '#e8c9a0';
-                    const waveX = headX + 80 + Math.sin(Date.now() * 0.01) * 10;
-                    const waveY = headY - 30 + Math.sin(Date.now() * 0.015) * 8;
-                    ctx.fillText('👋', waveX, waveY);
-                }
-
-                // Status-Anzeige
-                const status = this.isSpeaking ? '🔊' : this.isThinking ? '🧠' : '●';
-                ctx.fillStyle = this.isSpeaking ? '#00ff88' : this.isThinking ? '#6666ff' : '#00ff88';
-                ctx.font = '14px sans-serif';
-                ctx.textAlign = 'right';
-                ctx.fillText(status, w - 12, 18);
-
-                // Emotion-Label
-                const emotions = {
-                    neutral: '😐 Neutral',
-                    happy: '😊 Glücklich',
-                    thinking: '🤔 Denkend',
-                    speaking: '🗣️ Sprechend'
-                };
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                ctx.font = '10px Inter, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(emotions[this.emotion] || 'Neutral', w / 2, h - 8);
-            },
-
-            setEmotion(emotion) {
-                this.emotion = emotion;
-            },
-
-            speak(text) {
-                this.isSpeaking = true;
-                this.emotion = 'speaking';
-                const duration = Math.min(text.length * 25, 2500);
-                setTimeout(() => {
-                    this.isSpeaking = false;
-                    this.emotion = 'neutral';
-                }, duration);
-            }
-        };
-        window.LivingAI = LivingAI;
 
         // ============================================================
         //  8. APP MANAGER
@@ -2141,7 +2362,41 @@
                 { id: 'cosmic-world', name: 'Cosmic World', icon: '🌌', category: 'cosmic', desc: '3D-Universum' },
                 { id: 'solar-system', name: 'Sonnensystem', icon: '☀️', category: 'cosmic', desc: 'Planeten anzeigen' },
                 { id: 'planet-center', name: 'Planeten Center', icon: '🪐', category: 'cosmic', desc: 'Planeten-Info' },
-                { id: 'cosmic-desktop', name: 'Cosmic Desktop', icon: '🖥️', category: 'cosmic', desc: 'Desktop-Ansicht' }
+                { id: 'cosmic-desktop', name: 'Cosmic Desktop', icon: '🖥️', category: 'cosmic', desc: 'Desktop-Ansicht' },
+
+                // MUSIC STUDIO PRO
+                { id: 'music-studio-pro', name: 'Music Studio Pro', icon: '🎚️', category: 'music', desc: 'Professionelle Musikproduktion' },
+                { id: 'video-studio-pro', name: 'Video Studio Pro', icon: '🎥', category: 'media', desc: 'Professionelle Videoproduktion' },
+                { id: 'ai-video-generator-pro', name: 'AI Video Generator Pro', icon: '🤖', category: 'ai', desc: 'KI-Videogenerierung V2.0' },
+
+                // GAMES
+                { id: 'games-center', name: 'Games Center', icon: '🎮', category: 'entertainment', desc: 'Spiele und Highscores' },
+
+                // HEALTH
+                { id: 'health-center', name: 'Health Center', icon: '🏥', category: 'health', desc: 'Gesundheitsmanagement' },
+                { id: 'healthy', name: 'Healthy', icon: '💪', category: 'health', desc: 'Sport und Fitness' },
+
+                // EDUCATION
+                { id: 'university-center', name: 'University Center', icon: '🎓', category: 'education', desc: 'Studium und Kurse' },
+                { id: 'ai-tutor', name: 'AI Tutor', icon: '🧑‍🏫', category: 'education', desc: 'KI-gestützter Lernassistent' },
+                { id: 'science-center', name: 'Science Center', icon: '🔬', category: 'education', desc: 'Naturwissenschaften' },
+                { id: 'philosophy-center', name: 'Philosophy Center', icon: '🧠', category: 'education', desc: 'Philosophie und Ethik' },
+                { id: 'language-center', name: 'Language Center', icon: '🌍', category: 'education', desc: 'Sprachen lernen' },
+
+                // TRAVEL
+                { id: 'travel-center', name: 'Travel Center', icon: '✈️', category: 'lifestyle', desc: 'Reiseplanung' },
+
+                // DRIVING
+                { id: 'driving-school', name: 'Fahrschule', icon: '🚗', category: 'education', desc: 'Fahrschule Theorie' },
+                { id: 'traffic-center', name: 'Verkehr & Blitzer', icon: '🚦', category: 'transport', desc: 'Verkehrsinfos' },
+
+                // MUSIC & SONGWRITING
+                { id: 'music-studio', name: 'Musik Studio', icon: '🎹', category: 'music', desc: 'Musik erstellen' },
+                { id: 'ai-songwriter', name: 'AI Songwriter', icon: '✍️', category: 'music', desc: 'Songtexte schreiben' },
+
+                // VIDEO
+                { id: 'video-studio', name: 'Video Studio', icon: '🎬', category: 'media', desc: 'Videos erstellen' },
+                { id: 'ai-video-generator', name: 'AI Video Generator', icon: '🤖', category: 'ai', desc: 'Videos generieren' }
             ],
 
             init() {
@@ -2237,7 +2492,7 @@
                 document.addEventListener('mouseup', () => { if (drag) { drag = false;
                         win.style.cursor = ''; } });
 
-                // Resize (kleiner ziehbarer Bereich unten rechts)
+                // Resize
                 const resizeHandle = document.createElement('div');
                 resizeHandle.style.cssText =
                     'position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize;z-index:1000;';
@@ -2394,6 +2649,42 @@
                         return this.getPersonalCenterUI();
                     case 'system-center':
                         return this.getSystemCenterUI();
+                    case 'music-studio-pro':
+                        return this.getMusicStudioProUI();
+                    case 'video-studio-pro':
+                        return this.getVideoStudioProUI();
+                    case 'ai-video-generator-pro':
+                        return this.getAIVideoGeneratorProUI();
+                    case 'games-center':
+                        return this.getGamesCenterUI();
+                    case 'health-center':
+                        return this.getHealthCenterUI();
+                    case 'healthy':
+                        return this.getHealthyUI();
+                    case 'university-center':
+                        return this.getUniversityCenterUI();
+                    case 'ai-tutor':
+                        return this.getAITutorUI();
+                    case 'science-center':
+                        return this.getScienceCenterUI();
+                    case 'philosophy-center':
+                        return this.getPhilosophyCenterUI();
+                    case 'language-center':
+                        return this.getLanguageCenterUI();
+                    case 'travel-center':
+                        return this.getTravelCenterUI();
+                    case 'driving-school':
+                        return this.getDrivingSchoolUI();
+                    case 'traffic-center':
+                        return this.getTrafficCenterUI();
+                    case 'music-studio':
+                        return this.getMusicStudioUI();
+                    case 'ai-songwriter':
+                        return this.getAISongwriterUI();
+                    case 'video-studio':
+                        return this.getVideoStudioUI();
+                    case 'ai-video-generator':
+                        return this.getAIVideoGeneratorUI();
                     default:
                         return `
                             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:6px;text-align:center;">
@@ -3488,6 +3779,9 @@
                                 <option value="FR">🇫🇷 Français</option>
                                 <option value="ES">🇪🇸 Español</option>
                                 <option value="RU">🇷🇺 Русский</option>
+                                <option value="FA">🇮🇷 فارسی</option>
+                                <option value="IT">🇮🇹 Italiano</option>
+                                <option value="PT">🇵🇹 Português</option>
                             </select>
                         </div>
                         <div style="margin:4px 0;">
@@ -3821,6 +4115,308 @@
                 `;
             },
 
+            // ===== MUSIC STUDIO PRO =====
+            getMusicStudioProUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎚️</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Music Studio Pro</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Professionelle Musikproduktion</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎹 Piano Roll')">🎹 Piano Roll</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🎛️ Mixer')">🎛️ Mixer</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('✨ Effekte')">✨ Effekte</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📤 Export')">📤 Export</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== VIDEO STUDIO PRO =====
+            getVideoStudioProUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎥</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Video Studio Pro</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Professionelle Videoproduktion</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎞️ Timeline')">🎞️ Timeline</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('✨ Effekte')">✨ Effekte</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📝 Titel')">📝 Titel</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📤 Export')">📤 Export</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== AI VIDEO GENERATOR PRO =====
+            getAIVideoGeneratorProUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🤖</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">AI Video Generator Pro</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">KI-Videogenerierung V2.0</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎬 Generieren')">🎬 Generieren</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📦 Batch')">📦 Batch</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🎬 Storyboard')">🎬 Storyboard</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('⚙️ Einstellungen')">⚙️ Einstellungen</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== GAMES CENTER =====
+            getGamesCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎮</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Games Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">${this.installedApps.filter(a => a.category === 'entertainment').length} Spiele</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎯 Highscores')">🏆 Highscores</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('⭐ Erfolge')">⭐ Erfolge</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== HEALTH CENTER =====
+            getHealthCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🏥</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Health Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Gesundheitsmanagement</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🩺 Symptome')">🩺 Symptome</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('💊 Medikamente')">💊 Medikamente</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('👨‍⚕️ Ärzte')">👨‍⚕️ Ärzte</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📈 Tracking')">📈 Tracking</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== HEALTHY =====
+            getHealthyUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">💪</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Healthy</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Sport und Fitness</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🏃 Aktivitäten')">🏃 Aktivitäten</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🍲 Ernährung')">🍲 Ernährung</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('💧 Wasser')">💧 Wasser</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🏋️ Übungen')">🏋️ Übungen</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== UNIVERSITY CENTER =====
+            getUniversityCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎓</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">University Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Studium und Kurse</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('📚 Kurse')">📚 Kurse</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🧠 Wissen')">🧠 Wissen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📖 Bibliothek')">📖 Bibliothek</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🧠 Quiz')">🧠 Quiz</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== AI TUTOR =====
+            getAITutorUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🧑‍🏫</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">AI Tutor</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">KI-gestützter Lernassistent</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('💬 Chat')">💬 Chat</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📚 Fächer')">📚 Fächer</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📊 Fortschritt')">📊 Fortschritt</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📋 Verlauf')">📋 Verlauf</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== SCIENCE CENTER =====
+            getScienceCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🔬</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Science Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Naturwissenschaften</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🧬 Biologie')">🧬 Biologie</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🧪 Chemie')">🧪 Chemie</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('⚡ Physik')">⚡ Physik</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🌌 Astronomie')">🌌 Astronomie</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== PHILOSOPHY CENTER =====
+            getPhilosophyCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🧠</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Philosophy Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Philosophie und Ethik</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🧠 Denker')">🧠 Denker</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🏛️ Schulen')">🏛️ Schulen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('⚖️ Ethik')">⚖️ Ethik</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('💬 Zitate')">💬 Zitate</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== LANGUAGE CENTER =====
+            getLanguageCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🌍</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Language Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Sprachen lernen</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('📚 Kurse')">📚 Kurse</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📖 Vokabeln')">📖 Vokabeln</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🌐 Übersetzung')">🌐 Übersetzung</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🧠 Quiz')">🧠 Quiz</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== TRAVEL CENTER =====
+            getTravelCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">✈️</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Travel Center</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Reiseplanung</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🌍 Reiseziele')">🌍 Reiseziele</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🏨 Hotels')">🏨 Hotels</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('✈️ Flüge')">✈️ Flüge</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📅 Reiseplaner')">📅 Reiseplaner</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== DRIVING SCHOOL =====
+            getDrivingSchoolUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🚗</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Fahrschule</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Theorie und Praxis</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('📚 Lernen')">📚 Lernen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🧠 Quiz')">🧠 Quiz</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📋 Regeln')">📋 Regeln</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🛑 Schilder')">🛑 Schilder</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== TRAFFIC CENTER =====
+            getTrafficCenterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🚦</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Verkehr & Blitzer</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Verkehrsinfos</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('⚠️ Blitzer')">⚠️ Blitzer</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🚗 Verkehr')">🚗 Verkehr</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🗺️ Routen')">🗺️ Routen</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🅿️ Parken')">🅿️ Parken</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== MUSIC STUDIO =====
+            getMusicStudioUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎹</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Musik Studio</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Musik erstellen</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎹 Piano Roll')">🎹 Piano Roll</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🎛️ Mixer')">🎛️ Mixer</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('✨ Effekte')">✨ Effekte</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📤 Export')">📤 Export</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== AI SONGWRITER =====
+            getAISongwriterUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">✍️</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">AI Songwriter</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Songtexte schreiben</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('✍️ Schreiben')">✍️ Schreiben</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🔧 Korrigieren')">🔧 Korrigieren</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('💡 Brainstorm')">💡 Brainstorm</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('💾 Gespeichert')">💾 Gespeichert</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== VIDEO STUDIO =====
+            getVideoStudioUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🎬</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">Video Studio</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Videos erstellen</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('📁 Projekt')">📁 Projekt</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('✂️ Bearbeiten')">✂️ Bearbeiten</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('📤 Export')">📤 Export</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== AI VIDEO GENERATOR =====
+            getAIVideoGeneratorUI() {
+                return `
+                    <div style="padding:8px;text-align:center;">
+                        <div style="font-size:48px;">🤖</div>
+                        <h3 style="color:var(--text-primary);font-size:14px;">AI Video Generator</h3>
+                        <p style="color:var(--text-secondary);font-size:11px;">Videos generieren</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                            <button class="haldo-btn" style="font-size:10px;padding:3px 8px;" onclick="alert('🎬 Generieren')">🎬 Generieren</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('🎬 Galerie')">🎬 Galerie</button>
+                            <button class="haldo-btn haldo-btn-secondary" style="font-size:10px;padding:3px 8px;" onclick="alert('⚙️ Einstellungen')">⚙️ Einstellungen</button>
+                        </div>
+                    </div>
+                `;
+            },
+
             // ===== SETTINGS =====
             openSettings(app) {
                 const categories = [
@@ -3860,8 +4456,10 @@
                 if (!container) return;
 
                 document.querySelectorAll('[data-cat]').forEach(el => {
-                    el.style.background = el.dataset.cat === category ? 'var(--primary)' : 'transparent';
-                    el.style.color = el.dataset.cat === category ? 'white' : 'var(--text-secondary)';
+                    el.style.background = el.datas
+                    cat === category ? 'var(--primary)' : 'transparent';
+                    el.style.color = el.datas
+                    cat === category ? 'white' : 'var(--text-secondary)';
                 });
 
                 let content = '';
@@ -3905,7 +4503,7 @@
                         content = `
                             <h2 style="color:var(--text-primary);font-size:13px;">🌍 Sprache</h2>
                             <div style="margin-top:4px;">
-                                <div style="margin:4px 0;"><label style="color:var(--text-secondary);font-size:10px;">Systemsprache</label><select class="haldo-input" style="font-size:10px;margin-top:2px;" onchange="document.getElementById('menu-lang').textContent=this.value;"><option>🇩🇪 Deutsch</option><option>🇬🇧 English</option><option>🏴 Kurmancî</option><option>🏴 Êzîdî</option><option>🇹🇷 Türkçe</option><option>🇸🇦 العربية</option><option>🇫🇷 Français</option><option>🇪🇸 Español</option><option>🇷🇺 Русский</option></select></div>
+                                <div style="margin:4px 0;"><label style="color:var(--text-secondary);font-size:10px;">Systemsprache</label><select class="haldo-input" style="font-size:10px;margin-top:2px;" onchange="document.getElementById('menu-lang').textContent=this.value;"><option>🇩🇪 Deutsch</option><option>🇬🇧 English</option><option>🏴 Kurmancî</option><option>🏴 Êzîdî</option><option>🇹🇷 Türkçe</option><option>🇸🇦 العربية</option><option>🇫🇷 Français</option><option>🇪🇸 Español</option><option>🇷🇺 Русский</option><option>🇮🇷 فارسی</option><option>🇮🇹 Italiano</option><option>🇵🇹 Português</option></select></div>
                                 <div style="margin:4px 0;"><label style="color:var(--text-secondary);font-size:10px;">Tastaturlayout</label><select class="haldo-input" style="font-size:10px;margin-top:2px;"><option>QWERTZ</option><option>QWERTY</option><option>Êzîdî</option></select></div>
                             </div>
                         `;
@@ -3998,50 +4596,43 @@
 
             // ===== AI CHAT =====
             openAIChat(app) {
-                // Living AI in den Chat integrieren
                 const content = `
                     <div style="display:flex;flex-direction:column;height:100%;padding:0;">
-                        <div id="ai-chat-messages" style="flex:1;overflow-y:auto;padding:6px;margin-bottom:4px;">
-                            <div style="text-align:center;color:var(--text-muted);padding:8px;font-size:11px;">
+                        <div id="ai-chat-messages" style="flex:1;overflow-y:auto;padding:8px;margin-bottom:4px;">
+                            <div style="text-align:center;color:var(--text-muted);padding:12px;font-size:12px;">
                                 💙 Hallo! Ich bin <strong style="color:var(--text-primary);">HalDo</strong>, deine KI.<br>
                                 Stelle mir eine Frage.
                             </div>
                         </div>
-                        <div style="display:flex;gap:3px;padding:4px 6px;border-top:1px solid var(--glass-border);flex-wrap:wrap;">
-                            <input id="ai-chat-input" class="haldo-input" placeholder="Nachricht..." style="flex:1;min-width:60px;font-size:11px;" onkeydown="if(event.key==='Enter')AppManager.sendAIMessage()">
-                            <button onclick="AppManager.sendAIMessage()" class="haldo-btn" style="font-size:10px;padding:3px 10px;">📤</button>
-                            <button onclick="AppManager.toggleVoiceInput()" class="haldo-btn haldo-btn-secondary" id="ai-voice-btn" style="font-size:12px;padding:3px 6px;">🎤</button>
-                            <button onclick="AppManager.toggleLivingAI()" class="haldo-btn haldo-btn-secondary" id="ai-living-btn" style="font-size:12px;padding:3px 6px;">👤</button>
+                        <div style="display:flex;gap:4px;padding:4px 8px;border-top:1px solid var(--glass-border);flex-wrap:wrap;">
+                            <input id="ai-chat-input" class="haldo-input" placeholder="Nachricht..." style="flex:1;min-width:80px;font-size:12px;" onkeydown="if(event.key==='Enter')AppManager.sendAIMessage()">
+                            <button onclick="AppManager.sendAIMessage()" class="haldo-btn" style="font-size:12px;padding:4px 12px;">📤</button>
+                            <button onclick="AppManager.toggleVoiceInput()" class="haldo-btn haldo-btn-secondary" id="ai-voice-btn" style="font-size:14px;padding:4px 8px;">🎤</button>
+                            <button onclick="AppManager.toggleLivingAI()" class="haldo-btn haldo-btn-secondary" id="ai-living-btn" style="font-size:14px;padding:4px 8px;">👤</button>
                         </div>
-                        <div id="living-ai-container" style="display:none;height:200px;border-top:1px solid var(--glass-border);"></div>
                     </div>
                 `;
                 const win = this.createWindow(app.name, app.icon, content, 420, 380);
                 document.getElementById('window-container').appendChild(win);
                 this.updateTaskbar();
-
-                // Living AI initialisieren
-                setTimeout(() => {
-                    const container = document.getElementById('living-ai-container');
-                    if (container) {
-                        LivingAI.init('living-ai-container');
-                    }
-                }, 300);
             },
 
             toggleLivingAI() {
                 const container = document.getElementById('living-ai-container');
-                const btn = document.getElementById('ai-living-btn');
-                if (!container || !btn) return;
-                if (container.style.display === 'none') {
-                    container.style.display = 'block';
-                    btn.textContent = '👤';
-                    btn.style.color = 'var(--success)';
-                    LivingAI.init('living-ai-container');
-                } else {
-                    container.style.display = 'none';
-                    btn.textContent = '👤';
-                    btn.style.color = '';
+                if (container) {
+                    if (container.style.display === 'none' || container.style.display === '') {
+                        container.style.display = 'block';
+                        if (typeof LivingAI !== 'undefined' && !LivingAI.isReady) {
+                            LivingAI.init('living-ai-container');
+                        } else if (typeof LivingAI !== 'undefined') {
+                            LivingAI.show();
+                        }
+                    } else {
+                        container.style.display = 'none';
+                        if (typeof LivingAI !== 'undefined') {
+                            LivingAI.hide();
+                        }
+                    }
                 }
             },
 
@@ -4066,8 +4657,9 @@
                 messages.appendChild(loading);
                 messages.scrollTop = messages.scrollHeight;
 
-                // Living AI: Denk-Modus
-                LivingAI.setEmotion('thinking');
+                if (typeof LivingAI !== 'undefined') {
+                    LivingAI.setEmotion('thinking');
+                }
 
                 AICore.simpleChat(text).then(reply => {
                     loading.remove();
@@ -4078,11 +4670,11 @@
                     messages.appendChild(aiMsg);
                     messages.scrollTop = messages.scrollHeight;
 
-                    // Living AI: Sprechen
-                    LivingAI.speak(reply);
-                    LivingAI.setEmotion('happy');
+                    if (typeof LivingAI !== 'undefined') {
+                        LivingAI.speak(reply);
+                        LivingAI.setEmotion('happy');
+                    }
 
-                    // Voice Ausgabe
                     if ('speechSynthesis' in window) {
                         const utter = new SpeechSynthesisUtterance(reply);
                         utter.lang = 'de-DE';
@@ -4098,11 +4690,9 @@
                     const rec = new webkitSpeechRecognition();
                     rec.lang = 'de-DE';
                     rec.onstart = () => { btn.textContent = '⏹️';
-                        btn.style.color = 'var(--success)';
-                        LivingAI.setEmotion('listening'); };
+                        btn.style.color = 'var(--success)'; };
                     rec.onend = () => { btn.textContent = '🎤';
-                        btn.style.color = '';
-                        LivingAI.setEmotion('neutral'); };
+                        btn.style.color = ''; };
                     rec.onresult = (e) => {
                         const text = e.results[0][0].transcript;
                         const input = document.getElementById('ai-chat-input');
@@ -4165,7 +4755,7 @@
                 const container = document.getElementById('desktop-icons');
                 if (!container) return;
                 const apps = this.apps.filter(a => this.installedApps.includes(a.id));
-                container.innerHTML = apps.slice(0, 16).map(app => `
+                container.innerHTML = apps.slice(0, 20).map(app => `
                     <div class="desktop-icon" onclick="AppManager.openApp('${app.id}')" title="${app.desc || app.name}">
                         <div class="icon-img">${app.icon}</div>
                         <div class="icon-label">${app.name}</div>
@@ -4195,7 +4785,7 @@
         window.AppManager = AppManager;
 
         // ============================================================
-        //  8. UHR
+        //  9. UHR
         // ============================================================
         function updateClock() {
             const el = document.getElementById('taskbar-time');
@@ -4206,7 +4796,7 @@
         }
 
         // ============================================================
-        //  9. MAIN START
+        //  10. MAIN START
         // ============================================================
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 HalDo AI OS 24.6.0 Ultimate startet...');
@@ -4215,7 +4805,7 @@
         });
 
         // ============================================================
-        //  10. SERVICE WORKER (PWA)
+        //  11. SERVICE WORKER (PWA)
         // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -4234,7 +4824,7 @@
         });
 
         // ============================================================
-        //  11. OFFLINE-ERKENNUNG
+        //  12. OFFLINE-ERKENNUNG
         // ============================================================
         window.addEventListener('online', () => {
             const status = document.getElementById('taskbar-status');
@@ -4257,7 +4847,7 @@
         });
 
         // ============================================================
-        //  12. GLOBALE FEHLERBEHANDLUNG
+        //  13. GLOBALE FEHLERBEHANDLUNG
         // ============================================================
         window.onerror = (msg, url, line) => {
             console.error('❌ Fehler:', msg, url, line);
@@ -4269,7 +4859,8 @@
 
         console.log('💙❤️🚀 HalDo AI OS 24.6.0 Ultimate – Cosmic Intelligent Operating System');
         console.log('📱 Alle 70+ Apps sind bereit!');
-        console.log('👤 Living AI Avatar ist aktiv!');
+        console.log('👤 Living AI Avatar V2.0.0 ist aktiv!');
+        console.log('🌌 Cosmic World V2.0.0 mit Avatar-Integration!');
     </script>
 
 </body>
