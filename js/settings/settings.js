@@ -66,11 +66,11 @@ const Settings = {
                 name: '🧠 AI & Memory',
                 settings: [
                     { 
-                        id: 'groq_api_key',          // <-- DAS IST DER KEY!
+                        id: 'groq_api_key',     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     // <-- DAS IST DER KEY!
                         label: '🔑 Groq API Key',
-                        type: 'password',            // <-- Versteckte Eingabe
+                        type: 'password',   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         // <-- Versteckte Eingabe
                         default: '',
-                        placeholder: 'gsk_... hier einfügen'
+                        placeholder: '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'
                     },
                     { 
                         id: 'ai_model', 
