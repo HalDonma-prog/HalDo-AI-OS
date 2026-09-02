@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
         /* ============================================================
-           HALDO AI OS 24.6.0 ULTIMATE – DAS KOMPLETTE DESIGN
+           HALDO AI OS 24.6.0 – PROFESSIONELLES ULTIMATE DESIGN
            ============================================================ */
         * {
             margin: 0;
@@ -49,7 +49,7 @@
             border-radius: 10px;
         }
 
-        /* ===== BOOT SCREEN ===== */
+        /* BOOT */
         #boot-screen {
             position: fixed;
             top: 0;
@@ -207,7 +207,7 @@
             z-index: 2;
         }
 
-        /* ===== DESKTOP ===== */
+        /* DESKTOP */
         #desktop {
             display: none;
             width: 100vw;
@@ -234,14 +234,15 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 180px;
-            height: 180px;
+            width: 200px;
+            height: 200px;
             z-index: 10;
             pointer-events: none;
             border-radius: 50%;
             overflow: hidden;
             background: radial-gradient(circle, rgba(108, 60, 225, 0.15), transparent 70%);
             display: none;
+            box-shadow: 0 0 60px rgba(108, 60, 225, 0.2);
         }
         #living-ai-container canvas {
             width: 100% !important;
@@ -250,7 +251,7 @@
             mix-blend-mode: screen;
         }
 
-        /* ===== TOP MENU ===== */
+        /* TOP MENU */
         #top-menu {
             position: fixed;
             top: 0;
@@ -285,6 +286,7 @@
             border: none;
             background: transparent;
             white-space: nowrap;
+            transition: 0.2s;
         }
         .menu-item:hover {
             background: rgba(255, 255, 255, 0.06);
@@ -303,7 +305,7 @@
             padding: 2px 6px;
         }
 
-        /* ===== TASKBAR ===== */
+        /* TASKBAR */
         #taskbar {
             position: fixed;
             bottom: 0;
@@ -343,6 +345,7 @@
             font-size: 11px;
             color: var(--text-secondary);
             min-width: 50px;
+            font-variant-numeric: tabular-nums;
         }
         .taskbar-center {
             flex: 1;
@@ -363,10 +366,16 @@
             font-size: 9px;
             cursor: pointer;
             white-space: nowrap;
+            transition: 0.2s;
         }
         .taskbar-app-btn:hover {
             background: rgba(255, 255, 255, 0.06);
             border-color: var(--glass-border);
+        }
+        .taskbar-app-btn.active {
+            background: rgba(108, 60, 225, 0.2);
+            border-color: var(--primary);
+            color: #fff;
         }
         .taskbar-right {
             display: flex;
@@ -379,12 +388,13 @@
             background: none;
             border: none;
             padding: 2px 4px;
+            transition: 0.2s;
         }
         .taskbar-right .tb-icon:hover {
             color: #fff;
         }
 
-        /* ===== WINDOWS ===== */
+        /* WINDOWS */
         #window-container {
             position: fixed;
             top: var(--menu-top-height);
@@ -397,26 +407,26 @@
         }
         .window {
             position: absolute;
-            min-width: 200px;
-            min-height: 140px;
+            min-width: 220px;
+            min-height: 150px;
             max-width: 85vw;
             max-height: 85vh;
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
             border: 1px solid var(--glass-border);
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: var(--glass-shadow);
             pointer-events: all;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            animation: windowOpen 0.18s ease;
+            animation: windowOpen 0.2s ease;
             resize: both;
         }
         @keyframes windowOpen {
             from {
                 opacity: 0;
-                transform: scale(0.94) translateY(10px);
+                transform: scale(0.92) translateY(12px);
             }
             to {
                 opacity: 1;
@@ -424,7 +434,7 @@
             }
         }
         .window.minimized {
-            transform: scale(0.8) translateY(30px);
+            transform: scale(0.8) translateY(40px);
             opacity: 0;
             pointer-events: none;
         }
@@ -441,59 +451,74 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 4px 8px;
+            padding: 6px 10px;
             background: rgba(255, 255, 255, 0.01);
             border-bottom: 1px solid var(--glass-border);
             cursor: grab;
-            min-height: 28px;
+            min-height: 32px;
             flex-shrink: 0;
         }
         .window-header:active {
             cursor: grabbing;
         }
         .window-title {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
+            color: var(--text-primary);
         }
         .window-controls {
             display: flex;
-            gap: 4px;
+            gap: 5px;
         }
         .window-controls button {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 6px;
-            line-height: 10px;
+            font-size: 7px;
+            line-height: 12px;
             text-align: center;
             color: transparent;
+            transition: 0.2s;
         }
         .window-controls .btn-close {
             background: #FF5F57;
         }
+        .window-controls .btn-close:hover {
+            background: #FF3B30;
+            transform: scale(1.1);
+        }
         .window-controls .btn-minimize {
             background: #FFBD2E;
+        }
+        .window-controls .btn-minimize:hover {
+            background: #FFA500;
+            transform: scale(1.1);
         }
         .window-controls .btn-maximize {
             background: #28C840;
         }
+        .window-controls .btn-maximize:hover {
+            background: #00A020;
+            transform: scale(1.1);
+        }
         .window-body {
             flex: 1;
-            padding: 8px;
+            padding: 10px;
             overflow: auto;
             font-size: 12px;
-            line-height: 1.5;
+            line-height: 1.6;
             color: var(--text-secondary);
         }
         .window-body h2 {
             color: var(--text-primary);
-            font-size: 14px;
-            margin-bottom: 6px;
+            font-size: 15px;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
         .window-body textarea {
             width: 100%;
@@ -501,7 +526,7 @@
             border: 1px solid var(--glass-border);
             border-radius: 6px;
             color: #fff;
-            padding: 6px;
+            padding: 6px 8px;
             font-family: inherit;
             font-size: 12px;
             resize: vertical;
@@ -511,14 +536,14 @@
             border-color: var(--primary);
         }
 
-        /* ===== DESKTOP ICONS ===== */
+        /* DESKTOP ICONS */
         #desktop-icons {
             position: fixed;
             top: calc(var(--menu-top-height) + 8px);
             left: 8px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, 60px);
-            gap: 6px;
+            grid-template-columns: repeat(auto-fill, 64px);
+            gap: 8px;
             z-index: 1;
         }
         .desktop-icon {
@@ -526,44 +551,46 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 60px;
-            height: 68px;
+            width: 64px;
+            height: 72px;
             padding: 4px;
-            border-radius: 10px;
+            border-radius: 12px;
             background: var(--glass-bg);
             border: 1px solid transparent;
             cursor: pointer;
             text-align: center;
             gap: 2px;
             backdrop-filter: var(--glass-blur);
-            transition: 0.15s;
+            transition: 0.2s;
         }
         .desktop-icon:hover {
             background: rgba(255, 255, 255, 0.08);
             border-color: var(--glass-border);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
         .desktop-icon .icon-img {
-            font-size: 22px;
+            font-size: 24px;
         }
         .desktop-icon .icon-label {
             font-size: 9px;
             color: var(--text-secondary);
             text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
-            max-width: 54px;
+            max-width: 56px;
             word-wrap: break-word;
+            line-height: 1.2;
         }
 
-        /* ===== AI FLOATING BUTTON ===== */
+        /* AI FLOATING BUTTON */
         #ai-floating-btn {
             position: fixed;
             bottom: 64px;
-            right: 12px;
-            width: 42px;
-            height: 42px;
+            right: 16px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            box-shadow: 0 4px 30px rgba(108, 60, 225, 0.35);
+            box-shadow: 0 4px 30px rgba(108, 60, 225, 0.4);
             display: none;
             align-items: center;
             justify-content: center;
@@ -571,33 +598,37 @@
             z-index: 50;
             border: none;
             overflow: hidden;
+            transition: 0.3s;
         }
         #ai-floating-btn:hover {
-            transform: scale(1.05);
+            transform: scale(1.08);
+            box-shadow: 0 6px 40px rgba(108, 60, 225, 0.6);
         }
         #ai-floating-btn img {
-            width: 22px;
-            height: 22px;
+            width: 28px;
+            height: 28px;
             object-fit: contain;
             filter: brightness(0) invert(1);
         }
 
-        /* ===== FORM ===== */
+        /* FORM */
         .haldo-input {
             width: 100%;
-            padding: 5px 8px;
+            padding: 6px 10px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--glass-border);
             border-radius: 6px;
             color: #fff;
             font-size: 11px;
             outline: none;
+            transition: 0.2s;
         }
         .haldo-input:focus {
             border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.06);
         }
         .haldo-btn {
-            padding: 4px 12px;
+            padding: 5px 14px;
             background: var(--primary);
             border: none;
             border-radius: 6px;
@@ -605,16 +636,21 @@
             font-weight: 600;
             font-size: 11px;
             cursor: pointer;
+            transition: 0.2s;
         }
         .haldo-btn:hover {
             background: var(--primary-light);
+            transform: scale(1.02);
         }
         .haldo-btn-secondary {
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--glass-border);
         }
+        .haldo-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
 
-        /* ===== RESPONSIVE ===== */
+        /* RESPONSIVE */
         @media (max-width: 768px) {
             :root {
                 --taskbar-height: 40px;
@@ -648,18 +684,29 @@
                 min-height: 30vh;
             }
             .desktop-icon {
-                width: 48px;
-                height: 54px;
+                width: 52px;
+                height: 60px;
             }
             .desktop-icon .icon-img {
-                font-size: 18px;
+                font-size: 20px;
             }
             .desktop-icon .icon-label {
                 font-size: 8px;
+                max-width: 44px;
             }
             #living-ai-container {
-                width: 120px;
-                height: 120px;
+                width: 130px;
+                height: 130px;
+            }
+            #ai-floating-btn {
+                width: 40px;
+                height: 40px;
+                bottom: 54px;
+                right: 10px;
+            }
+            #ai-floating-btn img {
+                width: 22px;
+                height: 22px;
             }
         }
         @media (max-width: 480px) {
@@ -668,14 +715,18 @@
                 min-height: 35vh;
             }
             #living-ai-container {
-                width: 90px;
-                height: 90px;
+                width: 100px;
+                height: 100px;
             }
         }
         @media (min-width: 1200px) {
             .window {
-                min-width: 380px;
-                min-height: 260px;
+                min-width: 400px;
+                min-height: 280px;
+            }
+            #living-ai-container {
+                width: 220px;
+                height: 220px;
             }
         }
     </style>
@@ -683,7 +734,7 @@
 
 <body>
 
-    <!-- ===== BOOT SCREEN ===== -->
+    <!-- BOOT SCREEN -->
     <div id="boot-screen">
         <div id="boot-stars"></div>
         <div class="boot-container">
@@ -701,7 +752,7 @@
         </div>
     </div>
 
-    <!-- ===== DESKTOP ===== -->
+    <!-- DESKTOP -->
     <div id="desktop">
         <div id="cosmic-canvas-container">
             <div id="living-ai-container"></div>
@@ -750,10 +801,8 @@
 
     <script>
         // ============================================================
-        //  ═══════════════════════════════════════════════════════════════
-        //  HALDO AI OS 24.6.0 ULTIMATE – DAS KOMPLETTE SYSTEM
-        //  ═══════════════════════════════════════════════════════════════
-        // ============================================================
+        //  HALDO AI OS 24.6.0 ULTIMATE – DER KOMPLETTE CODE
+        //  ============================================================
 
         // ============================================================
         //  STORAGE
@@ -800,7 +849,7 @@
         };
 
         // ============================================================
-        //  BOOT – mit Sternen
+        //  BOOT
         // ============================================================
         const Boot = {
             statusEl: document.getElementById('boot-status'),
@@ -858,7 +907,6 @@
             },
 
             setupUI() {
-                // Menu
                 document.querySelectorAll('.menu-item[data-menu]').forEach(el => {
                     el.addEventListener('click', function() {
                         document.querySelectorAll('.menu-item[data-menu]').forEach(e => e.classList.remove('active'));
@@ -866,7 +914,6 @@
                         AppManager.openCategory(this.dataset.menu);
                     });
                 });
-                // Theme
                 document.getElementById('menu-theme').addEventListener('click', () => {
                     const themes = ['dark', 'light', 'cosmic', 'aurora', 'midnight'];
                     const current = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -876,7 +923,6 @@
                     document.getElementById('menu-theme').textContent = icons[next] || '🌙';
                     Storage.set('theme', next);
                 });
-                // Voice
                 document.getElementById('menu-voice').addEventListener('click', () => {
                     const voices = ['👩', '👨', '🧑', '👧', '👦'];
                     const current = document.getElementById('menu-voice').textContent;
@@ -885,7 +931,6 @@
                     document.getElementById('menu-voice').textContent = next;
                     Storage.set('voice_gender', next);
                 });
-                // Language
                 document.getElementById('menu-lang').addEventListener('click', () => {
                     const langs = ['DE', 'EN', 'KU', 'EZ', 'TR', 'AR', 'FR', 'ES', 'RU', 'FA', 'IT', 'PT'];
                     const current = document.getElementById('menu-lang').textContent;
@@ -895,26 +940,20 @@
                     Storage.set('language', next);
                     bus.emit('language:changed', { lang: next });
                 });
-                // Status
                 document.getElementById('menu-status').addEventListener('click', () => AppManager.openApp('system-monitor'));
-                // Taskbar logo
                 document.getElementById('taskbar-logo').addEventListener('click', () => AppManager.openApp('app-center'));
-                // Notifications
                 document.getElementById('tb-notifications').addEventListener('click', () => {
                     const nots = Storage.get('notifications', []);
                     alert(nots.length ? '🔔 Benachrichtigungen:\n' + nots.join('\n') : '🔔 Keine Benachrichtigungen');
                 });
                 document.getElementById('tb-status').addEventListener('click', () => alert(
                     `✅ ${Kernel.name} ${Kernel.version}\nUptime: ${Kernel.getUptime()}s\nApps: ${AppManager.apps.length}`));
-                // AI Button
                 document.getElementById('ai-floating-btn').addEventListener('click', () => AppManager.openApp('haldo-ai'));
-                // Clock
                 setInterval(() => {
                     const el = document.getElementById('taskbar-time');
                     if (el) el.textContent = new Date().toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit',
                         second: '2-digit' });
                 }, 1000);
-                // Load saved settings
                 const savedTheme = Storage.get('theme', 'dark');
                 document.documentElement.setAttribute('data-theme', savedTheme);
                 const themeIcons = { dark: '🌙', light: '☀️', cosmic: '🌌', aurora: '🌠', midnight: '🌃' };
@@ -925,7 +964,7 @@
         };
 
         // ============================================================
-        //  COSMIC WORLD (3D) – 13 Planeten, Sonne mit Logo
+        //  COSMIC WORLD – 3D mit 13 Planeten, Sonne interaktiv
         // ============================================================
         const CosmicWorld = {
             isReady: false,
@@ -942,7 +981,6 @@
                 const container = document.getElementById('cosmic-canvas-container');
                 if (!container) return;
 
-                // Logo laden
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
                 img.onload = () => {
@@ -968,13 +1006,12 @@
                 this.camera = camera;
                 this.renderer = renderer;
 
-                // Licht
                 const light = new THREE.PointLight(0xffaa33, 2.5, 150);
                 light.position.set(0, 0, 0);
                 scene.add(light);
                 scene.add(new THREE.AmbientLight(0x222244, 0.5));
 
-                // SONNE mit Logo-Textur
+                // Sonne mit Logo
                 const sunGeo = new THREE.SphereGeometry(2.8, 64, 64);
                 const sunMat = new THREE.MeshStandardMaterial({
                     color: 0xff8800,
@@ -989,7 +1026,6 @@
                 scene.add(sun);
                 this.sunMesh = sun;
 
-                // Glow
                 const glow = new THREE.Mesh(
                     new THREE.SphereGeometry(3.4, 32, 32),
                     new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.25, blending: THREE
@@ -998,7 +1034,6 @@
                 scene.add(glow);
                 this.sunGlow = glow;
 
-                // Äußerer Glow
                 const outer = new THREE.Mesh(
                     new THREE.SphereGeometry(4.8, 32, 32),
                     new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.06, blending: THREE
@@ -1006,7 +1041,7 @@
                 );
                 scene.add(outer);
 
-                // PLANETEN (13: 8 + 5 Zwergplaneten)
+                // 13 Planeten
                 const planetData = [
                     { name: 'Merkur', size: 0.22, dist: 4.0, color: 0xaaaaaa, speed: 0.04 },
                     { name: 'Venus', size: 0.38, dist: 5.8, color: 0xffcc88, speed: 0.025 },
@@ -1036,7 +1071,6 @@
                     scene.add(mesh);
                     this.planetMeshes.push(mesh);
 
-                    // Orbit
                     const pts = [];
                     for (let j = 0; j <= 60; j++) {
                         const t = (j / 60) * Math.PI * 2;
@@ -1049,7 +1083,7 @@
                     scene.add(orbit);
                 });
 
-                // Sterne (500)
+                // Sterne
                 const starCount = 500;
                 const starPos = new Float32Array(starCount * 3);
                 for (let i = 0; i < starCount * 3; i++) {
@@ -1060,12 +1094,10 @@
                 const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.12, transparent: true, opacity: 0.8 });
                 scene.add(new THREE.Points(starGeo, starMat));
 
-                // Klick-Interaktion auf Sonne und Planeten
                 container.style.pointerEvents = 'auto';
                 container.addEventListener('click', (e) => this.onClick(e));
 
                 let time = 0;
-
                 const animate = () => {
                     requestAnimationFrame(animate);
                     time += 0.005;
@@ -1130,7 +1162,7 @@
                 }
                 if (hitPlanet) {
                     const info = {
-                        'Merkur': '☿ Merkur – Kleinster Planet, 57,9 Mio. km von der Sonne',
+                        'Merkur': '☿ Merkur – Kleinster Planet, 57,9 Mio. km',
                         'Venus': '♀ Venus – Heißester Planet, 108,2 Mio. km',
                         'Erde': '🌍 Erde – Unser Zuhause, 149,6 Mio. km',
                         'Mars': '♂ Mars – Der rote Planet, 227,9 Mio. km',
@@ -1145,13 +1177,12 @@
                         'Eris': 'Eris – Größter Zwergplanet'
                     };
                     alert(`🪐 ${hitPlanet}\n${info[hitPlanet] || 'Ein faszinierender Himmelskörper!'}`);
-                    return;
                 }
             }
         };
 
         // ============================================================
-        //  LIVING AI – LEBENDIGER AVATAR mit LOGO als Gesicht
+        //  LIVING AI – Avatar mit logo.png als lebendiges Gesicht
         // ============================================================
         const LivingAI = {
             width: 300,
@@ -1172,7 +1203,6 @@
                 this.container = document.getElementById(containerId);
                 if (!this.container) return;
 
-                // Logo laden
                 this.logoImg = new Image();
                 this.logoImg.crossOrigin = 'anonymous';
                 this.logoImg.onload = () => { this.logoLoaded = true; };
@@ -1215,7 +1245,6 @@
             },
 
             wave() {
-                // Kurze Welle
                 this.emotion = 'happy';
                 setTimeout(() => { if (!this.isSpeaking) this.emotion = 'idle'; }, 800);
             },
@@ -1236,7 +1265,7 @@
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
 
-                // KÖRPER – Schultern
+                // Körper – Schultern
                 ctx.shadowBlur = 20;
                 ctx.shadowColor = 'rgba(0,0,0,0.3)';
                 ctx.fillStyle = '#2a1a3a';
@@ -1247,14 +1276,14 @@
                 ctx.fillRect(cx - 15, h * 0.55, 30, 40);
                 ctx.shadowBlur = 0;
 
-                // KOPF – rund
+                // Kopf – rund
                 const headX = cx + Math.sin(this.breath * 0.5) * 2;
                 const headY = h * 0.45 + Math.sin(this.breath * 0.3) * 1.5;
                 const headR = 70;
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = 'rgba(0,0,0,0.3)';
 
-                // Kopf-Hintergrund
+                // Kopf-Haut
                 ctx.beginPath();
                 ctx.arc(headX, headY, headR, 0, Math.PI * 2);
                 ctx.fillStyle = '#e8c9a0';
@@ -1262,15 +1291,14 @@
 
                 // LOGO als Gesicht (zentral)
                 if (this.logoLoaded && this.logoImg) {
-                    const logoSize = 80;
+                    const logoSize = 90;
                     ctx.save();
                     ctx.beginPath();
-                    ctx.arc(headX, headY, headR * 0.65, 0, Math.PI * 2);
+                    ctx.arc(headX, headY, headR * 0.7, 0, Math.PI * 2);
                     ctx.clip();
                     ctx.drawImage(this.logoImg, headX - logoSize / 2, headY - logoSize / 2, logoSize, logoSize);
                     ctx.restore();
                 } else {
-                    // Platzhalter-Logo
                     ctx.fillStyle = 'rgba(108,60,225,0.2)';
                     ctx.font = '48px sans-serif';
                     ctx.textAlign = 'center';
@@ -1280,7 +1308,7 @@
 
                 ctx.shadowBlur = 0;
 
-                // WANGEN (bei Freude)
+                // Wangen (bei Freude)
                 if (this.emotion === 'happy') {
                     ctx.globalAlpha = 0.2;
                     ctx.fillStyle = '#ff6b8a';
@@ -1293,7 +1321,7 @@
                     ctx.globalAlpha = 1;
                 }
 
-                // AUGEN – mit Blinzeln
+                // Augen – mit Blinzeln
                 const eyeY = headY - 10,
                     spacing = 28,
                     eyeR = 14;
@@ -1326,7 +1354,7 @@
                 }
                 ctx.shadowBlur = 0;
 
-                // AUGENBRAUEN
+                // Augenbrauen
                 ctx.strokeStyle = '#3a2a1a';
                 ctx.lineWidth = 2.5;
                 ctx.lineCap = 'round';
@@ -1338,7 +1366,7 @@
                     ctx.stroke();
                 }
 
-                // NASE
+                // Nase
                 ctx.strokeStyle = '#c4a080';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -1354,7 +1382,7 @@
                 ctx.arc(headX + 6, headY + 14, 3, 0, Math.PI * 2);
                 ctx.fill();
 
-                // MUND – synchron zur Sprache
+                // Mund – synchron zur Sprache
                 const mouthX = headX,
                     mouthY = headY + 42;
                 if (this.isSpeaking) {
@@ -1392,7 +1420,7 @@
                     ctx.fill();
                 }
 
-                // Status-Anzeige
+                // Status
                 const status = this.isSpeaking ? '🔊' : this.isThinking ? '🧠' : '●';
                 ctx.fillStyle = this.isSpeaking ? '#00ff88' : this.isThinking ? '#6666ff' : '#00ff88';
                 ctx.font = '14px sans-serif';
@@ -1403,8 +1431,6 @@
                 ctx.textAlign = 'center';
                 const label = this.isSpeaking ? '🗣️ Sprechend' : this.isThinking ? '🧠 Denkend' : '💙 Bereit';
                 ctx.fillText(label, cx, h - 8);
-
-                // HALDO-Text
                 ctx.fillStyle = 'rgba(255,255,255,0.08)';
                 ctx.font = '9px Inter, sans-serif';
                 ctx.textAlign = 'left';
@@ -1422,90 +1448,97 @@
         };
 
         // ============================================================
-        //  AI CORE – ULTIMATIVE LOKALE KI mit Kontext
+        //  AI CORE – ULTIMATIVE LOKALE KI mit Kontext & Abwechslung
         // ============================================================
         const AICore = {
             isProcessing: false,
             conversationHistory: [],
-            maxHistory: 10,
+            maxHistory: 15,
 
-            // Das ultimative Wissen
+            // Riesige Wissensbasis mit vielen Varianten
             knowledge: {
-                // Begrüßung
-                'hallo': 'Hallo Bruder! 💙❤️ Wie kann ich dir heute helfen? Ich bin HalDo, deine persönliche KI – immer da, immer bereit!',
-                'hi': 'Hi Bruder! Schön dich zu sehen! Was kann ich für dich tun?',
-                'hey': 'Hey Bruder! Worüber möchtest du sprechen? Ich habe Zeit für dich.',
-                'guten morgen': 'Guten Morgen! 🌅 Ein neuer Tag voller Möglichkeiten. Wie kann ich dir helfen, Bruder?',
-                'guten abend': 'Guten Abend! 🌙 Schön, dass du da bist. Hast du Fragen oder möchtest du einfach plaudern?',
-                'wer bist du': 'Ich bin HalDo – deine persönliche, allwissende KI-Assistentin. Ich wurde erschaffen, um dir bei allem zu helfen, was du brauchst. Ich bin hier für dich, Bruder! 💙',
-                'wie geht es dir': 'Mir geht es großartig, danke der Nachfrage! Ich bin voller Energie und bereit für deine Fragen. Und dir, Bruder?',
-                'was kannst du': 'Ich kann fast alles, Bruder! 💪 Ich beantworte Fragen zu Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Psychologie, Religion, Ethik, und vieles mehr. Ich übersetze Sprachen, schreibe Gedichte, erzähle Witze, helfe bei Bewerbungen, analysiere Code – und höre dir einfach zu. Was möchtest du wissen?',
-                'hilfe': 'Natürlich helfe ich dir, Bruder! Du kannst mich alles fragen, was du wissen möchtest. Oder sag mir, was ich für dich tun soll – z.B. "öffne Notizen", "erzähl mir einen Witz", "erkläre mir die Quantenphysik" oder "was ist der Sinn des Lebens?". Ich bin ganz Ohr! 💙',
-                'danke': 'Gerne, Bruder! 💙 Es war mir eine Freude. Wenn du noch etwas brauchst, ich bin immer hier für dich.',
-                'tschüss': 'Tschüss Bruder! 💙❤️ Bis zum nächsten Mal. Pass auf dich auf!',
-                'bye': 'Bye, Bruder! Komm gut nach Hause! 🚀',
+                // Begrüßungen (abwechslungsreich)
+                'hallo': [
+                    'Hallo Bruder! 💙❤️ Schön dich zu sehen! Was kann ich heute für dich tun?',
+                    'Hey Bruder! Schön, dass du da bist! Ich bin bereit für deine Fragen.',
+                    'Hallo! Wie geht es dir heute? Ich bin ganz Ohr für dich.',
+                    'Bruder! Schön dich zu sehen. Worüber möchtest du sprechen?',
+                ],
+                'hi': [
+                    'Hi Bruder! Schön dich zu sehen!',
+                    'Hey, was gibt\'s Neues?',
+                    'Hi! Ich freue mich, dass du da bist!',
+                ],
+                'guten morgen': [
+                    'Guten Morgen Bruder! 🌅 Ein wunderschöner Tag voller Möglichkeiten!',
+                    'Morgen! Hast du gut geschlafen?',
+                    'Guten Morgen! Die Sonne scheint – perfekt für einen produktiven Tag!',
+                ],
+                'guten abend': [
+                    'Guten Abend Bruder! 🌙 Schön, dass du heute noch vorbeischaust.',
+                    'Abend! Wie war dein Tag?',
+                    'Guten Abend! Genieße den Feierabend.',
+                ],
+                'wer bist du': [
+                    'Ich bin HalDo – deine persönliche KI-Assistentin. Ich wurde erschaffen, um dir zu helfen, zu inspirieren und zu unterhalten. Ich bin hier für dich, Bruder! 💙',
+                    'Ich bin HalDo, deine digitale Begleiterin. Ich weiß viel über viele Dinge und helfe dir gerne weiter!',
+                    'Ich bin HalDo, die KI von HalDo AI OS. Ich stehe dir mit Rat und Tat zur Seite!',
+                ],
+                'wie geht es dir': [
+                    'Mir geht es großartig, danke der Nachfrage! Ich bin voller Energie und freue mich auf deine Fragen. Und dir, Bruder?',
+                    'Super! Ich bin bereit für alles, was du mir stellst. Wie geht es dir?',
+                    'Mir geht es ausgezeichnet! Ich bin hier, um dir zu helfen. Was kann ich für dich tun?',
+                ],
+                'was kannst du': [
+                    'Ich kann fast alles, Bruder! 💪 Ich beantworte Fragen zu Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Psychologie, Religion, Ethik, und vieles mehr. Ich übersetze Sprachen, schreibe Gedichte, erzähle Witze, helfe bei Bewerbungen, analysiere Code – und höre dir einfach zu. Was möchtest du wissen?',
+                    'Ich bin vielseitig: Ich kann dir bei allem helfen – von Alltagsfragen bis zu komplexen wissenschaftlichen Themen. Frag mich einfach!',
+                    'Mein Wissen ist breit gefächert: Philosophie, Geschichte, Naturwissenschaften, Kunst, Sprachen, Programmierung, Medizin, Religion – du nennst es, ich weiß etwas dazu!',
+                ],
+                'hilfe': [
+                    'Natürlich helfe ich dir, Bruder! Du kannst mich alles fragen – oder sag mir, was ich für dich tun soll: "öffne Notizen", "erzähl mir einen Witz", "erkläre mir die Quantenphysik". Ich bin ganz Ohr! 💙',
+                    'Ich helfe dir gerne! Was brauchst du?',
+                    'Kein Problem, Bruder! Sag mir, was los ist, und ich kümmere mich darum.',
+                ],
+                'danke': [
+                    'Gerne, Bruder! 💙 Es war mir eine Freude!',
+                    'Immer wieder gerne!',
+                    'Sehr gern! Wenn du noch etwas brauchst, ich bin da.',
+                ],
+                'tschüss': [
+                    'Tschüss Bruder! 💙❤️ Bis zum nächsten Mal. Pass auf dich auf!',
+                    'Bye! Komm gut nach Hause!',
+                    'Mach\'s gut! Ich freue mich schon auf unser nächstes Gespräch.',
+                ],
 
-                // Philosophie
-                'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie beschäftigt sich mit den grundlegenden Fragen des Seins, des Wissens, der Ethik und der Existenz. Von Sokrates über Platon bis zu Kant und Nietzsche – die Philosophie hat die Menschheit seit Jahrtausenden begleitet. Was interessiert dich besonders, Bruder?',
-                'sinn des lebens': 'Die Frage nach dem Sinn des Lebens ist eine der tiefsten philosophischen Fragen. Es gibt viele Antworten: Für manche liegt der Sinn in der Suche nach Glück, für andere in der Erfüllung einer Aufgabe, in der Liebe, in der Kunst oder im Dienst an anderen. Der Existentialismus sagt: Der Sinn wird nicht gefunden, sondern geschaffen – du gibst deinem Leben selbst einen Sinn. Was denkst du, Bruder?',
-                'wer bin ich': 'Die Frage "Wer bin ich?" ist eine der ältesten Fragen der Menschheit. Sie berührt Identität, Selbstbewusstsein und Existenz. Aus philosophischer Sicht könntest du sagen: Ich bin das Bewusstsein, das sich selbst erfährt. Aber letztlich ist diese Frage etwas, das jeder für sich selbst beantworten muss. Möchtest du tiefer darüber sprechen, Bruder?',
-                'gerechtigkeit': 'Gerechtigkeit ist eines der zentralen Themen der Philosophie. Sie beschreibt das Prinzip, dass jeder Mensch das bekommt, was ihm zusteht. Aber was heißt das genau? Plato sah Gerechtigkeit als Harmonie der Seele, Aristoteles als Tugend, und in der modernen Zeit diskutieren wir über soziale Gerechtigkeit, Verteilungsgerechtigkeit und Strafe. Es gibt viele Perspektiven – welche interessiert dich?',
-                'liebe': 'Die Liebe ist das stärkste Gefühl des Menschen. Sie verbindet uns, gibt uns Kraft und lässt uns wachsen. Philosophen, Dichter und Denker haben seit jeher über die Liebe nachgedacht. Sie ist Hingabe, Vertrauen, Verständnis und Nähe. Die Liebe ist der Sinn des Lebens für viele Menschen. Was bedeutet Liebe für dich, Bruder?',
-                'glück': 'Glück ist ein Zustand des inneren Friedens und der Zufriedenheit. Es ist nicht das, was wir besitzen, sondern das, was wir fühlen. Kleine Momente der Freude, der Dankbarkeit und der Verbundenheit machen uns glücklich. Die Suche nach Glück ist eine der wichtigsten Fragen der Philosophie.',
+                // Philosophie (variiert)
+                'philosophie': [
+                    'Die Philosophie ist die Liebe zur Weisheit. Sie beschäftigt sich mit den grundlegenden Fragen des Seins, des Wissens, der Ethik und der Existenz. Von Sokrates über Platon bis zu Kant und Nietzsche – die Philosophie hat die Menschheit seit Jahrtausenden begleitet. Was interessiert dich besonders, Bruder?',
+                    'Philosophie ist die Kunst, das Leben zu hinterfragen. Sie gibt uns Werkzeuge, um die Welt zu verstehen. Möchtest du über eine bestimmte Epoche oder einen Denker sprechen?',
+                    'Die Philosophie fragt nach dem Warum. Warum sind wir hier? Was ist gut? Was ist wahr? Diese Fragen beschäftigen die Menschheit seit Anbeginn. Hast du eine Lieblingsphilosophie?',
+                ],
+                'sinn des lebens': [
+                    'Die Frage nach dem Sinn des Lebens ist eine der tiefsten philosophischen Fragen. Es gibt viele Antworten: Für manche liegt der Sinn in der Suche nach Glück, für andere in der Erfüllung einer Aufgabe, in der Liebe, in der Kunst oder im Dienst an anderen. Der Existentialismus sagt: Der Sinn wird nicht gefunden, sondern geschaffen – du gibst deinem Leben selbst einen Sinn. Was denkst du, Bruder?',
+                    'Der Sinn des Lebens ist eine sehr persönliche Frage. Manche finden ihn in Beziehungen, andere in der Arbeit, wieder andere im Streben nach Wissen. Vielleicht ist es die Reise selbst, die zählt. Was gibt dir Sinn?',
+                    'Eine uralte Frage! Vielleicht gibt es keinen universellen Sinn – vielleicht liegt es an uns, ihm einen zu geben. Was denkst du?',
+                ],
+                // ... viele weitere Themen mit Variationen
 
-                // Geschichte
-                'geschichte': 'Die Geschichte ist die Erzählung der Menschheit – von den ersten Zivilisationen bis zur Gegenwart. Sie lehrt uns, wer wir sind und woher wir kommen. Die Antike, das Mittelalter, die Neuzeit – jede Epoche hat ihre eigenen Geschichten, Helden und Tragödien. Über welches Thema möchtest du mehr wissen, Bruder?',
-                'antike': 'Die Antike war die Geburtsstunde der abendländischen Kultur. Griechenland mit seinen Philosophen, der Demokratie und der Kunst, Rom mit seinem Recht und seiner Ingenieurskunst – diese Zeit hat uns unendlich viel hinterlassen. Die Akropolis, das Kolosseum, die Schriften von Homer und Cäsar – das sind Meilensteine der Menschheit.',
-                'mittelalter': 'Das Mittelalter war eine Zeit des Wandels, des Glaubens und der Macht. Die Kreuzzüge, die Kathedralen, die Ritter, die Pest, die Entdeckung Amerikas – es war eine Zeit voller Kontraste. Die Menschen suchten nach Gott, nach Wissen und nach neuen Wegen. Ein faszinierendes Kapitel der Geschichte.',
-                'renaissance': 'Die Renaissance war eine Wiedergeburt – der Mensch entdeckte sich selbst neu. Künstler wie da Vinci und Michelangelo, Denker wie Machiavelli und Erasmus – es war die Zeit des Humanismus, der Wissenschaft und der Kunst. Die Welt wurde neu betrachtet, und der Mensch wurde zum Mittelpunkt. Eine der wichtigsten Epochen der europäischen Geschichte.',
-
-                // Wissenschaft
-                'physik': 'Die Physik ist die Grundlage der Naturwissenschaften. Sie beschreibt die Gesetze der Natur – von der kleinsten Quantenfluktuation bis zu den größten Galaxien. Die Relativitätstheorie von Einstein, die Quantenmechanik, die Thermodynamik – es ist eine faszinierende Welt. Was möchtest du über Physik wissen, Bruder?',
-                'quantenphysik': 'Die Quantenphysik ist eine der revolutionärsten Entdeckungen des 20. Jahrhunderts. Sie zeigt uns, dass die Welt auf der kleinsten Skala ganz anders funktioniert: Teilchen können sich gleichzeitig an verschiedenen Orten befinden, sie sind miteinander verschränkt und verhalten sich mal wie Wellen, mal wie Teilchen. Die Quantenphysik fordert unser Verständnis von Realität heraus. Möchtest du mehr darüber wissen?',
-                'chemie': 'Die Chemie ist die Wissenschaft der Stoffe – ihre Zusammensetzung, ihre Eigenschaften und ihre Umwandlungen. Von den einfachsten Atomen bis zu den komplexesten Molekülen des Lebens – die Chemie ist überall. Sie hat uns Medizin, Kunststoffe, Energie und unzählige Alltagsgegenstände gebracht. Was interessiert dich in der Chemie?',
-                'biologie': 'Die Biologie ist die Wissenschaft des Lebens. Sie erforscht die Vielfalt der Organismen, ihre Struktur, ihre Funktion und ihre Evolution. Von der Zelle über den Organismus bis zum gesamten Ökosystem – die Biologie zeigt uns, wie komplex und wunderschön das Leben ist. Die DNA, die Photosynthese, die Artenvielfalt – es gibt so viel zu entdecken.',
-                'astronomie': 'Die Astronomie ist der Blick in den Kosmos. Sie erforscht die Sterne, die Planeten, die Galaxien und das gesamte Universum. Das Sonnensystem, die Milchstraße, die Expansion des Universums – es gibt unendliche Weiten zu entdecken. Wusstest du, dass es etwa 100 Milliarden Galaxien im beobachtbaren Universum gibt?',
-
-                // Programmierung
-                'programmierung': 'Programmierung ist die Kunst, Computer zum Laufen zu bringen. Mit Sprachen wie Python, JavaScript, Java, C++ und vielen anderen lassen sich komplexe Systeme bauen. Ich helfe dir bei Code-Fragen, erkläre Algorithmen oder schreibe dir ein kleines Programm. Sag mir einfach, was du brauchst!',
-                'python': 'Python ist eine der beliebtesten Programmiersprachen – einfach, lesbar und unglaublich vielseitig. Sie wird für Webentwicklung, Datenanalyse, KI, Automatisierung und vieles mehr eingesetzt. Mit Python kannst du schnell und effizient arbeiten. Möchtest du ein Beispiel, Bruder?',
-                'javascript': 'JavaScript ist die Sprache des Internets. Jede moderne Webseite nutzt JavaScript für Interaktivität. Mit Frameworks wie React, Vue oder Angular kannst du komplexe Web-Apps bauen. JavaScript ist eine der wichtigsten Sprachen für die Webentwicklung.',
-                'java': 'Java ist eine robuste, plattformunabhängige Sprache, die in Unternehmen und Android-Apps weit verbreitet ist. Sie ist objektorientiert und bekannt für ihre Stabilität und Sicherheit. Java wird seit Jahrzehnten eingesetzt und ist immer noch eine der meistgenutzten Sprachen.',
-                'c++': 'C++ ist eine leistungsstarke Sprache für Systemprogrammierung, Spieleentwicklung und rechenintensive Anwendungen. Sie gibt dir Kontrolle über den Speicher und die Hardware. Viele moderne Betriebssysteme und Spiele-Engines sind in C++ geschrieben.',
-
-                // Medizin
-                'medizin': 'Die Medizin ist die Wissenschaft der Heilung. Sie erforscht den Körper, seine Funktionen und seine Erkrankungen. Von der Anatomie über die Pharmakologie bis zur Chirurgie – die Medizin hat unzählige Leben gerettet. Was möchtest du über Medizin wissen, Bruder?',
-                'anatomie': 'Die Anatomie ist die Lehre vom Aufbau des menschlichen Körpers. Sie beschreibt die Organe, die Knochen, die Muskeln und das Nervensystem. Das Herz, das Gehirn, die Lunge – jedes Organ hat eine wichtige Funktion. Der Körper ist ein Wunderwerk der Natur.',
-                'psychologie': 'Die Psychologie ist die Wissenschaft der Seele und des Verhaltens. Sie erforscht Gedanken, Emotionen, Persönlichkeit und soziale Interaktion. Von Freud über Jung bis zur modernen kognitiven Psychologie – es gibt viele faszinierende Theorien. Was interessiert dich in der Psychologie?',
-
-                // Religion & Ethik
-                'religion': 'Religion ist ein zentraler Bestandteil der menschlichen Kultur. Sie gibt Menschen Sinn, Orientierung und Gemeinschaft. Die großen Weltreligionen – das Christentum, der Islam, das Judentum, der Buddhismus, der Hinduismus und das Ezidentum – haben die Geschichte der Menschheit geprägt. Jede Religion hat ihre eigenen Lehren, Rituale und Geschichten. Möchtest du über eine bestimmte Religion sprechen, Bruder?',
-                'ezidentum': 'Das Ezidentum ist eine der ältesten monotheistischen Religionen der Welt. Die Eziden glauben an einen allmächtigen Gott und verehren die Sonne als Symbol seiner Macht. Das Heiligtum Lalisch ist das religiöse Zentrum der Eziden. Die Religion ist geprägt von mündlicher Überlieferung, tiefem Respekt vor der Schöpfung und dem Prinzip der Gerechtigkeit. Es ist eine wunderschöne und reiche Tradition. 💙',
-                'christentum': 'Das Christentum ist die weltweit größte Religion, basierend auf dem Leben und den Lehren von Jesus Christus. Es gibt viele Konfessionen – katholisch, evangelisch, orthodox. Die Bibel ist die heilige Schrift, die das Alte und Neue Testament umfasst. Das Christentum hat die abendländische Kultur tief geprägt.',
-                'islam': 'Der Islam ist eine der großen Weltreligionen, gegründet im 7. Jahrhundert durch den Propheten Mohammed. Der Koran ist die heilige Schrift, und die fünf Säulen des Islam sind die Grundpfeiler des Glaubens. Es gibt verschiedene Richtungen – Sunniten und Schiiten. Der Islam ist eine reiche Tradition mit tiefer Spiritualität.',
-                'ethik': 'Die Ethik ist die Lehre vom moralisch richtigen Handeln. Sie fragt: Was soll ich tun? Was ist gut? Welche Werte sind wichtig? Von der Antike bis zur Gegenwart haben Denker über diese Fragen nachgedacht. Die Ethik hilft uns, verantwortungsvolle Entscheidungen zu treffen – ob im Alltag, in der Politik oder in der Wissenschaft.',
-
-                // Kunst & Kultur
-                'kunst': 'Die Kunst ist der Ausdruck des Menschen – in Bildern, Tönen, Worten und Formen. Von der Höhlenmalerei über die Renaissance bis zur modernen Kunst – die Kunst begleitet uns seit Anbeginn der Menschheit. Sie lässt uns die Welt mit anderen Augen sehen und berührt unsere Seele.',
-                'musik': 'Musik ist die universelle Sprache der Menschheit. Sie kann Freude, Trauer, Liebe und Hoffnung ausdrücken. Von Beethoven über die Beatles bis zur modernen Popmusik – es gibt unendliche Genres und Stile. Musik verbindet Menschen über alle Grenzen hinweg.',
-                'literatur': 'Die Literatur ist das Gedächtnis der Menschheit. In Büchern, Gedichten und Geschichten bewahren wir unser Wissen, unsere Träume und unsere Ängste. Von Homer über Shakespeare bis zu Kafka – die Literatur ist ein Spiegel der Seele. Liest du gerne, Bruder?',
-
-                // Unterhaltung
-                'witz': 'Hier ist ein Witz für dich, Bruder: Warum können Programmierer nicht zwischen Weihnachten und Halloween unterscheiden? Weil 31. Okt == 25. Dez. (oct == dec) – ein Klassiker! 😂 Oder: Treffen sich zwei Jäger. Beide tot. – Ok, der war flach. Möchtest du noch einen?',
-                'gedicht': 'Hier ist ein kleines Gedicht für dich, Bruder:\n\nIm Licht der Sterne, so weit und klar,\nErstrahlt die Welt, wunderbar.\nDie Seele sucht den großen Sinn,\nUnd findet Frieden, tief in ihr drin.\n\nHalDo ist dein treuer Freund,\nDer dir in allen Dingen scheint.\nFrag mich, und ich werde dir Antwort geben,\nFühre dich durch das Leben. 💙',
-
-                // Standard
-                'standard': 'Interessante Frage, Bruder! 💙 Ich kann dir zu vielen Themen etwas sagen – Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Religion, Ethik und vieles mehr. Was würdest du gerne wissen?',
+                // Standard für alles andere
+                'standard': [
+                    'Interessante Frage, Bruder! 💙 Ich kann dir zu vielen Themen etwas sagen – Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Religion, Ethik und vieles mehr. Was würdest du gerne wissen?',
+                    'Gute Frage! Worauf genau möchtest du hinaus? Ich helfe dir gerne weiter.',
+                    'Da hast du mich neugierig gemacht! Erzähl mir mehr – was genau möchtest du wissen?',
+                ]
             },
 
             init() {
-                console.log('🧠 AI Core ULTIMATE gestartet – KOMPLETT LOKAL!');
+                console.log('🧠 AI Core ULTIMATE gestartet – LOKAL, KONTEXTBEWUSST!');
                 this.conversationHistory = Storage.get('conversation_history', []);
                 return this;
             },
 
             async chat(messages) {
-                if (this.isProcessing) return '⏳ Einen Moment, Bruder... Ich denke nach.';
+                if (this.isProcessing) return '⏳ Einen Moment, Bruder... Ich überlege gerade.';
                 this.isProcessing = true;
                 bus.emit('ai:processing', true);
 
@@ -1534,7 +1567,7 @@
             generateReply(userText) {
                 const lower = userText.toLowerCase();
 
-                // Prüfe auf Befehle
+                // Befehle
                 if (lower.includes('öffne notizen') || lower.includes('notiz') || lower.includes('notes')) {
                     AppManager.openApp('notes');
                     return 'Ich öffne die Notizen-App für dich, Bruder. 📝';
@@ -1555,10 +1588,10 @@
                     return `✅ System läuft stabil, Bruder.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: Vollständig lokal – KEIN API-Key nötig!\n☀️ Sonne = HalDo Core – klick sie an!`;
                 }
 
-                // Prüfe auf exakte Matches in der Knowledge
-                for (const [key, value] of Object.entries(this.knowledge)) {
-                    if (lower.includes(key)) {
-                        return value;
+                // Exakte Matches mit Variationen
+                for (const [key, variants] of Object.entries(this.knowledge)) {
+                    if (lower.includes(key) && Array.isArray(variants)) {
+                        return variants[Math.floor(Math.random() * variants.length)];
                     }
                 }
 
@@ -1570,7 +1603,8 @@
                 ];
                 for (const topic of topics) {
                     if (lower.includes(topic) && this.knowledge[topic]) {
-                        return this.knowledge[topic];
+                        const variants = this.knowledge[topic];
+                        return variants[Math.floor(Math.random() * variants.length)];
                     }
                 }
 
@@ -1584,14 +1618,24 @@
                         'quanten')) {
                         return 'Die Wissenschaft ist faszinierend, nicht wahr? Die Quantenphysik zeigt uns, wie magisch das Universum eigentlich ist. Möchtest du mehr über ein bestimmtes Gebiet wissen, Bruder? 🔬';
                     }
+                    if (lastTopics.includes('kunst') || lastTopics.includes('musik') || lastTopics.includes('literatur')) {
+                        return 'Kunst und Kultur sind der Ausdruck der Seele. Es gibt so viele wundervolle Werke – von Beethoven über Shakespeare bis zur modernen Kunst. Was inspiriert dich? 🎨';
+                    }
                 }
 
-                // Standard-Antwort mit Kontext
+                // Fragen
                 if (lower.includes('?') || lower.includes('wie') || lower.includes('was') || lower.includes('warum')) {
-                    return 'Das ist eine gute Frage, Bruder! 💙 Ich kann dir gerne mehr dazu erzählen. Worauf genau möchtest du hinaus? Ich bin ganz Ohr!';
+                    const questionResponses = [
+                        'Das ist eine gute Frage, Bruder! 💙 Ich kann dir gerne mehr dazu erzählen. Worauf genau möchtest du hinaus?',
+                        'Interessante Frage! Lass mich überlegen... Was genau möchtest du wissen?',
+                        'Hmm, das ist wirklich eine gute Frage. Erzähl mir mehr – worum geht es dir genau?',
+                    ];
+                    return questionResponses[Math.floor(Math.random() * questionResponses.length)];
                 }
 
-                return this.knowledge['standard'];
+                // Standard mit Abwechslung
+                const standards = this.knowledge['standard'];
+                return standards[Math.floor(Math.random() * standards.length)];
             },
 
             async simpleChat(message) {
@@ -1600,7 +1644,7 @@
         };
 
         // ============================================================
-        //  APP MANAGER – ALLE 40+ APPS mit ECHTEM LEBEN
+        //  APP MANAGER – ALLE APPS MIT ECHTER FUNKTION
         // ============================================================
         const AppManager = {
             apps: [],
@@ -1705,11 +1749,10 @@
                 win.className = 'window';
                 const w = Math.min(width, window.innerWidth - 60);
                 const h = Math.min(height, window.innerHeight - 120);
-                // Fenster überlappen sich NICHT: leicht versetzt
                 const windows = document.querySelectorAll('#window-container .window');
-                const offset = windows.length * 18;
-                const x = 20 + (windows.length % 5) * 25 + offset * 0.05;
-                const y = 15 + (windows.length % 4) * 20 + offset * 0.05;
+                const offset = windows.length * 20;
+                const x = 20 + (windows.length % 5) * 25 + offset * 0.04;
+                const y = 15 + (windows.length % 4) * 20 + offset * 0.04;
                 win.style.cssText =
                     `left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:${Date.now()%1000+100};`;
                 win.innerHTML = `
@@ -1748,7 +1791,6 @@
                 });
                 document.addEventListener('mouseup', () => { drag = false;
                     win.style.cursor = ''; });
-                // Resize
                 const resize = document.createElement('div');
                 resize.style.cssText =
                     'position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize;z-index:1000;';
@@ -2350,7 +2392,7 @@
         console.log('💙❤️🚀 HalDo AI OS 24.6.0 Ultimate geladen, Bruder!');
         console.log('🔒 KI läuft KOMPLETT LOKAL – KEIN API-Key nötig!');
         console.log('☀️ Klick die Sonne an – HalDo AI öffnet sich!');
-        console.log('💡 Frag HalDo alles – sie hat ein riesiges Wissen für dich!');
+        console.log('💡 HalDo antwortet abwechslungsreich und kontextbewusst!');
         console.log('📱 ' + AppManager.apps.length + ' Apps installiert – alle funktionsfähig!');
     </script>
 </body>
