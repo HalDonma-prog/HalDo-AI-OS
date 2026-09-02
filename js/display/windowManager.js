@@ -1,26 +1,18 @@
 /**
  * HALDO AI OS 24.6.0 – WINDOW MANAGER
- * Professionelle Fensterverwaltung mit Drag, Resize, Minimize, Maximize
- * Version: 1.0.0
+ * Fenster verwalten: Öffnen, Schließen, Verschieben, Größe ändern
  */
-
 const WindowManager = {
-    // ---- KONFIGURATION ----
     windows: [],
     zIndex: 100,
     maxWindows: 20,
     isReady: false,
-    
-    // ---- DOM-REFERENZEN ----
     container: null,
-    
-    // ---- INITIALISIERUNG ----
+
     init() {
         console.log('🪟 Window Manager wird initialisiert...');
-        
         this.container = document.getElementById('window-container');
         if (!this.container) {
-            console.warn('⚠️ Window-Container nicht gefunden – erstelle ihn...');
             this.container = document.createElement('div');
             this.container.id = 'window-container';
             this.container.style.cssText = `
@@ -35,66 +27,38 @@ const WindowManager = {
             `;
             document.body.appendChild(this.container);
         }
-        
         this.isReady = true;
         this.setupGlobalListeners();
-        
-        EventBus.emit('window:ready', { timestamp: Date.now() });
+        EventBus.emit('window:ready');
         console.log('✅ Window Manager ready');
         return this;
     },
-    
-    // ---- GLOBALE LISTENER ----
+
     setupGlobalListeners() {
-        // Fenster in den Vordergrund bringen
         document.addEventListener('mousedown', (e) => {
             const windowEl = e.target.closest('.window');
-            if (windowEl) {
-                this.bringToFront(windowEl);
-            }
+            if (windowEl) this.bringToFront(windowEl);
         });
-        
-        // Escape schließt aktives Fenster
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.getActiveWindow()) {
                 this.closeWindow(this.getActiveWindow());
             }
         });
-        
-        // Fenstergröße anpassen
-        window.addEventListener('resize', () => {
-            this.adjustWindows();
-        });
+        window.addEventListener('resize', () => this.adjustWindows());
     },
-    
-    // ---- FENSTER ÖFFNEN ----
+
     openWindow(appId, title, content, icon = null, width = 400, height = 320) {
-        if (!this.isReady) {
-            console.warn('⚠️ Window Manager nicht bereit');
-            return null;
-        }
-        
-        // Prüfen ob schon offen
+        if (!this.isReady) { console.warn('⚠️ Window Manager nicht bereit'); return null; }
+
         const existing = this.windows.find(w => w.appId === appId && !w.minimized);
-        if (existing) {
-            this.bringToFront(existing.element);
-            return existing.element;
-        }
-        
-        // Prüfen ob zu viele Fenster
+        if (existing) { this.bringToFront(existing.element); return existing.element; }
+
         if (this.windows.length >= this.maxWindows) {
             console.warn('⚠️ Maximale Fensteranzahl erreicht');
-            EventBus.emit('window:error', { 
-                error: 'max_windows_reached',
-                max: this.maxWindows 
-            });
             return null;
         }
-        
-        // Fenster-Element erstellen
+
         const windowEl = this.createWindowElement(appId, title, content, icon, width, height);
-        
-        // Fenster-Daten speichern
         const windowData = {
             id: Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
             appId: appId,
@@ -107,33 +71,26 @@ const WindowManager = {
             y: this.getNextPosition().y,
             minimized: false,
             maximized: false,
-            fullscreen: false,
             zIndex: ++this.zIndex,
             openedAt: Date.now()
         };
-        
+
         this.windows.push(windowData);
         this.activeWindow = windowEl;
-        
-        // Event auslösen
         EventBus.emit('window:opened', windowData);
-        
-        // Taskbar aktualisieren
         this.updateTaskbar();
-        
         console.log(`📂 Fenster geöffnet: ${title} (${appId})`);
         return windowEl;
     },
-    
-    // ---- FENSTER-ELEMENT ERSTELLEN ----
+
     createWindowElement(appId, title, content, icon, width, height) {
         const win = document.createElement('div');
         win.className = 'window';
         win.dataset.appId = appId;
-        
+
         const w = Math.min(width, window.innerWidth - 40);
         const h = Math.min(height, window.innerHeight - 100);
-        
+
         win.style.cssText = `
             position: absolute;
             left: ${this.getNextPosition().x}px;
@@ -147,7 +104,6 @@ const WindowManager = {
             max-height: 88vh;
             background: var(--glass-bg, rgba(255,255,255,0.04));
             backdrop-filter: var(--glass-blur, blur(20px));
-            -webkit-backdrop-filter: var(--glass-blur, blur(20px));
             border: 1px solid var(--glass-border, rgba(255,255,255,0.06));
             border-radius: var(--radius, 10px);
             box-shadow: var(--glass-shadow, 0 8px 32px rgba(0,0,0,0.5));
@@ -158,7 +114,7 @@ const WindowManager = {
             animation: windowOpen 0.18s ease;
             font-family: var(--font-primary, Inter, sans-serif);
         `;
-        
+
         // Header
         const header = document.createElement('div');
         header.className = 'window-header';
@@ -167,15 +123,14 @@ const WindowManager = {
             align-items: center;
             justify-content: space-between;
             padding: 4px 8px;
-            background: rgba(255, 255, 255, 0.01);
-            border-bottom: 1px solid var(--glass-border, rgba(255,255,255,0.06));
+            background: rgba(255,255,255,0.01);
+            border-bottom: 1px solid var(--glass-border);
             cursor: grab;
             flex-shrink: 0;
             min-height: 28px;
             user-select: none;
         `;
-        
-        // Titel
+
         const titleEl = document.createElement('div');
         titleEl.className = 'window-title';
         titleEl.style.cssText = `
@@ -196,78 +151,35 @@ const WindowManager = {
         titleSpan.textContent = title;
         titleEl.appendChild(titleSpan);
         header.appendChild(titleEl);
-        
-        // Controls
+
         const controls = document.createElement('div');
         controls.className = 'window-controls';
-        controls.style.cssText = `
-            display: flex;
-            gap: 4px;
-        `;
-        
+        controls.style.cssText = `display: flex; gap: 4px;`;
+
         const btnMin = document.createElement('button');
         btnMin.className = 'btn-minimize';
         btnMin.textContent = '−';
-        btnMin.style.cssText = `
-            width: 10px;
-            height: 10px;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            padding: 0;
-            font-size: 6px;
-            line-height: 10px;
-            text-align: center;
-            color: transparent;
-            background: #FFBD2E;
-        `;
+        btnMin.style.cssText = `width:10px;height:10px;border:none;border-radius:50%;cursor:pointer;padding:0;font-size:6px;line-height:10px;text-align:center;color:transparent;background:#FFBD2E;`;
         btnMin.onclick = (e) => { e.stopPropagation(); this.minimizeWindow(win); };
         controls.appendChild(btnMin);
-        
+
         const btnMax = document.createElement('button');
         btnMax.className = 'btn-maximize';
         btnMax.textContent = '⛶';
-        btnMax.style.cssText = `
-            width: 10px;
-            height: 10px;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            padding: 0;
-            font-size: 6px;
-            line-height: 10px;
-            text-align: center;
-            color: transparent;
-            background: #28C840;
-        `;
+        btnMax.style.cssText = `width:10px;height:10px;border:none;border-radius:50%;cursor:pointer;padding:0;font-size:6px;line-height:10px;text-align:center;color:transparent;background:#28C840;`;
         btnMax.onclick = (e) => { e.stopPropagation(); this.maximizeWindow(win); };
         controls.appendChild(btnMax);
-        
+
         const btnClose = document.createElement('button');
         btnClose.className = 'btn-close';
         btnClose.textContent = '✕';
-        btnClose.style.cssText = `
-            width: 10px;
-            height: 10px;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            padding: 0;
-            font-size: 6px;
-            line-height: 10px;
-            text-align: center;
-            color: transparent;
-            background: #FF5F57;
-        `;
+        btnClose.style.cssText = `width:10px;height:10px;border:none;border-radius:50%;cursor:pointer;padding:0;font-size:6px;line-height:10px;text-align:center;color:transparent;background:#FF5F57;`;
         btnClose.onclick = (e) => { e.stopPropagation(); this.closeWindow(win); };
         controls.appendChild(btnClose);
-        
+
         header.appendChild(controls);
         win.appendChild(header);
-        
+
         // Body
         const body = document.createElement('div');
         body.className = 'window-body';
@@ -279,21 +191,17 @@ const WindowManager = {
             font-size: 12px;
             line-height: 1.4;
         `;
-        if (typeof content === 'string') {
-            body.innerHTML = content;
-        } else if (content instanceof HTMLElement) {
-            body.appendChild(content);
-        }
+        if (typeof content === 'string') body.innerHTML = content;
+        else if (content instanceof HTMLElement) body.appendChild(content);
         win.appendChild(body);
-        
-        // Drag-Funktion
+
+        // Drag
         this.makeDraggable(win, header);
-        
-        // Resize-Funktion
+        // Resize
         this.makeResizable(win);
-        
+
         this.container.appendChild(win);
-        
+
         // CSS-Animation für Fenster
         if (!document.getElementById('window-animations')) {
             const style = document.createElement('style');
@@ -320,20 +228,19 @@ const WindowManager = {
             `;
             document.head.appendChild(style);
         }
-        
+
         return win;
     },
-    
-    // ---- DRAGGABLE ----
+
     makeDraggable(windowEl, handle) {
         let isDragging = false;
         let startX, startY, origX, origY;
-        
+
         handle.addEventListener('mousedown', (e) => {
             const data = this.windows.find(w => w.element === windowEl);
             if (data && data.maximized) return;
             if (e.target.closest('.window-controls')) return;
-            
+
             isDragging = true;
             const rect = windowEl.getBoundingClientRect();
             startX = e.clientX;
@@ -344,24 +251,18 @@ const WindowManager = {
             windowEl.style.transition = 'none';
             e.preventDefault();
         });
-        
+
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
             windowEl.style.left = (origX + dx) + 'px';
             windowEl.style.top = (origY + dy) + 'px';
-            windowEl.style.right = 'auto';
-            windowEl.style.bottom = 'auto';
-            
-            // Fenster-Daten aktualisieren
             const data = this.windows.find(w => w.element === windowEl);
-            if (data) {
-                data.x = origX + dx;
-                data.y = origY + dy;
-            }
+            if (data) { data.x = origX + dx;
+                data.y = origY + dy; }
         });
-        
+
         document.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
@@ -370,8 +271,7 @@ const WindowManager = {
             }
         });
     },
-    
-    // ---- RESIZABLE ----
+
     makeResizable(windowEl) {
         const resizeHandle = document.createElement('div');
         resizeHandle.style.cssText = `
@@ -385,14 +285,13 @@ const WindowManager = {
             background: transparent;
         `;
         windowEl.appendChild(resizeHandle);
-        
+
         let isResizing = false;
         let startX, startY, startWidth, startHeight;
-        
+
         resizeHandle.addEventListener('mousedown', (e) => {
             const data = this.windows.find(w => w.element === windowEl);
             if (data && data.maximized) return;
-            
             isResizing = true;
             startX = e.clientX;
             startY = e.clientY;
@@ -402,23 +301,18 @@ const WindowManager = {
             e.preventDefault();
             e.stopPropagation();
         });
-        
+
         document.addEventListener('mousemove', (e) => {
             if (!isResizing) return;
             const dw = e.clientX - startX;
             const dh = e.clientY - startY;
-            const newWidth = Math.max(200, startWidth + dw);
-            const newHeight = Math.max(120, startHeight + dh);
-            windowEl.style.width = newWidth + 'px';
-            windowEl.style.height = newHeight + 'px';
-            
+            windowEl.style.width = Math.max(200, startWidth + dw) + 'px';
+            windowEl.style.height = Math.max(120, startHeight + dh) + 'px';
             const data = this.windows.find(w => w.element === windowEl);
-            if (data) {
-                data.width = newWidth;
-                data.height = newHeight;
-            }
+            if (data) { data.width = Math.max(200, startWidth + dw);
+                data.height = Math.max(120, startHeight + dh); }
         });
-        
+
         document.addEventListener('mouseup', () => {
             if (isResizing) {
                 isResizing = false;
@@ -426,35 +320,27 @@ const WindowManager = {
             }
         });
     },
-    
-    // ---- FENSTER SCHLIEßEN ----
+
     closeWindow(windowEl) {
         const index = this.windows.findIndex(w => w.element === windowEl);
         if (index === -1) return false;
-        
         const data = this.windows[index];
         data.element.remove();
         this.windows.splice(index, 1);
-        
         if (this.activeWindow === windowEl) {
             this.activeWindow = this.windows.length > 0 ? this.windows[this.windows.length - 1].element : null;
         }
-        
         EventBus.emit('window:closed', data);
         this.updateTaskbar();
-        
         console.log(`📂 Fenster geschlossen: ${data.title}`);
         return true;
     },
-    
-    // ---- FENSTER MINIMIEREN ----
+
     minimizeWindow(windowEl) {
         const data = this.windows.find(w => w.element === windowEl);
         if (!data) return false;
-        
         data.minimized = !data.minimized;
         windowEl.classList.toggle('minimized', data.minimized);
-        
         if (data.minimized) {
             this.activeWindow = null;
             EventBus.emit('window:minimized', data);
@@ -462,78 +348,52 @@ const WindowManager = {
             this.bringToFront(windowEl);
             EventBus.emit('window:restored', data);
         }
-        
         this.updateTaskbar();
         return true;
     },
-    
-    // ---- FENSTER MAXIMIEREN ----
+
     maximizeWindow(windowEl) {
         const data = this.windows.find(w => w.element === windowEl);
         if (!data) return false;
-        
         data.maximized = !data.maximized;
         windowEl.classList.toggle('maximized', data.maximized);
-        
         if (data.maximized) {
             EventBus.emit('window:maximized', data);
         } else {
-            // Zurück zur vorherigen Größe
             windowEl.style.width = data.width + 'px';
             windowEl.style.height = data.height + 'px';
             windowEl.style.left = data.x + 'px';
             windowEl.style.top = data.y + 'px';
             EventBus.emit('window:restored', data);
         }
-        
         this.bringToFront(windowEl);
         this.updateTaskbar();
         return true;
     },
-    
-    // ---- FENSTER IN DEN VORDERGRUND ----
+
     bringToFront(windowEl) {
         if (!windowEl) return false;
-        
         this.activeWindow = windowEl;
         windowEl.style.zIndex = ++this.zIndex;
-        
         const data = this.windows.find(w => w.element === windowEl);
         if (data && data.minimized) {
             data.minimized = false;
             windowEl.classList.remove('minimized');
             EventBus.emit('window:restored', data);
         }
-        
         EventBus.emit('window:focused', data);
         this.updateTaskbar();
         return true;
     },
-    
-    // ---- AKTIVES FENSTER ----
-    getActiveWindow() {
-        return this.activeWindow;
-    },
-    
-    getActiveWindowData() {
-        return this.windows.find(w => w.element === this.activeWindow) || null;
-    },
-    
-    // ---- FENSTER POSITION ----
+
+    getActiveWindow() { return this.activeWindow; },
+
     getNextPosition() {
-        const baseX = 20;
-        const baseY = 15;
         const offset = this.windows.length * 20;
-        const maxOffset = 80;
-        const actualOffset = Math.min(offset, maxOffset);
-        
-        return {
-            x: baseX + actualOffset % 60,
-            y: baseY + Math.floor(actualOffset / 60) * 30
-        };
+        const actualOffset = Math.min(offset, 80);
+        return { x: 20 + actualOffset % 60, y: 15 + Math.floor(actualOffset / 60) * 30 };
     },
-    
-    // ---- FENSTER ANPASSEN ----
+
     adjustWindows() {
         for (const data of this.windows) {
             if (!data.maximized && !data.minimized) {
@@ -558,68 +418,39 @@ const WindowManager = {
             }
         }
     },
-    
-    // ---- ALLE FENSTER SCHLIEßEN ----
+
     closeAll() {
         const windows = [...this.windows];
-        for (const data of windows) {
-            this.closeWindow(data.element);
-        }
+        for (const data of windows) this.closeWindow(data.element);
         EventBus.emit('window:all-closed', { count: windows.length });
         return true;
     },
-    
-    // ---- FENSTER NACH APP-ID FINDEN ----
-    getWindowByAppId(appId) {
-        return this.windows.find(w => w.appId === appId) || null;
-    },
-    
-    // ---- FENSTERSTATISTIK ----
+
+    getWindowByAppId(appId) { return this.windows.find(w => w.appId === appId) || null; },
+
     getStats() {
         const total = this.windows.length;
         const minimized = this.windows.filter(w => w.minimized).length;
-        const maximized = this.windows.filter(w => w.maximized).length;
-        const open = total - minimized;
-        
-        return {
-            total,
-            open,
-            minimized,
-            maximized,
-            active: this.activeWindow ? this.windows.find(w => w.element === this.activeWindow)?.title || null : null
-        };
+        return { total, open: total - minimized, minimized, active: this.activeWindow ? this.windows.find(w => w.element ===
+                this.activeWindow)?.title || null : null };
     },
-    
-    // ---- TASKBAR AKTUALISIEREN ----
+
     updateTaskbar() {
         const container = document.getElementById('taskbar-apps');
         if (!container) return;
-        
         container.innerHTML = '';
         for (const data of this.windows) {
             const btn = document.createElement('button');
-            btn.className = 'taskbar-app-btn' + 
-                (data.element === this.activeWindow ? ' active' : '') + 
-                (data.minimized ? ' minimized' : '');
+            btn.className = 'taskbar-app-btn' + (data.element === this.activeWindow ? ' active' : '') + (data.minimized ?
+                ' minimized' : '');
             btn.textContent = data.icon ? `${data.icon} ${data.title}` : data.title;
             btn.title = data.title;
             btn.style.cssText = `
-                padding: 2px 6px;
-                height: 24px;
-                background: ${data.element === this.activeWindow ? 'rgba(108,60,225,0.2)' : 'rgba(255,255,255,0.03)'};
-                border: 1px solid ${data.element === this.activeWindow ? 'var(--primary, #6C3CE1)' : 'transparent'};
-                border-radius: 5px;
-                color: var(--text-secondary, rgba(255,255,255,0.7));
-                font-size: 9px;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.15s ease;
-                display: flex;
-                align-items: center;
-                gap: 3px;
-                white-space: nowrap;
-                flex-shrink: 0;
-                font-family: var(--font-primary, Inter, sans-serif);
+                padding:2px 6px;height:24px;background:${data.element === this.activeWindow ? 'rgba(108,60,225,0.2)' : 'rgba(255,255,255,0.03)'};
+                border:1px solid ${data.element === this.activeWindow ? 'var(--primary)' : 'transparent'};
+                border-radius:5px;color:var(--text-secondary);font-size:9px;font-weight:500;cursor:pointer;
+                transition:all 0.15s ease;display:flex;align-items:center;gap:3px;white-space:nowrap;flex-shrink:0;
+                font-family:var(--font-primary, Inter, sans-serif);
             `;
             btn.onclick = () => {
                 if (data.minimized) {
@@ -635,15 +466,6 @@ const WindowManager = {
             };
             container.appendChild(btn);
         }
-    },
-    
-    // ---- VERSION ----
-    getVersion() {
-        return '1.0.0';
     }
 };
-
-// ---- WINDOW MANAGER GLOBAL VERFÜGBAR MACHEN ----
 window.WindowManager = WindowManager;
-
-console.log('🪟 Window Manager geladen – HalDo AI OS 24.6.0');
