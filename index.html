@@ -1040,7 +1040,26 @@
   <div id="intro-progress-text" class="intro-progress-text">2%</div>
   <div class="intro-version">v24</div>
 </div>
+function gid(id){ return document.getElementById(id) || null; }
 
+var DOM = {
+  introContainer: gid('intro-container'),
+  introStatus: gid('intro-status'),
+  introProgress: gid('intro-progress-bar'),
+  introProgressText: gid('intro-progress-text'),
+  cosmic: gid('cosmic'),
+  appContainer: gid('app-container'),
+  dock: gid('dock'),
+  notification: gid('notification'),
+  clock: gid('clock-display')
+};
+
+// In bootSequence vor Nutzung prüfen:
+if (!DOM.introStatus || !DOM.introProgress || !DOM.introContainer) {
+  console.error('Intro‑Elemente fehlen — bootSequence abgebrochen');
+  Notify.error('Fehler: Boot‑Overlay nicht gefunden. Überprüfe index.html');
+  return;
+}
 <!-- Weitere Container, die das JS referenziert -->
 <canvas id="cosmic"></canvas>
 <div id="app-container"></div>
