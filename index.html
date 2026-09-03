@@ -4,13 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
     <meta name="theme-color" content="#0a0a1a" />
+    <meta name="description" content="HalDo AI OS – Das ultimative intelligente Betriebssystem" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="assets/images/logo.png" />
     <title>HalDo AI OS 24.6.0 Ultimate</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
         /* ============================================================
-           HALDO AI OS – MONUMENTALES ULTIMATE DESIGN
+           HALDO AI OS – MONUMENTALES ULTIMATE DESIGN (Teil 1)
            ============================================================ */
         * {
             margin: 0;
@@ -49,7 +54,7 @@
             border-radius: 10px;
         }
 
-        /* BOOT */
+        /* ===== BOOT SCREEN ===== */
         #boot-screen {
             position: fixed;
             top: 0;
@@ -207,7 +212,7 @@
             z-index: 2;
         }
 
-        /* DESKTOP */
+        /* ===== DESKTOP ===== */
         #desktop {
             display: none;
             width: 100vw;
@@ -252,7 +257,7 @@
             image-rendering: auto;
         }
 
-        /* TOP MENU */
+        /* ===== TOP MENU ===== */
         #top-menu {
             position: fixed;
             top: 0;
@@ -306,7 +311,7 @@
             padding: 2px 6px;
         }
 
-        /* TASKBAR */
+        /* ===== TASKBAR ===== */
         #taskbar {
             position: fixed;
             bottom: 0;
@@ -392,7 +397,7 @@
             color: #fff;
         }
 
-        /* WINDOWS */
+        /* ===== WINDOWS ===== */
         #window-container {
             position: fixed;
             top: var(--menu-top-height);
@@ -551,7 +556,7 @@
             border-color: var(--primary);
         }
 
-        /* DESKTOP ICONS */
+        /* ===== DESKTOP ICONS ===== */
         #desktop-icons {
             position: fixed;
             top: calc(var(--menu-top-height) + 8px);
@@ -596,7 +601,7 @@
             line-height: 1.2;
         }
 
-        /* AI FLOATING BUTTON */
+        /* ===== AI FLOATING BUTTON ===== */
         #ai-floating-btn {
             position: fixed;
             bottom: 64px;
@@ -626,7 +631,7 @@
             filter: brightness(0) invert(1);
         }
 
-        /* FORM */
+        /* ===== FORM ELEMENTS ===== */
         .haldo-input {
             width: 100%;
             padding: 6px 10px;
@@ -665,7 +670,7 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* RESPONSIVE */
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             :root {
                 --taskbar-height: 40px;
@@ -744,12 +749,45 @@
                 height: 220px;
             }
         }
+
+        /* ===== THEMES ===== */
+        [data-theme="light"] {
+            --bg-primary: #f0f0f5;
+            --text-primary: #1a1a2e;
+            --text-secondary: rgba(26, 26, 46, 0.7);
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="cosmic"] {
+            --bg-primary: #050510;
+            --text-primary: #ffffff;
+            --glass-bg: rgba(108, 60, 225, 0.08);
+            --glass-border: rgba(108, 60, 225, 0.12);
+            --primary: #8B5CF6;
+            --secondary: #00D4FF;
+        }
+        [data-theme="aurora"] {
+            --bg-primary: #0a0a20;
+            --text-primary: #ffffff;
+            --glass-bg: rgba(0, 200, 150, 0.06);
+            --glass-border: rgba(0, 200, 150, 0.1);
+            --primary: #00C896;
+            --secondary: #00D4FF;
+        }
+        [data-theme="midnight"] {
+            --bg-primary: #080812;
+            --text-primary: #e0e0ff;
+            --glass-bg: rgba(30, 20, 60, 0.2);
+            --glass-border: rgba(80, 60, 160, 0.12);
+            --primary: #7C5CFE;
+            --secondary: #6C3CE1;
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- BOOT SCREEN -->
+    <!-- ===== BOOT SCREEN ===== -->
     <div id="boot-screen">
         <div id="boot-stars"></div>
         <div class="boot-container">
@@ -767,7 +805,7 @@
         </div>
     </div>
 
-    <!-- DESKTOP -->
+    <!-- ===== DESKTOP ===== -->
     <div id="desktop">
         <div id="cosmic-canvas-container">
             <div id="living-ai-container"></div>
@@ -784,6 +822,7 @@
                 <button class="menu-item" data-menu="media">🎬 Medien</button>
                 <button class="menu-item" data-menu="communication">💬 Kommunikation</button>
                 <button class="menu-item" data-menu="settings">⚙️ Einstellungen</button>
+                <button class="menu-item" data-menu="health">🏥 Gesundheit</button>
             </div>
             <div class="menu-right">
                 <button class="menu-item" id="menu-theme">🌙</button>
@@ -816,7 +855,7 @@
 
     <script>
         // ============================================================
-        //  HALDO AI OS 24.6.0 ULTIMATE – DER KOMPLETTE CODE
+        //  HALDO AI OS 24.6.0 ULTIMATE – DER KOMPLETTE CODE (Teil 1)
         //  ============================================================
 
         // ============================================================
@@ -1056,7 +1095,7 @@
                 );
                 scene.add(outer);
 
-                // 13 Planeten
+                // 13 Planeten (8 + 5 Zwergplaneten)
                 const planetData = [
                     { name: 'Merkur', size: 0.22, dist: 4.0, color: 0xaaaaaa, speed: 0.04 },
                     { name: 'Venus', size: 0.38, dist: 5.8, color: 0xffcc88, speed: 0.025 },
@@ -1195,6 +1234,20 @@
                 }
             }
         };
+
+        // ============================================================
+        //  LIVING AI – Avatar mit logo.png als lebendiges Gesicht
+        //  (Fortsetzung in Teil 2)
+        // ============================================================
+        // ... Der Rest kommt in Teil 2 ...
+        console.log('💙❤️🚀 Teil 1 der monumentalen index.html geladen!');
+        console.log('📌 Teil 2 folgt mit Living AI, AICore und AppManager.');
+    </script>
+</body>
+</html>
+// ============================================================
+        //  TEIL 2 – LIVING AI, AI CORE & APP MANAGER (KOMPLETT)
+        //  ============================================================
 
         // ============================================================
         //  LIVING AI – Avatar mit logo.png als lebendiges Gesicht
@@ -1506,7 +1559,7 @@
 
         // ============================================================
         //  AI CORE – ULTIMATIVE LOKALE KI mit API-Key-Option
-        // ============================================================
+        //  ============================================================
         const AICore = {
             isProcessing: false,
             conversationHistory: [],
@@ -1577,6 +1630,33 @@
                     'Interessante Frage, Bruder! 💙 Ich kann dir zu vielen Themen etwas sagen – Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Religion, Ethik und vieles mehr. Was würdest du gerne wissen?',
                     'Gute Frage! Worauf genau möchtest du hinaus? Ich helfe dir gerne weiter.',
                     'Da hast du mich neugierig gemacht! Erzähl mir mehr – was genau möchtest du wissen?'
+                ],
+                // Gesundheit / Arzt
+                'gesundheit': [
+                    'Das Gesundheitszentrum hilft dir bei der Verwaltung deiner Arzttermine, Medikamente, Laborwerte und Gesundheitsdokumente. Ich kann dich dabei unterstützen, Bruder! 💙',
+                    'Deine Gesundheit ist wichtig! Ich helfe dir, den Überblick zu behalten – Termine, Befunde, Medikamente.'
+                ],
+                'arzt': [
+                    'Im Ärzte Center kannst du deine Ärzte verwalten, Termine buchen und Dokumente speichern. Soll ich dir einen Termin vorschlagen?',
+                    'Arztbesuche sind wichtig – ich helfe dir gerne bei der Organisation. Welchen Arzt brauchst du?'
+                ],
+                'telemedizin': [
+                    'Telemedizin ermöglicht virtuelle Arztbesuche – du kannst mit deinem Arzt sprechen, ohne das Haus zu verlassen. Möchtest du mehr darüber wissen, Bruder?',
+                    'Telemedizin ist die Zukunft der Gesundheitsversorgung. Ich kann dir helfen, einen Termin zu vereinbaren.'
+                ],
+                // E-Mail
+                'email': [
+                    'Die E-Mail-App ist dein zentrales Postfach. Du kannst Nachrichten schreiben, empfangen, beantworten und Anhänge verwalten. Soll ich eine neue E-Mail für dich vorbereiten?',
+                    'E-Mails sind wichtig für die Kommunikation. Ich helfe dir gerne beim Verfassen, Korrigieren oder Übersetzen.'
+                ],
+                // Telefonie
+                'telefon': [
+                    'Das Telefon Center verwaltet deine Kontakte und Anrufe. Sag mir einfach, wen du anrufen möchtest, Bruder! 📞',
+                    'Mit der Telefonie-App kannst du Kontakte anrufen und Anrufprotokolle einsehen. Soll ich dir deine Kontakte anzeigen?'
+                ],
+                'videoanruf': [
+                    'Videoanrufe sind die beste Möglichkeit, mit Freunden und Familie in Kontakt zu bleiben – ich kann einen Video-Call für dich starten. 📹',
+                    'Video-Calls verbinden dich von Angesicht zu Angesicht – auch über große Entfernungen. Wen möchtest du anrufen?'
                 ]
             },
 
@@ -1659,6 +1739,7 @@
             generateLocalReply(userText) {
                 const lower = userText.toLowerCase();
 
+                // Befehle
                 if (lower.includes('öffne notizen') || lower.includes('notiz') || lower.includes('notes')) {
                     AppManager.openApp('notes');
                     return 'Ich öffne die Notizen-App für dich, Bruder. 📝';
@@ -1675,19 +1756,38 @@
                     AppManager.openApp('settings');
                     return 'Ich öffne die Einstellungen. ⚙️';
                 }
+                if (lower.includes('öffne email') || lower.includes('email')) {
+                    AppManager.openApp('email');
+                    return 'Ich öffne die E-Mail-App. ✉️';
+                }
+                if (lower.includes('öffne gesundheit') || lower.includes('health')) {
+                    AppManager.openApp('health-center');
+                    return 'Ich öffne das Gesundheitszentrum. 🏥';
+                }
+                if (lower.includes('öffne arzt') || lower.includes('doctor')) {
+                    AppManager.openApp('doctor-center');
+                    return 'Ich öffne das Ärzte Center. 👨‍⚕️';
+                }
+                if (lower.includes('öffne telemedizin') || lower.includes('telemedicine')) {
+                    AppManager.openApp('telemedicine');
+                    return 'Ich öffne die Telemedizin. 💊';
+                }
                 if (lower.includes('systemstatus') || lower.includes('status')) {
                     return `✅ System läuft stabil, Bruder.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: ${this.useLocal ? 'Lokal' : 'Groq API'} aktiv\n☀️ Sonne = HalDo Core – klick sie an!`;
                 }
 
+                // Exakte Matches mit Variationen
                 for (const [key, variants] of Object.entries(this.knowledge)) {
                     if (lower.includes(key) && Array.isArray(variants)) {
                         return variants[Math.floor(Math.random() * variants.length)];
                     }
                 }
 
+                // Themen-Erkennung
                 const topics = ['philosophie', 'geschichte', 'physik', 'quanten', 'chemie', 'biologie', 'astronomie',
                     'programmierung', 'python', 'javascript', 'java', 'medizin', 'psychologie', 'religion',
-                    'ezidentum', 'christentum', 'islam', 'ethik', 'kunst', 'musik', 'literatur', 'liebe', 'glück'
+                    'ezidentum', 'christentum', 'islam', 'ethik', 'kunst', 'musik', 'literatur', 'liebe', 'glück',
+                    'gesundheit', 'arzt', 'telemedizin', 'email', 'telefon', 'videoanruf'
                 ];
                 for (const topic of topics) {
                     if (lower.includes(topic) && this.knowledge[topic]) {
@@ -1696,6 +1796,7 @@
                     }
                 }
 
+                // Kontext-basiert
                 if (this.conversationHistory.length > 2) {
                     const lastTopics = this.conversationHistory.slice(-4).map(h => h.content || '').join(' ');
                     if (lastTopics.includes('philosophie') || lastTopics.includes('sinn')) {
@@ -1704,8 +1805,12 @@
                     if (lastTopics.includes('wissenschaft') || lastTopics.includes('physik')) {
                         return 'Die Wissenschaft ist faszinierend! Die Quantenphysik zeigt uns, wie magisch das Universum ist. Möchtest du mehr über ein bestimmtes Gebiet wissen, Bruder? 🔬';
                     }
+                    if (lastTopics.includes('gesundheit') || lastTopics.includes('arzt')) {
+                        return 'Deine Gesundheit liegt mir am Herzen, Bruder! Möchtest du einen Arzttermin planen, deine Medikamente verwalten oder ein Gesundheitsdokument einsehen? 💙';
+                    }
                 }
 
+                // Fragen
                 if (lower.includes('?') || lower.includes('wie') || lower.includes('was') || lower.includes('warum')) {
                     const qs = [
                         'Das ist eine gute Frage, Bruder! 💙 Ich kann dir gerne mehr dazu erzählen. Worauf genau möchtest du hinaus?',
@@ -1715,6 +1820,7 @@
                     return qs[Math.floor(Math.random() * qs.length)];
                 }
 
+                // Standard
                 const standards = this.knowledge['standard'];
                 return standards[Math.floor(Math.random() * standards.length)];
             },
@@ -1726,7 +1832,7 @@
 
         // ============================================================
         //  APP MANAGER – ALLE 84+ APPS MIT ECHTER FUNKTION
-        // ============================================================
+        //  ============================================================
         const AppManager = {
             apps: [],
             installedApps: [],
@@ -2628,6 +2734,3 @@
         console.log('💡 HalDo antwortet abwechslungsreich und kontextbewusst!');
         console.log('📱 ' + AppManager.apps.length + ' Apps installiert – alle funktionsfähig!');
         console.log('⚙️ API-Key in den Einstellungen (⚙️ → AI & Memory) eintragen!');
-    </script>
-</body>
-</html>
