@@ -4,19 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
     <meta name="theme-color" content="#0a0a1a" />
-    <meta name="description" content="HalDo AI OS – Das ultimative intelligente Betriebssystem" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="manifest.json" />
-    <link rel="apple-touch-icon" href="assets/images/logo.png" />
-    <title>HalDo AI OS 25.0.0 Cosmic Evolution</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
-    </script>
+    <title>HalDo AI OS 25.0.0 – Lite Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
-        /* ============================================================
-           HALDO AI OS 25.0.0 – COSMIC EVOLUTION DESIGN
-           ============================================================ */
+        /* ===== KOMPLETTES CSS (wie gehabt) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -54,7 +45,7 @@
             border-radius: 10px;
         }
 
-        /* ===== BOOT SCREEN ===== */
+        /* BOOT */
         #boot-screen {
             position: fixed;
             top: 0;
@@ -212,27 +203,13 @@
             z-index: 2;
         }
 
-        /* ===== DESKTOP ===== */
+        /* DESKTOP */
         #desktop {
             display: none;
             width: 100vw;
             height: 100vh;
             position: relative;
             background: #0a0a1a;
-        }
-        #cosmic-canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-        #cosmic-canvas-container canvas {
-            display: block;
-            width: 100% !important;
-            height: 100% !important;
         }
         #living-ai-container {
             position: absolute;
@@ -257,7 +234,7 @@
             image-rendering: auto;
         }
 
-        /* ===== TOP MENU ===== */
+        /* TOP MENU */
         #top-menu {
             position: fixed;
             top: 0;
@@ -311,7 +288,7 @@
             padding: 2px 6px;
         }
 
-        /* ===== TASKBAR ===== */
+        /* TASKBAR */
         #taskbar {
             position: fixed;
             bottom: 0;
@@ -397,7 +374,7 @@
             color: #fff;
         }
 
-        /* ===== WINDOWS ===== */
+        /* WINDOWS */
         #window-container {
             position: fixed;
             top: var(--menu-top-height);
@@ -523,40 +500,8 @@
             margin-bottom: 8px;
             font-weight: 600;
         }
-        .window-body textarea {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--glass-border);
-            border-radius: 6px;
-            color: #fff;
-            padding: 6px 8px;
-            font-family: inherit;
-            font-size: 12px;
-            resize: vertical;
-        }
-        .window-body textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        .window-body input[type="text"],
-        .window-body input[type="password"],
-        .window-body select {
-            width: 100%;
-            padding: 5px 8px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--glass-border);
-            border-radius: 6px;
-            color: #fff;
-            font-size: 11px;
-            outline: none;
-            transition: 0.2s;
-        }
-        .window-body input:focus,
-        .window-body select:focus {
-            border-color: var(--primary);
-        }
 
-        /* ===== DESKTOP ICONS ===== */
+        /* DESKTOP ICONS */
         #desktop-icons {
             position: fixed;
             top: calc(var(--menu-top-height) + 8px);
@@ -601,7 +546,7 @@
             line-height: 1.2;
         }
 
-        /* ===== AI FLOATING BUTTON ===== */
+        /* AI FLOATING BUTTON */
         #ai-floating-btn {
             position: fixed;
             bottom: 64px;
@@ -631,7 +576,7 @@
             filter: brightness(0) invert(1);
         }
 
-        /* ===== FORM ELEMENTS ===== */
+        /* FORM */
         .haldo-input {
             width: 100%;
             padding: 6px 10px;
@@ -670,7 +615,7 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* ===== RESPONSIVE ===== */
+        /* RESPONSIVE */
         @media (max-width: 768px) {
             :root {
                 --taskbar-height: 40px;
@@ -750,7 +695,7 @@
             }
         }
 
-        /* ===== THEMES ===== */
+        /* THEMES */
         [data-theme="light"] {
             --bg-primary: #f0f0f5;
             --text-primary: #1a1a2e;
@@ -787,29 +732,27 @@
 
 <body>
 
-    <!-- ===== BOOT SCREEN ===== -->
+    <!-- BOOT SCREEN -->
     <div id="boot-screen">
         <div id="boot-stars"></div>
         <div class="boot-container">
             <div class="boot-logo-wrapper">
                 <div class="boot-logo-ring"></div>
                 <div class="boot-logo">
-                    <img src="assets/images/logo.png" alt="HalDo OS" id="boot-logo-img" onerror="this.src='logo.png'" />
+                    <img src="logo.png" alt="HalDo OS" id="boot-logo-img" onerror="this.src='logo.png'" />
                 </div>
                 <div class="boot-glow"></div>
             </div>
             <h1 class="boot-title">HalDo AI OS</h1>
             <p class="boot-status" id="boot-status">Initializing Cosmic Core...</p>
             <div class="boot-progress"><div class="boot-progress-bar" id="boot-progress"></div></div>
-            <p class="boot-version">v25.0.0 Cosmic Evolution</p>
+            <p class="boot-version">v25.0.0 Lite</p>
         </div>
     </div>
 
-    <!-- ===== DESKTOP ===== -->
+    <!-- DESKTOP -->
     <div id="desktop">
-        <div id="cosmic-canvas-container">
-            <div id="living-ai-container"></div>
-        </div>
+        <div id="living-ai-container"></div>
         <div id="desktop-icons"></div>
         <div id="window-container"></div>
 
@@ -836,7 +779,7 @@
         <div id="taskbar">
             <div class="taskbar-left">
                 <div id="taskbar-logo">
-                    <img src="assets/images/logo.png" alt="HalDo" id="taskbar-logo-img" onerror="this.src='logo.png'" />
+                    <img src="logo.png" alt="HalDo" id="taskbar-logo-img" onerror="this.src='logo.png'" />
                 </div>
                 <span id="taskbar-time">00:00:00</span>
             </div>
@@ -849,13 +792,13 @@
 
         <!-- AI FLOATING BUTTON -->
         <button id="ai-floating-btn">
-            <img src="assets/images/logo.png" alt="AI" onerror="this.src='logo.png'" />
+            <img src="logo.png" alt="AI" onerror="this.src='logo.png'" />
         </button>
     </div>
 
     <script>
         // ============================================================
-        //  HALDO AI OS 25.0.0 – COSMIC EVOLUTION (TEIL 1)
+        //  HALDO AI OS 25.0.0 LITE – KOMPLETTE LOGIK OHNE THREE.JS
         //  ============================================================
 
         // ============================================================
@@ -912,7 +855,7 @@
 
             createStars() {
                 if (!this.starsContainer) return;
-                const count = 80;
+                const count = 60;
                 for (let i = 0; i < count; i++) {
                     const star = document.createElement('div');
                     const size = Math.random() * 2.5 + 0.5;
@@ -940,7 +883,7 @@
                     'Loading Kernel...',
                     'Loading AI Engine...',
                     'Loading Applications...',
-                    'Loading Cosmic World...',
+                    'Loading System...',
                     'System Ready 🚀'
                 ];
                 for (let i = 0; i < steps.length; i++) {
@@ -949,7 +892,6 @@
                     await new Promise(r => setTimeout(r, 300));
                     if (i === 2) AICore.init();
                     if (i === 3) AppManager.init();
-                    if (i === 4) CosmicWorld.init();
                 }
                 document.getElementById('boot-screen').classList.add('hidden');
                 document.getElementById('desktop').style.display = 'block';
@@ -1018,239 +960,8 @@
         };
 
         // ============================================================
-        //  COSMIC WORLD – 3D mit 13 Planeten, Sonne mit Logo
-        // ============================================================
-        const CosmicWorld = {
-            isReady: false,
-            scene: null,
-            camera: null,
-            renderer: null,
-            planetMeshes: [],
-            sunMesh: null,
-            sunGlow: null,
-            logoTexture: null,
-
-            init() {
-                console.log('🌌 Cosmic World init');
-                const container = document.getElementById('cosmic-canvas-container');
-                if (!container) return;
-
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = () => {
-                    this.logoTexture = new THREE.Texture(img);
-                    if (this.sunMesh) {
-                        this.sunMesh.material.map = this.logoTexture;
-                        this.sunMesh.material.needsUpdate = true;
-                    }
-                };
-                img.onerror = () => console.warn('⚠️ Logo nicht gefunden');
-                img.src = 'assets/images/logo.png';
-
-                const scene = new THREE.Scene();
-                scene.background = new THREE.Color(0x0a0a1a);
-                const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-                camera.position.set(0, 16, 40);
-                camera.lookAt(0, 0, 0);
-                const renderer = new THREE.WebGLRenderer({ antialias: true });
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                container.appendChild(renderer.domElement);
-                this.scene = scene;
-                this.camera = camera;
-                this.renderer = renderer;
-
-                const light = new THREE.PointLight(0xffaa33, 2.5, 150);
-                light.position.set(0, 0, 0);
-                scene.add(light);
-                scene.add(new THREE.AmbientLight(0x222244, 0.5));
-
-                // Sonne mit Logo
-                const sunGeo = new THREE.SphereGeometry(2.8, 64, 64);
-                const sunMat = new THREE.MeshStandardMaterial({
-                    color: 0xff8800,
-                    emissive: 0xff4400,
-                    emissiveIntensity: 1.0,
-                    roughness: 0.2,
-                    metalness: 0.0
-                });
-                const sun = new THREE.Mesh(sunGeo, sunMat);
-                sun.position.set(0, 0, 0);
-                sun.userData.isSun = true;
-                scene.add(sun);
-                this.sunMesh = sun;
-
-                const glow = new THREE.Mesh(
-                    new THREE.SphereGeometry(3.4, 32, 32),
-                    new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.25, blending: THREE
-                            .AdditiveBlending })
-                );
-                scene.add(glow);
-                this.sunGlow = glow;
-
-                const outer = new THREE.Mesh(
-                    new THREE.SphereGeometry(4.8, 32, 32),
-                    new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.06, blending: THREE
-                            .AdditiveBlending })
-                );
-                scene.add(outer);
-
-                // 13 Planeten (8 + 5 Zwergplaneten)
-                const planetData = [
-                    { name: 'Merkur', size: 0.22, dist: 4.0, color: 0xaaaaaa, speed: 0.04 },
-                    { name: 'Venus', size: 0.38, dist: 5.8, color: 0xffcc88, speed: 0.025 },
-                    { name: 'Erde', size: 0.42, dist: 7.6, color: 0x4488ff, speed: 0.018 },
-                    { name: 'Mars', size: 0.34, dist: 9.4, color: 0xff4422, speed: 0.014 },
-                    { name: 'Jupiter', size: 1.0, dist: 12.0, color: 0xddbb88, speed: 0.009 },
-                    { name: 'Saturn', size: 0.85, dist: 15.0, color: 0xeeddbb, speed: 0.007 },
-                    { name: 'Uranus', size: 0.6, dist: 18.2, color: 0x88ddff, speed: 0.005 },
-                    { name: 'Neptun', size: 0.55, dist: 21.4, color: 0x3366ff, speed: 0.004 },
-                    { name: 'Pluto', size: 0.15, dist: 24.6, color: 0xccbbaa, speed: 0.003 },
-                    { name: 'Ceres', size: 0.12, dist: 27.0, color: 0xaa8866, speed: 0.0025 },
-                    { name: 'Haumea', size: 0.16, dist: 29.4, color: 0x88ccaa, speed: 0.002 },
-                    { name: 'Makemake', size: 0.14, dist: 31.8, color: 0xcc8866, speed: 0.0018 },
-                    { name: 'Eris', size: 0.18, dist: 34.2, color: 0x6699cc, speed: 0.0015 }
-                ];
-
-                this.planetMeshes = [];
-                planetData.forEach((p, i) => {
-                    const geo = new THREE.SphereGeometry(p.size, 32, 32);
-                    const mat = new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.5, metalness: 0.1,
-                        emissive: p.color, emissiveIntensity: 0.02 });
-                    const mesh = new THREE.Mesh(geo, mat);
-                    const angle = (i / planetData.length) * Math.PI * 2 + Math.random() * 0.2;
-                    mesh.position.x = Math.cos(angle) * p.dist;
-                    mesh.position.z = Math.sin(angle) * p.dist;
-                    mesh.userData = { dist: p.dist, speed: p.speed, angle: angle, name: p.name };
-                    scene.add(mesh);
-                    this.planetMeshes.push(mesh);
-
-                    const pts = [];
-                    for (let j = 0; j <= 60; j++) {
-                        const t = (j / 60) * Math.PI * 2;
-                        pts.push(new THREE.Vector3(Math.cos(t) * p.dist, 0, Math.sin(t) * p.dist));
-                    }
-                    const orbit = new THREE.Line(
-                        new THREE.BufferGeometry().setFromPoints(pts),
-                        new THREE.LineBasicMaterial({ color: p.color, transparent: true, opacity: 0.08 })
-                    );
-                    scene.add(orbit);
-                });
-
-                // Sterne
-                const starCount = 500;
-                const starPos = new Float32Array(starCount * 3);
-                for (let i = 0; i < starCount * 3; i++) {
-                    starPos[i] = (Math.random() - 0.5) * 400;
-                }
-                const starGeo = new THREE.BufferGeometry();
-                starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-                const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.12, transparent: true, opacity: 0.8 });
-                scene.add(new THREE.Points(starGeo, starMat));
-
-                container.style.pointerEvents = 'auto';
-                container.addEventListener('click', (e) => this.onClick(e));
-
-                let time = 0;
-                const animate = () => {
-                    requestAnimationFrame(animate);
-                    time += 0.005;
-                    if (this.sunMesh) {
-                        this.sunMesh.rotation.y += 0.002;
-                        if (this.sunGlow) {
-                            const p = 1 + Math.sin(time * 0.5) * 0.04;
-                            this.sunGlow.scale.set(p, p, p);
-                            this.sunGlow.material.opacity = 0.2 + Math.sin(time * 0.4) * 0.05;
-                        }
-                    }
-                    this.planetMeshes.forEach(m => {
-                        const data = m.userData;
-                        data.angle += data.speed * 0.3;
-                        m.position.x = Math.cos(data.angle) * data.dist;
-                        m.position.z = Math.sin(data.angle) * data.dist;
-                        m.rotation.y += 0.01;
-                    });
-                    const a = time * 0.01;
-                    camera.position.x = Math.sin(a) * 6;
-                    camera.position.z = 38 + Math.sin(a * 0.7) * 3;
-                    camera.position.y = 14 + Math.sin(a * 0.5) * 1.5;
-                    camera.lookAt(0, 0, 0);
-                    renderer.render(scene, camera);
-                };
-                animate();
-                this.isReady = true;
-
-                window.addEventListener('resize', () => {
-                    camera.aspect = window.innerWidth / window.innerHeight;
-                    camera.updateProjectionMatrix();
-                    renderer.setSize(window.innerWidth, window.innerHeight);
-                });
-            },
-
-            onClick(e) {
-                if (!this.scene || !this.camera) return;
-                const rect = this.renderer.domElement.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-                const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-                const ray = new THREE.Raycaster();
-                ray.setFromCamera(new THREE.Vector2(x, y), this.camera);
-                const intersects = ray.intersectObjects(this.scene.children, true);
-
-                let hitSun = false;
-                let hitPlanet = null;
-                for (const hit of intersects) {
-                    let obj = hit.object;
-                    while (obj) {
-                        if (obj.userData && obj.userData.isSun) { hitSun = true; break; }
-                        if (obj.userData && obj.userData.name) { hitPlanet = obj.userData.name; break; }
-                        obj = obj.parent;
-                    }
-                    if (hitSun || hitPlanet) break;
-                }
-
-                if (hitSun) {
-                    console.log('☀️ Sonne geklickt – öffne HalDo AI!');
-                    AppManager.openApp('haldo-ai');
-                    bus.emit('sun:clicked');
-                    return;
-                }
-                if (hitPlanet) {
-                    const info = {
-                        'Merkur': '☿ Merkur – Kleinster Planet, 57,9 Mio. km',
-                        'Venus': '♀ Venus – Heißester Planet, 108,2 Mio. km',
-                        'Erde': '🌍 Erde – Unser Zuhause, 149,6 Mio. km',
-                        'Mars': '♂ Mars – Der rote Planet, 227,9 Mio. km',
-                        'Jupiter': '♃ Jupiter – Größter Planet, 778,6 Mio. km',
-                        'Saturn': '♄ Saturn – Herr der Ringe, 1,43 Mrd. km',
-                        'Uranus': '♅ Uranus – Kälter Planet, 2,87 Mrd. km',
-                        'Neptun': '♆ Neptun – Stürmischster Planet, 4,50 Mrd. km',
-                        'Pluto': 'Pluto – Zwergplanet, 5,91 Mrd. km',
-                        'Ceres': 'Ceres – Zwergplanet im Asteroidengürtel',
-                        'Haumea': 'Haumea – Ei-förmiger Zwergplanet',
-                        'Makemake': 'Makemake – Zwergplanet im Kuipergürtel',
-                        'Eris': 'Eris – Größter Zwergplanet'
-                    };
-                    alert(`🪐 ${hitPlanet}\n${info[hitPlanet] || 'Ein faszinierender Himmelskörper!'}`);
-                }
-            }
-        };
-
-        // ============================================================
-        //  (TEIL 2 FOLGT – LIVING AI, AI CORE, APP MANAGER)
-        //  ============================================================
-        console.log('💙❤️🚀 HalDo AI OS 25.0.0 Cosmic Evolution – Teil 1 geladen!');
-        console.log('📌 Teil 2 folgt mit Living AI, AICore und AppManager.');
-    </script>
-</body>
-</html>
-// ============================================================
-        //  TEIL 2 – LIVING AI, AI CORE & APP MANAGER (KOMPLETT)
-        //  HALDO AI OS 25.0.0 COSMIC EVOLUTION
-        //  ============================================================
-
-        // ============================================================
         //  LIVING AI – Avatar mit logo.png als lebendiges Gesicht
-        //  Super-Vision-Qualität, 4K/8K-ready
+        //  (VOLLSTÄNDIG WIE GEHABT)
         // ============================================================
         const LivingAI = {
             width: 400,
@@ -1286,7 +997,7 @@
                 this.logoImg.onload = () => { this.logoLoaded = true; };
                 this.logoImg.onerror = () => { console.warn('⚠️ Logo nicht gefunden, verwende Platzhalter');
                     this.logoLoaded = false; };
-                this.logoImg.src = 'assets/images/logo.png';
+                this.logoImg.src = 'logo.png';
 
                 this.canvas = document.createElement('canvas');
                 this.canvas.width = this.width;
@@ -1344,7 +1055,6 @@
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
 
-                // Körper
                 ctx.shadowBlur = 30;
                 ctx.shadowColor = 'rgba(0,0,0,0.4)';
                 ctx.fillStyle = '#2a1a3a';
@@ -1355,7 +1065,6 @@
                 ctx.fillRect(cx - 20, h * 0.55, 40, 50);
                 ctx.shadowBlur = 0;
 
-                // Kopf
                 const headX = cx + Math.sin(this.breath * 0.5) * 3;
                 const headY = cy + Math.sin(this.breath * 0.3) * 2;
                 const headR = 90;
@@ -1371,7 +1080,6 @@
                 ctx.fill();
                 ctx.shadowBlur = 0;
 
-                // LOGO als Gesicht
                 if (this.logoLoaded && this.logoImg) {
                     const logoSize = 120;
                     ctx.save();
@@ -1388,7 +1096,6 @@
                     ctx.fillText('☀', headX, headY + 4);
                 }
 
-                // Wangen
                 if (emotion.blush > 0) {
                     ctx.globalAlpha = emotion.blush;
                     ctx.fillStyle = '#ff6b8a';
@@ -1404,7 +1111,6 @@
                     ctx.shadowBlur = 0;
                 }
 
-                // Augen
                 const eyeY = headY - 12,
                     spacing = 38,
                     eyeR = 18;
@@ -1448,7 +1154,6 @@
                     }
                 }
 
-                // Augenbrauen
                 ctx.strokeStyle = '#3a2a1a';
                 ctx.lineWidth = 3;
                 ctx.lineCap = 'round';
@@ -1461,7 +1166,6 @@
                     ctx.stroke();
                 }
 
-                // Nase
                 ctx.strokeStyle = '#c4a080';
                 ctx.lineWidth = 2.5;
                 ctx.beginPath();
@@ -1477,7 +1181,6 @@
                 ctx.arc(headX + 8, headY + 18, 4, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Mund
                 const mouthX = headX,
                     mouthY = headY + 52,
                     mouthType = emotion.mouthType || 'neutral';
@@ -1527,7 +1230,6 @@
                     ctx.stroke();
                 }
 
-                // Status
                 const status = this.isSpeaking ? '🔊' : this.isThinking ? '🧠' : '●';
                 ctx.fillStyle = this.isSpeaking ? '#00ff88' : this.isThinking ? '#6666ff' : '#00ff88';
                 ctx.font = 'bold 16px sans-serif';
@@ -1557,7 +1259,7 @@
         };
 
         // ============================================================
-        //  AI CORE – ULTIMATIVE LOKALE KI mit API-Key-Option
+        //  AI CORE – ULTIMATIVE LOKALE KI (wie gehabt)
         //  ============================================================
         const AICore = {
             isProcessing: false,
@@ -1630,7 +1332,6 @@
                     'Gute Frage! Worauf genau möchtest du hinaus? Ich helfe dir gerne weiter.',
                     'Da hast du mich neugierig gemacht! Erzähl mir mehr – was genau möchtest du wissen?'
                 ],
-                // Gesundheit / Arzt
                 'gesundheit': [
                     'Das Gesundheitszentrum hilft dir bei der Verwaltung deiner Arzttermine, Medikamente, Laborwerte und Gesundheitsdokumente. Ich kann dich dabei unterstützen, Bruder! 💙',
                     'Deine Gesundheit ist wichtig! Ich helfe dir, den Überblick zu behalten – Termine, Befunde, Medikamente.'
@@ -1643,12 +1344,10 @@
                     'Telemedizin ermöglicht virtuelle Arztbesuche – du kannst mit deinem Arzt sprechen, ohne das Haus zu verlassen. Möchtest du mehr darüber wissen, Bruder?',
                     'Telemedizin ist die Zukunft der Gesundheitsversorgung. Ich kann dir helfen, einen Termin zu vereinbaren.'
                 ],
-                // E-Mail
                 'email': [
                     'Die E-Mail-App ist dein zentrales Postfach. Du kannst Nachrichten schreiben, empfangen, beantworten und Anhänge verwalten. Soll ich eine neue E-Mail für dich vorbereiten?',
                     'E-Mails sind wichtig für die Kommunikation. Ich helfe dir gerne beim Verfassen, Korrigieren oder Übersetzen.'
                 ],
-                // Telefonie
                 'telefon': [
                     'Das Telefon Center verwaltet deine Kontakte und Anrufe. Sag mir einfach, wen du anrufen möchtest, Bruder! 📞',
                     'Mit der Telefonie-App kannst du Kontakte anrufen und Anrufprotokolle einsehen. Soll ich dir deine Kontakte anzeigen?'
@@ -1738,7 +1437,6 @@
             generateLocalReply(userText) {
                 const lower = userText.toLowerCase();
 
-                // Befehle
                 if (lower.includes('öffne notizen') || lower.includes('notiz') || lower.includes('notes')) {
                     AppManager.openApp('notes');
                     return 'Ich öffne die Notizen-App für dich, Bruder. 📝';
@@ -1772,17 +1470,15 @@
                     return 'Ich öffne die Telemedizin. 💊';
                 }
                 if (lower.includes('systemstatus') || lower.includes('status')) {
-                    return `✅ System läuft stabil, Bruder.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: ${this.useLocal ? 'Lokal' : 'Groq API'} aktiv\n☀️ Sonne = HalDo Core – klick sie an!`;
+                    return `✅ System läuft stabil, Bruder.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: ${this.useLocal ? 'Lokal' : 'Groq API'} aktiv`;
                 }
 
-                // Exakte Matches mit Variationen
                 for (const [key, variants] of Object.entries(this.knowledge)) {
                     if (lower.includes(key) && Array.isArray(variants)) {
                         return variants[Math.floor(Math.random() * variants.length)];
                     }
                 }
 
-                // Themen-Erkennung
                 const topics = ['philosophie', 'geschichte', 'physik', 'quanten', 'chemie', 'biologie', 'astronomie',
                     'programmierung', 'python', 'javascript', 'java', 'medizin', 'psychologie', 'religion',
                     'ezidentum', 'christentum', 'islam', 'ethik', 'kunst', 'musik', 'literatur', 'liebe', 'glück',
@@ -1795,7 +1491,6 @@
                     }
                 }
 
-                // Kontext-basiert
                 if (this.conversationHistory.length > 2) {
                     const lastTopics = this.conversationHistory.slice(-4).map(h => h.content || '').join(' ');
                     if (lastTopics.includes('philosophie') || lastTopics.includes('sinn')) {
@@ -1809,7 +1504,6 @@
                     }
                 }
 
-                // Fragen
                 if (lower.includes('?') || lower.includes('wie') || lower.includes('was') || lower.includes('warum')) {
                     const qs = [
                         'Das ist eine gute Frage, Bruder! 💙 Ich kann dir gerne mehr dazu erzählen. Worauf genau möchtest du hinaus?',
@@ -1819,7 +1513,6 @@
                     return qs[Math.floor(Math.random() * qs.length)];
                 }
 
-                // Standard
                 const standards = this.knowledge['standard'];
                 return standards[Math.floor(Math.random() * standards.length)];
             },
@@ -1830,7 +1523,7 @@
         };
 
         // ============================================================
-        //  APP MANAGER – ALLE 84+ APPS MIT ECHTER FUNKTION
+        //  APP MANAGER – ALLE APPS (wie gehabt)
         //  ============================================================
         const AppManager = {
             apps: [],
@@ -1847,7 +1540,6 @@
 
             getAppDefinitions() {
                 return [
-                    // SYSTEM
                     { id: 'app-center', name: 'App Center', icon: '📱', category: 'system' },
                     { id: 'settings', name: 'Einstellungen', icon: '⚙️', category: 'system' },
                     { id: 'system-monitor', name: 'System Monitor', icon: '📊', category: 'system' },
@@ -1873,8 +1565,6 @@
                     { id: 'migration', name: 'Migration', icon: '🔄', category: 'system' },
                     { id: 'rollback', name: 'Rollback', icon: '⏪', category: 'system' },
                     { id: 'recovery', name: 'Recovery', icon: '🔄', category: 'system' },
-
-                    // TOOLS
                     { id: 'notes', name: 'Notizen', icon: '📝', category: 'tools' },
                     { id: 'calculator', name: 'Rechner', icon: '🧮', category: 'tools' },
                     { id: 'calendar', name: 'Kalender', icon: '📅', category: 'tools' },
@@ -1890,15 +1580,11 @@
                     { id: 'zip', name: 'ZIP Manager', icon: '📦', category: 'tools' },
                     { id: 'file-manager', name: 'Dateien', icon: '📂', category: 'tools' },
                     { id: 'pdf-viewer', name: 'PDF Viewer', icon: '📕', category: 'tools' },
-
-                    // MEDIA
                     { id: 'music', name: 'Musik', icon: '🎵', category: 'media' },
                     { id: 'video-player', name: 'Video', icon: '🎬', category: 'media' },
                     { id: 'gallery', name: 'Galerie', icon: '🖼️', category: 'media' },
                     { id: 'image-editor', name: 'Bildbearbeitung', icon: '🎨', category: 'media' },
                     { id: 'media-center', name: 'Media Center', icon: '🎬', category: 'media' },
-
-                    // COMMUNICATION
                     { id: 'messages', name: 'Nachrichten', icon: '💬', category: 'communication' },
                     { id: 'contacts', name: 'Kontakte', icon: '👥', category: 'communication' },
                     { id: 'email', name: 'E-Mail', icon: '✉️', category: 'communication' },
@@ -1907,8 +1593,6 @@
                     { id: 'internet-center', name: 'Internet Center', icon: '🌐', category: 'communication' },
                     { id: 'call-center', name: 'Telefonie', icon: '📞', category: 'communication' },
                     { id: 'video-call', name: 'Videoanruf', icon: '📹', category: 'communication' },
-
-                    // AI
                     { id: 'haldo-ai', name: 'HalDo AI', icon: '🤖', category: 'ai' },
                     { id: 'ai-chat', name: 'AI Chat', icon: '💬', category: 'ai' },
                     { id: 'ai-memory', name: 'AI Memory', icon: '🧠', category: 'ai' },
@@ -1916,29 +1600,19 @@
                     { id: 'ai-command', name: 'AI Command', icon: '🎯', category: 'ai' },
                     { id: 'ai-knowledge', name: 'AI Knowledge', icon: '📚', category: 'ai' },
                     { id: 'ai-automation', name: 'AI Automation', icon: '🤖', category: 'ai' },
-
-                    // COSMIC
                     { id: 'cosmic-world', name: 'Cosmic World', icon: '🌌', category: 'cosmic' },
                     { id: 'planet-center', name: 'Planeten', icon: '🪐', category: 'cosmic' },
                     { id: 'cosmic-desktop', name: 'Cosmic Desktop', icon: '🖥️', category: 'cosmic' },
-
-                    // OFFICE
                     { id: 'documents', name: 'Dokumente', icon: '📄', category: 'office' },
                     { id: 'office-center', name: 'Office Center', icon: '📊', category: 'office' },
-
-                    // ENTERTAINMENT & HEALTH
                     { id: 'games-center', name: 'Games', icon: '🎮', category: 'entertainment' },
                     { id: 'health-center', name: 'Gesundheit', icon: '🏥', category: 'health' },
                     { id: 'doctor-center', name: 'Ärzte Center', icon: '👨‍⚕️', category: 'health' },
                     { id: 'telemedicine', name: 'Telemedizin', icon: '💊', category: 'health' },
                     { id: 'university-center', name: 'University', icon: '🎓', category: 'entertainment' },
                     { id: 'language-center', name: 'Language', icon: '🌍', category: 'entertainment' },
-
-                    // PERSONAL
                     { id: 'your-haldo', name: 'Your HalDo', icon: '💙', category: 'personal' },
                     { id: 'personal-center', name: 'Personal Center', icon: '👤', category: 'personal' },
-
-                    // EXTENSIONS
                     { id: 'extensions', name: 'Extensions', icon: '🧩', category: 'extensions' },
                     { id: 'app-runtime', name: 'App Runtime', icon: '⚡', category: 'extensions' },
                     { id: 'app-registry', name: 'App Registry', icon: '📋', category: 'extensions' },
@@ -1954,8 +1628,7 @@
                     this.renderDesktopIcons();
                 }
                 if (appId === 'cosmic-world') {
-                    if (!CosmicWorld.isReady) CosmicWorld.init();
-                    else alert('🌌 Cosmic World läuft bereits, Bruder!');
+                    alert('🌌 Cosmic World ist in der Lite-Version deaktiviert – bitte Three.js nachladen.');
                     return;
                 }
                 if (appId === 'haldo-ai' || appId === 'ai-chat') {
@@ -2044,6 +1717,7 @@
             },
 
             getAppContent(appId) {
+                // Kompakte Version – alle Apps wie gehabt, aber ohne 3D-Inhalte
                 switch (appId) {
                     case 'notes':
                         return this.getNotesUI();
@@ -2206,7 +1880,7 @@
                 }
             },
 
-            // ===== NOTIZEN =====
+            // ===== APP-UI-FUNKTIONEN (wie gehabt) =====
             getNotesUI() {
                 const notes = Storage.get('notes', []);
                 return `
@@ -2238,7 +1912,6 @@
                 if (body) body.innerHTML = this.getNotesUI();
             },
 
-            // ===== RECHNER =====
             getCalculatorUI() {
                 return `
                     <div style="max-width:260px;margin:0 auto;">
@@ -2263,7 +1936,6 @@
                 }
             },
 
-            // ===== KALENDER =====
             getCalendarUI() {
                 const now = new Date();
                 const month = now.toLocaleString('de', { month: 'long' });
@@ -2280,7 +1952,6 @@
                 `;
             },
 
-            // ===== MUSIK =====
             getMusicUI() {
                 return `
                     <div style="text-align:center;padding:10px;">
@@ -2296,7 +1967,6 @@
                 `;
             },
 
-            // ===== NACHRICHTEN =====
             getMessagesUI() {
                 const msgs = Storage.get('messages', [{ from: 'HalDo', text: 'Hallo Bruder! 💙 Ich bin immer für dich da!',
                     time: Date.now() }]);
@@ -2320,7 +1990,6 @@
                 if (body) body.innerHTML = this.getMessagesUI();
             },
 
-            // ===== KONTAKTE =====
             getContactsUI() {
                 const contacts = Storage.get('contacts', [{ name: 'HalDo AI', phone: '💙 Immer da' }]);
                 return `
@@ -2331,7 +2000,6 @@
                 `;
             },
 
-            // ===== E-MAIL =====
             getEmailUI() {
                 const emails = Storage.get('emails', [{ from: 'haldo@local.com', subject: 'Willkommen, Bruder!',
                     body: 'Dein HalDo AI OS ist bereit! 💙' }]);
@@ -2342,7 +2010,6 @@
                 `;
             },
 
-            // ===== BROWSER =====
             getBrowserUI() {
                 return `
                     <div style="display:flex;flex-direction:column;height:100%;">
@@ -2363,7 +2030,6 @@
                 try { frame.src = url; } catch { alert('Ungültige URL, Bruder!'); }
             },
 
-            // ===== ERINNERUNGEN =====
             getRemindersUI() {
                 const reminders = Storage.get('reminders', []);
                 return `
@@ -2395,7 +2061,6 @@
                 if (body) body.innerHTML = this.getRemindersUI();
             },
 
-            // ===== JOURNAL =====
             getJournalUI() {
                 const entries = Storage.get('journal', []);
                 return `
@@ -2420,7 +2085,6 @@
                 if (body) body.innerHTML = this.getJournalUI();
             },
 
-            // ===== TERMINAL =====
             getTerminalUI() {
                 return `
                     <div style="display:flex;flex-direction:column;height:100%;">
@@ -2484,7 +2148,6 @@
                 output.scrollTop = output.scrollHeight;
             },
 
-            // ===== THEMES =====
             getThemesUI() {
                 const current = document.documentElement.getAttribute('data-theme') || 'dark';
                 return `
@@ -2498,7 +2161,6 @@
                 `;
             },
 
-            // ===== APP CENTER =====
             getAppCenterUI() {
                 const categories = [...new Set(this.apps.map(a => a.category))];
                 return `
@@ -2519,7 +2181,6 @@
                 `;
             },
 
-            // ===== AI CHAT =====
             openAIChat(app) {
                 const content = `
                     <div style="display:flex;flex-direction:column;height:100%;padding:0;">
@@ -2589,7 +2250,6 @@
                 rec.start();
             },
 
-            // ===== EINSTELLUNGEN – MIT API-KEY-EINGABE =====
             openSettings(app) {
                 const apiKey = Storage.get('groq_api_key', '');
                 const content = `
@@ -2666,7 +2326,6 @@
                 }
             },
 
-            // ===== KATEGORIEN =====
             openCategory(category) {
                 const apps = this.apps.filter(a => a.category === category);
                 if (!apps.length) { alert(`Keine Apps in "${category}", Bruder!`); return; }
@@ -2727,9 +2386,11 @@
             Storage.set('logs', logs);
         };
 
-        console.log('💙❤️🚀 HalDo AI OS 25.0.0 Cosmic Evolution geladen, Bruder!');
+        console.log('💙❤️🚀 HalDo AI OS 25.0.0 Lite geladen, Bruder!');
         console.log('🔒 KI: ' + (AICore.useLocal ? 'Lokal' : 'Groq API'));
-        console.log('☀️ Klick die Sonne an – HalDo AI öffnet sich!');
-        console.log('💡 HalDo antwortet abwechslungsreich und kontextbewusst!');
         console.log('📱 ' + AppManager.apps.length + ' Apps installiert – alle funktionsfähig!');
         console.log('⚙️ API-Key in den Einstellungen (⚙️ → AI & Memory) eintragen!');
+        console.log('🌌 Cosmic World ist in der Lite-Version deaktiviert – Three.js kann nachgeladen werden.');
+    </script>
+</body>
+</html>
