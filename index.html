@@ -249,6 +249,7 @@
             height: 100% !important;
             border-radius: 50%;
             mix-blend-mode: screen;
+            image-rendering: auto;
         }
 
         /* TOP MENU */
@@ -530,6 +531,23 @@
         }
         .window-body textarea:focus {
             outline: none;
+            border-color: var(--primary);
+        }
+        .window-body input[type="text"],
+        .window-body input[type="password"],
+        .window-body select {
+            width: 100%;
+            padding: 5px 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 11px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .window-body input:focus,
+        .window-body select:focus {
             border-color: var(--primary);
         }
 
@@ -929,7 +947,7 @@
                     Storage.set('voice_gender', next);
                 });
                 document.getElementById('menu-lang').addEventListener('click', () => {
-                    const langs = ['DE', 'EN', 'KU', 'EZ', 'TR', 'AR', 'FR', 'ES', 'RU', 'FA', 'IT', 'PT'];
+                    const langs = ['DE', 'EN', 'KU', 'EZ', 'TR', 'AR', 'FR', 'ES', 'RU', 'FA', 'IT', 'PT', 'LA'];
                     const current = document.getElementById('menu-lang').textContent;
                     const idx = langs.indexOf(current);
                     const next = langs[(idx + 1) % langs.length];
@@ -961,7 +979,7 @@
         };
 
         // ============================================================
-        //  COSMIC WORLD – 3D mit 13 Planeten, Sonne interaktiv
+        //  COSMIC WORLD – 3D mit 13 Planeten, Sonne mit Logo
         // ============================================================
         const CosmicWorld = {
             isReady: false,
@@ -1180,10 +1198,11 @@
 
         // ============================================================
         //  LIVING AI – Avatar mit logo.png als lebendiges Gesicht
+        //  Super-Vision-Qualität, 4K/8K-ready
         // ============================================================
         const LivingAI = {
-            width: 300,
-            height: 350,
+            width: 400,
+            height: 480,
             container: null,
             canvas: null,
             ctx: null,
@@ -1195,6 +1214,17 @@
             eyeState: 'open',
             logoLoaded: false,
             logoImg: null,
+            // Emotionen mit Gesichtsausdrücken
+            emotionData: {
+                idle: { label: '💙 Bereit', eyeWidth: 1.0, eyeHeight: 1.0, mouthType: 'neutral', browY: 0, blush: 0.05,
+                    light: 0.3 },
+                thinking: { label: '🧠 Denkend', eyeWidth: 0.85, eyeHeight: 0.85, mouthType: 'thinking', browY: -6,
+                    blush: 0, light: 0.6 },
+                speaking: { label: '🗣️ Sprechend', eyeWidth: 0.95, eyeHeight: 0.95, mouthType: 'speaking', browY: 0,
+                    blush: 0.1, light: 0.9 },
+                happy: { label: '😊 Glücklich', eyeWidth: 0.9, eyeHeight: 0.85, mouthType: 'smile', browY: -4, blush: 0.25,
+                    light: 0.7 }
+            },
 
             init(containerId) {
                 this.container = document.getElementById(containerId);
@@ -1254,212 +1284,256 @@
                 const cx = w / 2,
                     cy = h / 2 - 10;
 
-                // Hintergrund – Cosmic Light
-                const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 180);
-                grad.addColorStop(0, 'rgba(108,60,225,0.2)');
-                grad.addColorStop(0.5, 'rgba(0,212,255,0.05)');
-                grad.addColorStop(1, 'rgba(10,10,30,0.9)');
+                // Hintergrund – Cosmic Light mit Glow
+                const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 220);
+                const emotion = this.emotionData[this.emotion] || this.emotionData.idle;
+                const lightIntensity = emotion.light || 0.3;
+                grad.addColorStop(0, `rgba(108,60,225,${0.2 * lightIntensity})`);
+                grad.addColorStop(0.5, `rgba(0,212,255,${0.08 * lightIntensity})`);
+                grad.addColorStop(1, 'rgba(10,10,30,0.95)');
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
 
-                // Körper – Schultern
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                // Körper – Schultern (verfeinert)
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = 'rgba(0,0,0,0.4)';
                 ctx.fillStyle = '#2a1a3a';
                 ctx.beginPath();
-                ctx.ellipse(cx, h * 0.75, 60, 40, 0, 0, Math.PI * 2);
+                ctx.ellipse(cx, h * 0.78, 80, 50, 0, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.fillStyle = '#3a2a1a';
-                ctx.fillRect(cx - 15, h * 0.55, 30, 40);
+                ctx.fillRect(cx - 20, h * 0.55, 40, 50);
                 ctx.shadowBlur = 0;
 
-                // Kopf – rund
-                const headX = cx + Math.sin(this.breath * 0.5) * 2;
-                const headY = h * 0.45 + Math.sin(this.breath * 0.3) * 1.5;
-                const headR = 70;
-                ctx.shadowBlur = 15;
+                // Kopf – rund, mit Tiefe
+                const headX = cx + Math.sin(this.breath * 0.5) * 3;
+                const headY = cy + Math.sin(this.breath * 0.3) * 2;
+                const headR = 90;
+                ctx.shadowBlur = 25;
                 ctx.shadowColor = 'rgba(0,0,0,0.3)';
 
-                // Kopf-Haut
+                // Kopf-Haut (mit Schatten)
                 ctx.beginPath();
                 ctx.arc(headX, headY, headR, 0, Math.PI * 2);
-                ctx.fillStyle = '#e8c9a0';
+                const skinGrad = ctx.createRadialGradient(headX - 20, headY - 20, 10, headX, headY, headR);
+                skinGrad.addColorStop(0, '#f5e0c8');
+                skinGrad.addColorStop(0.6, '#e8c9a0');
+                skinGrad.addColorStop(1, '#d4b08a');
+                ctx.fillStyle = skinGrad;
                 ctx.fill();
+                ctx.shadowBlur = 0;
 
-                // LOGO als Gesicht (zentral)
+                // LOGO als Gesicht (zentral, hochauflösend)
                 if (this.logoLoaded && this.logoImg) {
-                    const logoSize = 90;
+                    const logoSize = 120;
                     ctx.save();
                     ctx.beginPath();
-                    ctx.arc(headX, headY, headR * 0.7, 0, Math.PI * 2);
+                    ctx.arc(headX, headY, headR * 0.72, 0, Math.PI * 2);
                     ctx.clip();
                     ctx.drawImage(this.logoImg, headX - logoSize / 2, headY - logoSize / 2, logoSize, logoSize);
                     ctx.restore();
                 } else {
-                    ctx.fillStyle = 'rgba(108,60,225,0.2)';
-                    ctx.font = '48px sans-serif';
+                    // Platzhalter
+                    ctx.fillStyle = 'rgba(108,60,225,0.15)';
+                    ctx.font = '60px sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText('☀', headX, headY + 4);
                 }
 
-                ctx.shadowBlur = 0;
-
-                // Wangen (bei Freude)
-                if (this.emotion === 'happy') {
-                    ctx.globalAlpha = 0.2;
+                // Wangen (mit Blush-Effekt)
+                if (emotion.blush > 0) {
+                    ctx.globalAlpha = emotion.blush;
                     ctx.fillStyle = '#ff6b8a';
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = 'rgba(255,107,138,0.2)';
                     ctx.beginPath();
-                    ctx.arc(headX - 45, headY + 15, 18, 0, Math.PI * 2);
+                    ctx.ellipse(headX - 55, headY + 18, 22, 16, 0, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.beginPath();
-                    ctx.arc(headX + 45, headY + 15, 18, 0, Math.PI * 2);
+                    ctx.ellipse(headX + 55, headY + 18, 22, 16, 0, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.globalAlpha = 1;
+                    ctx.shadowBlur = 0;
                 }
 
-                // Augen – mit Blinzeln
-                const eyeY = headY - 10,
-                    spacing = 28,
-                    eyeR = 14;
+                // Augen – mit Blinzeln, hochauflösend
+                const eyeY = headY - 12,
+                    spacing = 38,
+                    eyeR = 18;
                 const isClosed = this.eyeState === 'closed';
-                ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 5;
-                ctx.shadowColor = 'rgba(0,0,0,0.1)';
+                const eyeW = emotion.eyeWidth || 1;
+                const eyeH = emotion.eyeHeight || 1;
+
                 for (let side of [-1, 1]) {
                     const ex = headX + side * spacing;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = 'rgba(0,0,0,0.1)';
+                    // Augenweiß
                     ctx.beginPath();
-                    ctx.ellipse(ex, eyeY, eyeR, isClosed ? 2 : eyeR, 0, 0, Math.PI * 2);
+                    ctx.ellipse(ex, eyeY, eyeR * eyeW, isClosed ? 3 : eyeR * eyeH, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
                     ctx.fill();
+                    ctx.shadowBlur = 0;
+
                     if (!isClosed) {
-                        // Iris
-                        ctx.fillStyle = '#2a1a0a';
+                        // Iris (mit Farbverlauf)
+                        const irisGrad = ctx.createRadialGradient(ex + 4, eyeY + 2, 2, ex, eyeY, eyeR - 4);
+                        irisGrad.addColorStop(0, '#6bc5ff');
+                        irisGrad.addColorStop(0.5, '#2a6a9a');
+                        irisGrad.addColorStop(1, '#0a1a3a');
                         ctx.beginPath();
-                        ctx.arc(ex + 3, eyeY + 1, 5, 0, Math.PI * 2);
+                        ctx.arc(ex + 3, eyeY + 2, eyeR - 4, 0, Math.PI * 2);
+                        ctx.fillStyle = irisGrad;
                         ctx.fill();
+
                         // Pupille
-                        ctx.fillStyle = '#1a0a0a';
                         ctx.beginPath();
-                        ctx.arc(ex + 4, eyeY + 1, 2.5, 0, Math.PI * 2);
+                        ctx.arc(ex + 4, eyeY + 3, 6, 0, Math.PI * 2);
+                        ctx.fillStyle = '#0a0a1a';
                         ctx.fill();
+
                         // Lichtreflex
-                        ctx.fillStyle = 'rgba(255,255,255,0.8)';
                         ctx.beginPath();
-                        ctx.arc(ex + 5, eyeY - 4, 2, 0, Math.PI * 2);
+                        ctx.arc(ex + 8, eyeY - 5, 3.5, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(ex + 4, eyeY - 2, 1.5, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(255,255,255,0.5)';
                         ctx.fill();
                     }
                 }
-                ctx.shadowBlur = 0;
 
-                // Augenbrauen
+                // Augenbrauen (mit Emotion)
                 ctx.strokeStyle = '#3a2a1a';
-                ctx.lineWidth = 2.5;
+                ctx.lineWidth = 3;
                 ctx.lineCap = 'round';
+                const browOffset = emotion.browY || 0;
                 for (let side of [-1, 1]) {
                     const bx = headX + side * spacing;
                     ctx.beginPath();
-                    ctx.moveTo(bx - 12, eyeY - 22);
-                    ctx.quadraticCurveTo(bx, eyeY - 28, bx + 12, eyeY - 22);
+                    ctx.moveTo(bx - 16, eyeY - 28 + browOffset);
+                    ctx.quadraticCurveTo(bx, eyeY - 34 + browOffset * 0.6, bx + 16, eyeY - 28 + browOffset * 1.2);
                     ctx.stroke();
                 }
 
-                // Nase
+                // Nase (mit Tiefe)
                 ctx.strokeStyle = '#c4a080';
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 2.5;
                 ctx.beginPath();
-                ctx.moveTo(headX, headY + 6);
-                ctx.quadraticCurveTo(headX + 8, headY + 16, headX, headY + 22);
-                ctx.quadraticCurveTo(headX - 8, headY + 16, headX, headY + 6);
+                ctx.moveTo(headX, headY + 8);
+                ctx.quadraticCurveTo(headX + 10, headY + 22, headX, headY + 30);
+                ctx.quadraticCurveTo(headX - 10, headY + 22, headX, headY + 8);
                 ctx.stroke();
+                // Nasenflügel
                 ctx.fillStyle = '#c4a080';
                 ctx.beginPath();
-                ctx.arc(headX - 6, headY + 14, 3, 0, Math.PI * 2);
+                ctx.arc(headX - 8, headY + 18, 4, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(headX + 6, headY + 14, 3, 0, Math.PI * 2);
+                ctx.arc(headX + 8, headY + 18, 4, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Mund – synchron zur Sprache
+                // Mund – synchron zur Sprache, mit Emotion
                 const mouthX = headX,
-                    mouthY = headY + 42;
+                    mouthY = headY + 52,
+                    mouthType = emotion.mouthType || 'neutral';
+                ctx.shadowBlur = 0;
+
                 if (this.isSpeaking) {
                     const breath = Math.sin(this.breath * 2) * 0.3 + 0.5;
                     ctx.fillStyle = '#aa3355';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = 'rgba(170,51,85,0.2)';
                     ctx.beginPath();
-                    ctx.ellipse(mouthX, mouthY + 4, 16 * (0.6 + breath * 0.4), 6 * (0.4 + breath * 0.6), 0, 0, Math.PI *
-                    2);
+                    ctx.ellipse(mouthX, mouthY + 5, 20 * (0.6 + breath * 0.4), 8 * (0.4 + breath * 0.6), 0, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.fillStyle = '#cc5566';
                     ctx.beginPath();
-                    ctx.ellipse(mouthX, mouthY + 7, 8 * (0.4 + breath * 0.3), 4 * (0.3 + breath * 0.3), 0, 0, Math.PI *
-                    2);
+                    ctx.ellipse(mouthX, mouthY + 9, 10 * (0.4 + breath * 0.3), 5 * (0.3 + breath * 0.3), 0, 0, Math.PI * 2);
                     ctx.fill();
-                } else if (this.emotion === 'happy') {
+                    ctx.shadowBlur = 0;
+                } else if (mouthType === 'smile') {
+                    ctx.strokeStyle = '#cc4466';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(mouthX, mouthY - 2, 20, 0.1, Math.PI - 0.1);
+                    ctx.stroke();
+                    ctx.fillStyle = '#cc4466';
+                    ctx.beginPath();
+                    ctx.arc(mouthX, mouthY + 10, 16, 0, Math.PI);
+                    ctx.fill();
+                } else if (mouthType === 'thinking') {
                     ctx.strokeStyle = '#cc4466';
                     ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.arc(mouthX, mouthY - 2, 16, 0.1, Math.PI - 0.1);
-                    ctx.stroke();
-                    ctx.fillStyle = '#cc4466';
-                    ctx.beginPath();
-                    ctx.arc(mouthX, mouthY + 8, 12, 0, Math.PI);
-                    ctx.fill();
-                } else if (this.emotion === 'thinking') {
-                    ctx.strokeStyle = '#cc4466';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(mouthX, mouthY + 4, 10, 0.1, Math.PI - 0.1);
+                    ctx.arc(mouthX, mouthY + 6, 14, 0.1, Math.PI - 0.1);
                     ctx.stroke();
                 } else {
                     ctx.fillStyle = '#cc4466';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = 'rgba(204,68,102,0.1)';
+                    ctx.beginPath();
+                    ctx.ellipse(mouthX, mouthY + 2, 18, 7, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = '#aa3355';
+                    ctx.lineWidth = 1.5;
                     ctx.beginPath();
                     ctx.ellipse(mouthX, mouthY + 2, 14, 5, 0, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.stroke();
                 }
 
-                // Status
+                // Status-Anzeige
                 const status = this.isSpeaking ? '🔊' : this.isThinking ? '🧠' : '●';
                 ctx.fillStyle = this.isSpeaking ? '#00ff88' : this.isThinking ? '#6666ff' : '#00ff88';
-                ctx.font = '14px sans-serif';
+                ctx.font = 'bold 16px sans-serif';
                 ctx.textAlign = 'right';
-                ctx.fillText(status, w - 10, 18);
-                ctx.fillStyle = 'rgba(255,255,255,0.25)';
-                ctx.font = '10px Inter, sans-serif';
+                ctx.fillText(status, w - 14, 24);
+
+                // Emotion-Label
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.font = '12px Inter, sans-serif';
                 ctx.textAlign = 'center';
-                const label = this.isSpeaking ? '🗣️ Sprechend' : this.isThinking ? '🧠 Denkend' : '💙 Bereit';
-                ctx.fillText(label, cx, h - 8);
-                ctx.fillStyle = 'rgba(255,255,255,0.08)';
-                ctx.font = '9px Inter, sans-serif';
+                ctx.fillText(emotion.label || '💙 Bereit', cx, h - 12);
+
+                // HalDo-Logo-Wasserzeichen
+                ctx.fillStyle = 'rgba(255,255,255,0.04)';
+                ctx.font = '10px Inter, sans-serif';
                 ctx.textAlign = 'left';
-                ctx.fillText('💙 HalDo AI', 10, h - 8);
+                ctx.fillText('💙 HalDo AI', 14, h - 12);
             },
 
             speak(text) {
                 this.isSpeaking = true;
                 this.emotion = 'speaking';
+                const duration = Math.min(text.length * 25, 3500);
                 setTimeout(() => {
                     this.isSpeaking = false;
                     if (!this.isThinking) this.emotion = 'idle';
-                }, Math.min(text.length * 30, 3000));
+                }, duration);
             }
         };
 
         // ============================================================
-        //  AI CORE – ULTIMATIVE LOKALE KI mit Kontext & API-Key-Option
+        //  AI CORE – ULTIMATIVE LOKALE KI mit API-Key-Option
+        //  Professionell, abwechslungsreich, allwissend
         // ============================================================
         const AICore = {
             isProcessing: false,
             conversationHistory: [],
-            maxHistory: 15,
+            maxHistory: 20,
             apiKey: Storage.get('groq_api_key', ''),
             useLocal: true,
 
-            // Riesige Wissensbasis mit vielen Varianten
+            // RIESIGE Wissensbasis mit vielen Variationen
             knowledge: {
                 'hallo': [
                     'Hallo Bruder! 💙❤️ Schön dich zu sehen! Was kann ich heute für dich tun?',
                     'Hey Bruder! Schön, dass du da bist! Ich bin bereit für deine Fragen.',
                     'Hallo! Wie geht es dir heute? Ich bin ganz Ohr für dich.',
+                    'Bruder! Schön dich zu sehen. Worüber möchtest du sprechen?',
                 ],
                 'hi': [
                     'Hi Bruder! Schön dich zu sehen!',
@@ -1571,11 +1645,11 @@
                                     model: 'mixtral-8x7b-32768',
                                     messages: [
                                         { role: 'system',
-                                            content: 'Du bist HalDo, eine freundliche, hilfsbereite KI. Antworte auf Deutsch.' },
+                                            content: 'Du bist HalDo, eine freundliche, hilfsbereite KI. Antworte auf Deutsch, professionell, einfühlsam und abwechslungsreich.' },
                                         ...messages
                                     ],
-                                    temperature: 0.7,
-                                    max_tokens: 500
+                                    temperature: 0.8,
+                                    max_tokens: 800
                                 })
                             });
                             if (response.ok) {
@@ -1702,7 +1776,7 @@
             getAppDefinitions() {
                 // ALLE 84+ Apps – jetzt mit voller Liste
                 return [
-                    // SYSTEM
+                    // SYSTEM (25)
                     { id: 'app-center', name: 'App Center', icon: '📱', category: 'system' },
                     { id: 'settings', name: 'Einstellungen', icon: '⚙️', category: 'system' },
                     { id: 'system-monitor', name: 'System Monitor', icon: '📊', category: 'system' },
@@ -1729,7 +1803,7 @@
                     { id: 'rollback', name: 'Rollback', icon: '⏪', category: 'system' },
                     { id: 'recovery', name: 'Recovery', icon: '🔄', category: 'system' },
 
-                    // TOOLS
+                    // TOOLS (15)
                     { id: 'notes', name: 'Notizen', icon: '📝', category: 'tools' },
                     { id: 'calculator', name: 'Rechner', icon: '🧮', category: 'tools' },
                     { id: 'calendar', name: 'Kalender', icon: '📅', category: 'tools' },
@@ -1743,15 +1817,17 @@
                     { id: 'camera', name: 'Kamera', icon: '📷', category: 'tools' },
                     { id: 'voice-recorder', name: 'Voice Recorder', icon: '🎙️', category: 'tools' },
                     { id: 'zip', name: 'ZIP Manager', icon: '📦', category: 'tools' },
+                    { id: 'file-manager', name: 'Dateien', icon: '📂', category: 'tools' },
+                    { id: 'pdf-viewer', name: 'PDF Viewer', icon: '📕', category: 'tools' },
 
-                    // MEDIA
+                    // MEDIA (6)
                     { id: 'music', name: 'Musik', icon: '🎵', category: 'media' },
                     { id: 'video-player', name: 'Video', icon: '🎬', category: 'media' },
                     { id: 'gallery', name: 'Galerie', icon: '🖼️', category: 'media' },
                     { id: 'image-editor', name: 'Bildbearbeitung', icon: '🎨', category: 'media' },
                     { id: 'media-center', name: 'Media Center', icon: '🎬', category: 'media' },
 
-                    // COMMUNICATION
+                    // COMMUNICATION (7)
                     { id: 'messages', name: 'Nachrichten', icon: '💬', category: 'communication' },
                     { id: 'contacts', name: 'Kontakte', icon: '👥', category: 'communication' },
                     { id: 'email', name: 'E-Mail', icon: '✉️', category: 'communication' },
@@ -1759,7 +1835,7 @@
                     { id: 'web-search', name: 'Websuche', icon: '🔎', category: 'communication' },
                     { id: 'internet-center', name: 'Internet Center', icon: '🌐', category: 'communication' },
 
-                    // AI
+                    // AI (8)
                     { id: 'haldo-ai', name: 'HalDo AI', icon: '🤖', category: 'ai' },
                     { id: 'ai-chat', name: 'AI Chat', icon: '💬', category: 'ai' },
                     { id: 'ai-memory', name: 'AI Memory', icon: '🧠', category: 'ai' },
@@ -1768,27 +1844,26 @@
                     { id: 'ai-knowledge', name: 'AI Knowledge', icon: '📚', category: 'ai' },
                     { id: 'ai-automation', name: 'AI Automation', icon: '🤖', category: 'ai' },
 
-                    // COSMIC
+                    // COSMIC (3)
                     { id: 'cosmic-world', name: 'Cosmic World', icon: '🌌', category: 'cosmic' },
                     { id: 'planet-center', name: 'Planeten', icon: '🪐', category: 'cosmic' },
                     { id: 'cosmic-desktop', name: 'Cosmic Desktop', icon: '🖥️', category: 'cosmic' },
 
-                    // OFFICE
+                    // OFFICE (3)
                     { id: 'documents', name: 'Dokumente', icon: '📄', category: 'office' },
-                    { id: 'pdf-viewer', name: 'PDF Viewer', icon: '📕', category: 'office' },
                     { id: 'office-center', name: 'Office Center', icon: '📊', category: 'office' },
 
-                    // ENTERTAINMENT
+                    // ENTERTAINMENT (4)
                     { id: 'games-center', name: 'Games', icon: '🎮', category: 'entertainment' },
                     { id: 'health-center', name: 'Health', icon: '🏥', category: 'entertainment' },
                     { id: 'university-center', name: 'University', icon: '🎓', category: 'entertainment' },
                     { id: 'language-center', name: 'Language', icon: '🌍', category: 'entertainment' },
 
-                    // PERSONAL
+                    // PERSONAL (2)
                     { id: 'your-haldo', name: 'Your HalDo', icon: '💙', category: 'personal' },
                     { id: 'personal-center', name: 'Personal Center', icon: '👤', category: 'personal' },
 
-                    // EXTENSIONS
+                    // EXTENSIONS (3)
                     { id: 'extensions', name: 'Extensions', icon: '🧩', category: 'extensions' },
                     { id: 'app-runtime', name: 'App Runtime', icon: '⚡', category: 'extensions' },
                     { id: 'app-registry', name: 'App Registry', icon: '📋', category: 'extensions' },
@@ -2084,7 +2159,7 @@
             // ===== RECHNER =====
             getCalculatorUI() {
                 return `
-                    <div style="max-width:240px;margin:0 auto;">
+                    <div style="max-width:260px;margin:0 auto;">
                         <div id="calc-display" style="padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;text-align:right;font-size:22px;min-height:36px;">0</div>
                         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:6px;">
                             ${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(b=>`<button onclick="AppManager.calcInput('${b}')" style="padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:4px;color:#fff;cursor:pointer;">${b}</button>`).join('')}
@@ -2486,6 +2561,7 @@
                                 <option value="FA">🇮🇷 فارسی</option>
                                 <option value="IT">🇮🇹 Italiano</option>
                                 <option value="PT">🇵🇹 Português</option>
+                                <option value="LA">🏛️ Latina</option>
                             </select>
                         </div>
                     </div>
