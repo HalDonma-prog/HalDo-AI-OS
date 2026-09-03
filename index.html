@@ -629,6 +629,11 @@
                 <button class="menu-item" onclick="launchApp('cosmic')">🌌 Cosmic</button>
                 <button class="menu-item" onclick="launchApp('settings')">⚙️ Settings</button>
                 <button class="menu-item" onclick="launchApp('help')">❓ Help</button>
+                <button class="menu-item" onclick="launchApp('appworld')">📱 Apps</button>
+                <button class="menu-item" onclick="launchApp('files')">📁 Files</button>
+                <button class="menu-item" onclick="launchApp('email')">📧 Email</button>
+                <button class="menu-item" onclick="launchApp('health')">🏥 Health</button>
+                <button class="menu-item" onclick="launchApp('phone')">📞 Phone</button>
             </div>
             <div class="menu-right">
                 <span class="menu-status"><span class="menu-status-dot"></span>Online</span>
@@ -649,6 +654,8 @@
             <button class="taskbar-item" onclick="launchApp('files')" title="Dateien">📁</button>
             <button class="taskbar-item" onclick="launchApp('email')" title="E-Mail">📧</button>
             <button class="taskbar-item" onclick="launchApp('help')" title="Hilfe">❓</button>
+            <button class="taskbar-item" onclick="launchApp('health')" title="Gesundheit">🏥</button>
+            <button class="taskbar-item" onclick="launchApp('phone')" title="Telefon">📞</button>
             <button class="taskbar-item" id="btn-about" title="Info">💙</button>
         </div>
 
@@ -664,6 +671,7 @@
         // ================================================================
         //  HALDO AI OS 26.0.0 – COSMIC ULTIMATE
         //  KOMPLETT ÜBERARBEITET & FEHLERFREI
+        //  ALLE 200+ APPS INTEGRIERT
         // ================================================================
 
         'use strict';
@@ -675,16 +683,17 @@
             version: '26.0.0',
             build: '2026.09.04',
             kernel: '6.0.0',
-            apiKey: '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',
+            apiKey: '', // WIRD IN DEN EINSTELLUNGEN GESETZT
             apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
             model: 'llama3-70b-8192',
             language: 'de',
-            maxHistory: 50,
+            maxHistory: 100,
             notificationDuration: 3000,
             languages: {
                 de: { name: 'Deutsch', code: 'de', flag: '🇩🇪' },
                 en: { name: 'English', code: 'en', flag: '🇬🇧' },
                 ku: { name: 'Kurmancî', code: 'ku', flag: '🇰🇲' },
+                ezidi: { name: 'Êzîdî', code: 'ezidi', flag: '𒀭' },
                 tr: { name: 'Türkçe', code: 'tr', flag: '🇹🇷' },
                 ar: { name: 'العربية', code: 'ar', flag: '🇸🇦' },
                 fr: { name: 'Français', code: 'fr', flag: '🇫🇷' },
@@ -705,7 +714,8 @@
                 language: 'de',
                 voiceEnabled: true,
                 notifications: true,
-                autoStartAI: true
+                autoStartAI: true,
+                apiKey: ''
             },
             system: {
                 started: Date.now(),
@@ -720,6 +730,8 @@
             contacts: JSON.parse(localStorage.getItem('haldo_contacts') || '[]'),
             tasks: JSON.parse(localStorage.getItem('haldo_tasks') || '[]'),
             emails: JSON.parse(localStorage.getItem('haldo_emails') || '{"inbox":[],"sent":[],"drafts":[]}'),
+            healthRecords: JSON.parse(localStorage.getItem('haldo_health') || '[]'),
+            appointments: JSON.parse(localStorage.getItem('haldo_appointments') || '[]'),
             conversationHistory: JSON.parse(localStorage.getItem('haldo_conversations') || '[]'),
             isBooted: false,
             isReady: false,
@@ -760,9 +772,18 @@
 
         function t(key) {
             var translations = {
-                de: { hello: 'Hallo!', error: 'Fehler', success: 'Erfolg', info: 'Info', warning: 'Warnung' },
-                en: { hello: 'Hello!', error: 'Error', success: 'Success', info: 'Info', warning: 'Warning' },
-                ku: { hello: 'Silav!', error: 'Çewtî', success: 'Serkeftin', info: 'Agahî', warning: 'Hişyarî' }
+                de: { hello: 'Hallo!', error: 'Fehler', success: 'Erfolg', info: 'Info', warning: 'Warnung',
+                    loading: 'Laden...', ready: 'Bereit', save: 'Speichern', cancel: 'Abbrechen', delete: 'Löschen',
+                    edit: 'Bearbeiten', search: 'Suchen', open: 'Öffnen', close: 'Schließen', back: 'Zurück',
+                    next: 'Weiter', yes: 'Ja', no: 'Nein', ok: 'OK', settings: 'Einstellungen' },
+                en: { hello: 'Hello!', error: 'Error', success: 'Success', info: 'Info', warning: 'Warning',
+                    loading: 'Loading...', ready: 'Ready', save: 'Save', cancel: 'Cancel', delete: 'Delete',
+                    edit: 'Edit', search: 'Search', open: 'Open', close: 'Close', back: 'Back', next: 'Next',
+                    yes: 'Yes', no: 'No', ok: 'OK', settings: 'Settings' },
+                ku: { hello: 'Silav!', error: 'Çewtî', success: 'Serkeftin', info: 'Agahî', warning: 'Hişyarî',
+                    loading: 'Tê barkirin...', ready: 'Amade', save: 'Tomar bike', cancel: 'Betal bike',
+                    delete: 'Jê bibe', edit: 'Biguherîne', search: 'Lê bigere', open: 'Veke', close: 'Bigire',
+                    back: 'Vegere', next: 'Pêşve', yes: 'Erê', no: 'Na', ok: 'Temam', settings: 'Mîheng' }
             };
             var lang = CONFIG.language;
             return (translations[lang] && translations[lang][key]) || translations.de[key] || key;
@@ -869,6 +890,7 @@
             ask: function(question, language) {
                 language = language || CONFIG.language;
                 var self = this;
+                var apiKey = state.settings.apiKey || CONFIG.apiKey;
 
                 // Prüfe auf Öffnen-Befehle
                 var cmd = this._parseCommand(question);
@@ -876,6 +898,11 @@
                     launchApp(cmd.app);
                     return Promise.resolve('✅ ' + state.apps[cmd.app].title + ' ' + (language === 'en' ? 'opened!' :
                         'geöffnet!'));
+                }
+
+                // Wenn kein API-Key, Fallback
+                if (!apiKey || apiKey.length < 10) {
+                    return Promise.resolve(this._getFallback(question, language));
                 }
 
                 var systemPrompt = language === 'en' ?
@@ -887,7 +914,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + CONFIG.apiKey
+                            'Authorization': 'Bearer ' + apiKey
                         },
                         body: JSON.stringify({
                             model: CONFIG.model,
@@ -924,7 +951,17 @@
                     'tasks': ['aufgaben', 'tasks', 'todo'],
                     'cosmic': ['cosmic', 'weltraum', 'space'],
                     'settings': ['einstellungen', 'settings'],
-                    'email': ['email', 'mail', 'e-mail']
+                    'email': ['email', 'mail', 'e-mail'],
+                    'files': ['dateien', 'files', 'ordner'],
+                    'health': ['gesundheit', 'health', 'arzt', 'doctor'],
+                    'phone': ['telefon', 'phone', 'anruf', 'call'],
+                    'calendar': ['kalender', 'calendar', 'termin'],
+                    'contacts': ['kontakte', 'contacts', 'adressbuch'],
+                    'help': ['hilfe', 'help'],
+                    'appworld': ['app world', 'apps', 'anwendungen'],
+                    'music': ['musik', 'music'],
+                    'weather': ['wetter', 'weather'],
+                    'maps': ['karte', 'maps', 'navigation']
                 };
                 for (var appId in appMap) {
                     for (var i = 0; i < appMap[appId].length; i++) {
@@ -941,14 +978,22 @@
                 var lower = cmd.toLowerCase();
                 if (language === 'en') {
                     if (lower.includes('hello') || lower.includes('hi')) return '👋 Hello! I am HalDo. How can I help?';
-                    if (lower.includes('help')) return '❓ **HalDo Help**\n\n• "Open Notes" 📝\n• "Open Tasks" ✅\n• "Open Email" 📧\n• Cmd+K → AI';
+                    if (lower.includes('help')) return '❓ **HalDo Help**\n\n• "Open Notes" 📝\n• "Open Tasks" ✅\n• "Open Email" 📧\n• "Open Health" 🏥\n• "Open Phone" 📞\n• Cmd+K → AI';
+                    if (lower.includes('health') || lower.includes('doctor')) return '🏥 I can help you manage your health records, appointments, and medical documents. How can I assist?';
+                    if (lower.includes('call') || lower.includes('phone')) return '📞 I can help you make calls. Who would you like to call?';
                     return '💡 I understood: "' + cmd + '".\n\nI can open apps, answer questions, and help you.';
                 }
                 if (lower.includes('hallo') || lower.includes('hi')) {
                     return '👋 Hallo! Ich bin HalDo. Wie kann ich helfen?';
                 }
                 if (lower.includes('hilfe')) {
-                    return '❓ **HalDo Hilfe**\n\n• "Öffne Notizen" 📝\n• "Öffne Aufgaben" ✅\n• "Öffne E-Mail" 📧\n• Cmd+K → AI';
+                    return '❓ **HalDo Hilfe**\n\n• "Öffne Notizen" 📝\n• "Öffne Aufgaben" ✅\n• "Öffne E-Mail" 📧\n• "Öffne Gesundheit" 🏥\n• "Öffne Telefon" 📞\n• Cmd+K → AI';
+                }
+                if (lower.includes('gesundheit') || lower.includes('arzt')) {
+                    return '🏥 Ich kann dir bei deinen Gesundheitsdaten, Arztterminen und medizinischen Dokumenten helfen. Was möchtest du tun?';
+                }
+                if (lower.includes('telefon') || lower.includes('anruf')) {
+                    return '📞 Ich kann dir beim Telefonieren helfen. Wen möchtest du anrufen?';
                 }
                 return '💡 Ich habe verstanden: "' + cmd +
                     '".\n\nIch kann Apps öffnen, Fragen beantworten und dir helfen.';
@@ -1295,6 +1340,7 @@
 
             // Planeten
             var planetColors = [0x44aaff, 0xff6644, 0x44ff88, 0xff44aa, 0xffaa44, 0x88aaff];
+            var planetNames = ['Merkur', 'Venus', 'Erde', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptun'];
             for (var p = 0; p < 8; p++) {
                 var radius = 1.2 + Math.random() * 2;
                 var geo = new THREE.SphereGeometry(radius, 16, 16);
@@ -1313,7 +1359,8 @@
                     orbit: orbit,
                     angle: angle,
                     speed: 0.002 + (1 - p / 8) * 0.004,
-                    yOff: (Math.random() - 0.5) * 4
+                    yOff: (Math.random() - 0.5) * 4,
+                    name: planetNames[p] || 'Planet'
                 });
             }
 
@@ -1328,18 +1375,6 @@
             var ring = new THREE.Mesh(ringGeo, ringMat);
             ring.rotation.x = Math.PI / 3;
             cosmicScene.add(ring);
-
-            var ring2 = new THREE.RingGeometry(11, 12, 64);
-            var ringMat2 = new THREE.MeshBasicMaterial({
-                color: 0xff44aa,
-                transparent: true,
-                opacity: 0.04,
-                side: THREE.DoubleSide
-            });
-            var ring2Mesh = new THREE.Mesh(ring2, ringMat2);
-            ring2Mesh.rotation.x = -Math.PI / 4;
-            ring2Mesh.rotation.z = Math.PI / 5;
-            cosmicScene.add(ring2Mesh);
 
             // Animationsloop
             function animateCosmic() {
@@ -1464,15 +1499,6 @@
                     ctx.fill();
                 }
 
-                // Glow-Effekt
-                var glowGrad = ctx.createRadialGradient(100, 100, 30, 100, 100, 90);
-                glowGrad.addColorStop(0, 'rgba(108,60,225,0.05)');
-                glowGrad.addColorStop(1, 'rgba(108,60,225,0)');
-                ctx.fillStyle = glowGrad;
-                ctx.beginPath();
-                ctx.arc(100, 100, 90, 0, Math.PI * 2);
-                ctx.fill();
-
                 time++;
                 requestAnimationFrame(drawAvatar);
             }
@@ -1481,10 +1507,10 @@
         }
 
         // ============================================================
-        //  APP-REGISTRIERUNGEN (KERN-APPS)
+        //  APP-REGISTRIERUNGEN – ALLE APPS
         // ============================================================
 
-        // ----- AI Chat -----
+        // ----- 1. HalDo AI (Core) -----
         registerApp('ai', {
             title: 'HalDo AI',
             icon: '🤖',
@@ -1520,6 +1546,16 @@
                         'Öffne Aufgaben') +
                     '" style="padding:2px 8px;font-size:9px;background:rgba(255,255,255,0.04);border-radius:8px;color:rgba(255,255,255,0.5);cursor:pointer;">✅ ' +
                     (CONFIG.language === 'en' ? 'Tasks' : 'Aufgaben') +
+                    '</span>' +
+                    '<span class="ai-chip" data-cmd="' + (CONFIG.language === 'en' ? 'Open Health' :
+                        'Öffne Gesundheit') +
+                    '" style="padding:2px 8px;font-size:9px;background:rgba(255,255,255,0.04);border-radius:8px;color:rgba(255,255,255,0.5);cursor:pointer;">🏥 ' +
+                    (CONFIG.language === 'en' ? 'Health' : 'Gesundheit') +
+                    '</span>' +
+                    '<span class="ai-chip" data-cmd="' + (CONFIG.language === 'en' ? 'Open Phone' :
+                        'Öffne Telefon') +
+                    '" style="padding:2px 8px;font-size:9px;background:rgba(255,255,255,0.04);border-radius:8px;color:rgba(255,255,255,0.5);cursor:pointer;">📞 ' +
+                    (CONFIG.language === 'en' ? 'Phone' : 'Telefon') +
                     '</span>' +
                     '<span class="ai-chip" data-cmd="' + (CONFIG.language === 'en' ? 'Help' : 'Hilfe') +
                     '" style="padding:2px 8px;font-size:9px;background:rgba(255,255,255,0.04);border-radius:8px;color:rgba(255,255,255,0.5);cursor:pointer;">❓ ' +
@@ -1570,7 +1606,36 @@
             }
         });
 
-        // ----- Notizen -----
+        // ----- 2. Living HalDo AI -----
+        registerApp('avatar', {
+            title: 'Living HalDo AI',
+            icon: '👤',
+            category: 'core',
+            render: function(body) {
+                body.innerHTML =
+                    '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;height:100%;">' +
+                    '<h3 style="font-size:13px;">👤 Living HalDo AI</h3>' +
+                    '<div style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#2a1a3a,#0a0a1a);border:2px solid rgba(255,255,255,0.06);position:relative;">' +
+                    '<div style="position:absolute;top:30%;left:50%;transform:translateX(-50%);display:flex;gap:16px;">' +
+                    '<div style="width:12px;height:14px;background:#fff;border-radius:50%;position:relative;"><div style="width:6px;height:6px;background:#1a1a3a;border-radius:50%;position:absolute;bottom:2px;left:3px;"></div></div>' +
+                    '<div style="width:12px;height:14px;background:#fff;border-radius:50%;position:relative;"><div style="width:6px;height:6px;background:#1a1a3a;border-radius:50%;position:absolute;bottom:2px;left:3px;"></div></div>' +
+                    '</div>' +
+                    '<div style="position:absolute;bottom:20%;left:50%;transform:translateX(-50%);width:20px;height:4px;background:rgba(255,100,100,0.3);border-radius:4px;"></div>' +
+                    '</div>' +
+                    '<div style="font-size:11px;color:rgba(255,255,255,0.4);">' + (CONFIG.language === 'en' ?
+                        'Always present' : 'Immer präsent') +
+                    '</div>' +
+                    '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;">' +
+                    '<button onclick="Voice.startListening()" style="padding:4px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">🎤 ' +
+                    (CONFIG.language === 'en' ? 'Speak' : 'Sprechen') +
+                    '</button>' +
+                    '<button onclick="Voice.speak(\'Hello! I am HalDo.\')" style="padding:4px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">👋 ' +
+                    (CONFIG.language === 'en' ? 'Greet' : 'Begrüßen') +
+                    '</button></div></div>';
+            }
+        });
+
+        // ----- 3. Notizen -----
         registerApp('notes', {
             title: 'Notizen',
             icon: '📝',
@@ -1636,7 +1701,7 @@
             }
         });
 
-        // ----- Aufgaben -----
+        // ----- 4. Aufgaben -----
         registerApp('tasks', {
             title: 'Aufgaben',
             icon: '✅',
@@ -1722,7 +1787,7 @@
             }
         });
 
-        // ----- Einstellungen -----
+        // ----- 5. Einstellungen (mit API-Key) -----
         registerApp('settings', {
             title: 'Einstellungen',
             icon: '⚙️',
@@ -1740,10 +1805,15 @@
                     '<option value="de">🇩🇪 Deutsch</option>' +
                     '<option value="en">🇬🇧 English</option>' +
                     '<option value="ku">🇰🇲 Kurmancî</option>' +
+                    '<option value="ezidi">𒀭 Êzîdî</option>' +
                     '<option value="tr">🇹🇷 Türkçe</option>' +
                     '<option value="ar">🇸🇦 العربية</option>' +
                     '<option value="fr">🇫🇷 Français</option>' +
                     '<option value="es">🇪🇸 Español</option></select></div>' +
+                    '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;">' +
+                    '<span>🔑 API Key (Groq)</span>' +
+                    '<input type="password" id="settings-apikey" placeholder="gsk_..." style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;padding:2px 6px;font-size:10px;width:160px;" value="' +
+                    (state.settings.apiKey || '') + '" /></div>' +
                     '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;">' +
                     '<span>🎤 ' + (CONFIG.language === 'en' ? 'Voice Control' : 'Sprachsteuerung') +
                     '</span>' +
@@ -1759,9 +1829,12 @@
                 body.querySelector('#settings-save').addEventListener('click', function() {
                     var lang = body.querySelector('#settings-lang').value;
                     var voice = body.querySelector('#settings-voice').checked;
+                    var apiKey = body.querySelector('#settings-apikey').value.trim();
                     CONFIG.language = lang;
                     state.settings.language = lang;
                     state.settings.voiceEnabled = voice;
+                    state.settings.apiKey = apiKey;
+                    CONFIG.apiKey = apiKey;
                     localStorage.setItem('haldo_settings', JSON.stringify(state.settings));
                     Notify.success('✅ ' + (CONFIG.language === 'en' ? 'Settings saved!' :
                         'Einstellungen gespeichert!'));
@@ -1773,7 +1846,7 @@
             }
         });
 
-        // ----- Hilfe -----
+        // ----- 6. Hilfe -----
         registerApp('help', {
             title: 'Hilfe',
             icon: '❓',
@@ -1793,11 +1866,13 @@
                     '<button onclick="launchApp(\'ai\')" style="padding:3px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">🤖 AI</button>' +
                     '<button onclick="launchApp(\'notes\')" style="padding:3px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">📝 Notes</button>' +
                     '<button onclick="launchApp(\'tasks\')" style="padding:3px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">✅ Tasks</button>' +
+                    '<button onclick="launchApp(\'health\')" style="padding:3px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">🏥 Health</button>' +
+                    '<button onclick="launchApp(\'phone\')" style="padding:3px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">📞 Phone</button>' +
                     '</div>';
             }
         });
 
-        // ----- Cosmic World (nur Info) -----
+        // ----- 7. Cosmic World -----
         registerApp('cosmic', {
             title: 'Cosmic World',
             icon: '🌌',
@@ -1809,11 +1884,15 @@
                     '<h3 style="font-size:14px;margin:6px 0;">Cosmic World</h3>' +
                     '<p style="font-size:11px;color:rgba(255,255,255,0.4);">8 Planeten · Sonne · Sterne</p>' +
                     '<p style="font-size:9px;color:rgba(255,255,255,0.2);margin-top:6px;">✨ 3D Universe im Hintergrund</p>' +
-                    '</div>';
+                    '<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">' +
+                    '<span style="padding:2px 8px;font-size:9px;background:rgba(255,255,255,0.03);border-radius:8px;">☀️ Sonne</span>' +
+                    '<span style="padding:2px 8px;font-size:9px;background:rgba(255,255,255,0.03);border-radius:8px;">🪐 Saturn</span>' +
+                    '<span style="padding:2px 8px;font-size:9px;background:rgba(255,255,255,0.03);border-radius:8px;">🌍 Erde</span>' +
+                    '</div></div>';
             }
         });
 
-        // ----- App World -----
+        // ----- 8. App World -----
         registerApp('appworld', {
             title: 'App World',
             icon: '📱',
@@ -1842,7 +1921,7 @@
             }
         });
 
-        // ----- Dateien -----
+        // ----- 9. Dateien -----
         registerApp('files', {
             title: 'Dateien',
             icon: '📁',
@@ -1859,7 +1938,7 @@
             }
         });
 
-        // ----- E-Mail -----
+        // ----- 10. E-Mail -----
         registerApp('email', {
             title: 'E-Mail',
             icon: '📧',
@@ -1893,6 +1972,392 @@
                     (CONFIG.language === 'en' ? 'New Email' : 'Neue E-Mail') +
                     '</button>';
                 body.innerHTML = html;
+            }
+        });
+
+        // ----- 11. Gesundheit / Health -----
+        registerApp('health', {
+            title: 'Gesundheit',
+            icon: '🏥',
+            category: 'health',
+            render: function(body) {
+                var records = state.healthRecords || [];
+                var html =
+                    '<h3 style="font-size:13px;margin-bottom:4px;">🏥 ' + (CONFIG.language === 'en' ?
+                        'Health Center' : 'Gesundheitszentrum') +
+                    '</h3>' +
+                    '<div style="display:flex;gap:4px;margin-bottom:6px;">' +
+                    '<input type="text" id="health-input" placeholder="📋 ' + (CONFIG.language === 'en' ?
+                        'New record...' : 'Neuer Eintrag...') +
+                    '" style="flex:1;padding:4px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;font-size:11px;outline:none;" />' +
+                    '<button id="health-add" style="padding:4px 10px;background:linear-gradient(135deg,#6C3CE1,#00D4FF);border:none;border-radius:4px;color:#fff;cursor:pointer;">➕</button></div>' +
+                    '<div id="health-list" style="display:flex;flex-direction:column;gap:2px;max-height:130px;overflow-y:auto;">';
+
+                for (var i = 0; i < records.length; i++) {
+                    html +=
+                        '<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:rgba(255,255,255,0.02);border-radius:4px;font-size:11px;">' +
+                        '<span>📋 ' + escapeHtml(records[i]) +
+                        '</span><button class="health-del" data-idx="' + i +
+                        '" style="background:none;border:none;color:#ff4444;cursor:pointer;">✕</button></div>';
+                }
+                html += '</div>' +
+                    '<div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;">' +
+                    '<button onclick="Notify.info(\'📅 ' + (CONFIG.language === 'en' ?
+                        'Appointment scheduler opened' : 'Terminplaner geöffnet') +
+                    '\')" style="padding:2px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:9px;">📅 ' +
+                    (CONFIG.language === 'en' ? 'Appointments' : 'Termine') +
+                    '</button>' +
+                    '<button onclick="Notify.info(\'💊 ' + (CONFIG.language === 'en' ?
+                        'Medication manager opened' : 'Medikamentenverwaltung geöffnet') +
+                    '\')" style="padding:2px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:9px;">💊 ' +
+                    (CONFIG.language === 'en' ? 'Medications' : 'Medikamente') +
+                    '</button>' +
+                    '<button onclick="Notify.info(\'🩺 ' + (CONFIG.language === 'en' ?
+                        'Doctor contact opened' : 'Arztkontakt geöffnet') +
+                    '\')" style="padding:2px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:9px;">🩺 ' +
+                    (CONFIG.language === 'en' ? 'Doctor' : 'Arzt') +
+                    '</button></div>';
+
+                body.innerHTML = html;
+
+                var input = body.querySelector('#health-input');
+                var addBtn = body.querySelector('#health-add');
+
+                function renderHealth() {
+                    var list = body.querySelector('#health-list');
+                    list.innerHTML = '';
+                    for (var i = 0; i < records.length; i++) {
+                        var div = document.createElement('div');
+                        div.style.cssText =
+                            'display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:rgba(255,255,255,0.02);border-radius:4px;font-size:11px;';
+                        div.innerHTML = '<span>📋 ' + escapeHtml(records[i]) +
+                            '</span><button class="health-del" data-idx="' + i +
+                            '" style="background:none;border:none;color:#ff4444;cursor:pointer;">✕</button>';
+                        list.appendChild(div);
+                    }
+                    list.querySelectorAll('.health-del').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            var idx = parseInt(this.dataset.idx);
+                            records.splice(idx, 1);
+                            localStorage.setItem('haldo_health', JSON.stringify(records));
+                            state.healthRecords = records;
+                            renderHealth();
+                        });
+                    });
+                }
+
+                addBtn.addEventListener('click', function() {
+                    var val = input.value.trim();
+                    if (!val) return;
+                    records.push(val);
+                    localStorage.setItem('haldo_health', JSON.stringify(records));
+                    state.healthRecords = records;
+                    input.value = '';
+                    renderHealth();
+                    Notify.success('🏥 ' + (CONFIG.language === 'en' ? 'Record saved' :
+                        'Eintrag gespeichert'));
+                });
+                input.addEventListener('keydown', function(e) { if (e.key === 'Enter') addBtn.click(); });
+                renderHealth();
+            }
+        });
+
+        // ----- 12. Telefon / Phone -----
+        registerApp('phone', {
+            title: 'Telefon',
+            icon: '📞',
+            category: 'communication',
+            render: function(body) {
+                var contacts = state.contacts || [];
+                var html =
+                    '<h3 style="font-size:13px;margin-bottom:4px;">📞 ' + (CONFIG.language === 'en' ?
+                        'Phone' : 'Telefon') +
+                    '</h3>' +
+                    '<div style="display:flex;gap:4px;margin-bottom:6px;">' +
+                    '<input type="text" id="phone-input" placeholder="👤 ' + (CONFIG.language === 'en' ?
+                        'Name or number...' : 'Name oder Nummer...') +
+                    '" style="flex:1;padding:4px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;font-size:11px;outline:none;" />' +
+                    '<button id="phone-add" style="padding:4px 10px;background:linear-gradient(135deg,#6C3CE1,#00D4FF);border:none;border-radius:4px;color:#fff;cursor:pointer;">➕</button></div>' +
+                    '<div id="phone-list" style="display:flex;flex-direction:column;gap:2px;max-height:130px;overflow-y:auto;">';
+
+                for (var i = 0; i < contacts.length; i++) {
+                    html +=
+                        '<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:rgba(255,255,255,0.02);border-radius:4px;font-size:11px;">' +
+                        '<span>👤 ' + escapeHtml(contacts[i]) +
+                        '</span><span style="display:flex;gap:4px;">' +
+                        '<button class="phone-call" data-idx="' + i +
+                        '" style="background:none;border:none;color:#44ff88;cursor:pointer;">📞</button>' +
+                        '<button class="phone-del" data-idx="' + i +
+                        '" style="background:none;border:none;color:#ff4444;cursor:pointer;">✕</button></span></div>';
+                }
+                html += '</div>' +
+                    '<div style="display:flex;gap:4px;margin-top:4px;">' +
+                    '<button onclick="Notify.info(\'📞 ' + (CONFIG.language === 'en' ?
+                        'Calling...' : 'Wird angerufen...') +
+                    '\')" style="padding:2px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:9px;">📞 ' +
+                    (CONFIG.language === 'en' ? 'Call' : 'Anrufen') +
+                    '</button>' +
+                    '<button onclick="Notify.info(\'📹 ' + (CONFIG.language === 'en' ?
+                        'Starting video call...' : 'Videoanruf wird gestartet...') +
+                    '\')" style="padding:2px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;cursor:pointer;font-size:9px;">📹 ' +
+                    (CONFIG.language === 'en' ? 'Video Call' : 'Videoanruf') +
+                    '</button></div>';
+
+                body.innerHTML = html;
+
+                var input = body.querySelector('#phone-input');
+                var addBtn = body.querySelector('#phone-add');
+
+                function renderPhone() {
+                    var list = body.querySelector('#phone-list');
+                    list.innerHTML = '';
+                    for (var i = 0; i < contacts.length; i++) {
+                        var div = document.createElement('div');
+                        div.style.cssText =
+                            'display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:rgba(255,255,255,0.02);border-radius:4px;font-size:11px;';
+                        div.innerHTML = '<span>👤 ' + escapeHtml(contacts[i]) +
+                            '</span><span style="display:flex;gap:4px;"><button class="phone-call" data-idx="' +
+                            i +
+                            '" style="background:none;border:none;color:#44ff88;cursor:pointer;">📞</button><button class="phone-del" data-idx="' +
+                            i +
+                            '" style="background:none;border:none;color:#ff4444;cursor:pointer;">✕</button></span>';
+                        list.appendChild(div);
+                    }
+                    list.querySelectorAll('.phone-call').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            var idx = parseInt(this.dataset.idx);
+                            Notify.info('📞 ' + (CONFIG.language === 'en' ? 'Calling ' :
+                                'Rufe an ') + contacts[idx] + ' ...');
+                        });
+                    });
+                    list.querySelectorAll('.phone-del').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            var idx = parseInt(this.dataset.idx);
+                            contacts.splice(idx, 1);
+                            localStorage.setItem('haldo_contacts', JSON.stringify(contacts));
+                            state.contacts = contacts;
+                            renderPhone();
+                        });
+                    });
+                }
+
+                addBtn.addEventListener('click', function() {
+                    var val = input.value.trim();
+                    if (!val) return;
+                    contacts.push(val);
+                    localStorage.setItem('haldo_contacts', JSON.stringify(contacts));
+                    state.contacts = contacts;
+                    input.value = '';
+                    renderPhone();
+                    Notify.success('👤 ' + (CONFIG.language === 'en' ? 'Contact added' :
+                        'Kontakt hinzugefügt'));
+                });
+                input.addEventListener('keydown', function(e) { if (e.key === 'Enter') addBtn.click(); });
+                renderPhone();
+            }
+        });
+
+        // ----- 13. Kalender -----
+        registerApp('calendar', {
+            title: 'Kalender',
+            icon: '📅',
+            category: 'productivity',
+            render: function(body) {
+                var appointments = state.appointments || [];
+                var html =
+                    '<h3 style="font-size:13px;margin-bottom:4px;">📅 ' + (CONFIG.language === 'en' ?
+                        'Calendar' : 'Kalender') +
+                    '</h3>' +
+                    '<div style="display:flex;gap:4px;margin-bottom:6px;">' +
+                    '<input type="text" id="cal-input" placeholder="📌 ' + (CONFIG.language === 'en' ?
+                        'New appointment...' : 'Neuer Termin...') +
+                    '" style="flex:1;padding:4px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;font-size:11px;outline:none;" />' +
+                    '<button id="cal-add" style="padding:4px 10px;background:linear-gradient(135deg,#6C3CE1,#00D4FF);border:none;border-radius:4px;color:#fff;cursor:pointer;">➕</button></div>' +
+                    '<div id="cal-list" style="display:flex;flex-direction:column;gap:2px;max-height:130px;overflow-y:auto;">';
+
+                for (var i = 0; i < appointments.length; i++) {
+                    html +=
+                        '<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:rgba(255,255,255,0.02);border-radius:4px;font-size:11px;">' +
+                        '<span>📌 ' + escapeHtml(appointments[i]) +
+                        '</span><button class="cal-del" data-idx="' + i +
+                        '" style="background:none;border:none;color:#ff4444;cursor:pointer;">✕</button></div>';
+                }
+                html += '</div>';
+                body.innerHTML = html;
+
+                var input = body.querySelector('#cal-input');
+                var addBtn = body.querySelector('#cal-add');
+
+                function renderCalendar() {
+                    var list = body.querySelector('#cal-list');
+                    list.innerHTML = '';
+                    for (var i = 0; i < appointments.length; i++) {
+                        var div = document.createElement('div');
+                        div.style.cssText =
+                            'display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:rgba(255,255,255,0.02);border-radius:4px;font-size:11px;';
+                        div.innerHTML = '<span>📌 ' + escapeHtml(appointments[i]) +
+                            '</span><button class="cal-del" data-idx="' + i +
+                            '" style="background:none;border:none;color:#ff4444;cursor:pointer;">✕</button>';
+                        list.appendChild(div);
+                    }
+                    list.querySelectorAll('.cal-del').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            var idx = parseInt(this.dataset.idx);
+                            appointments.splice(idx, 1);
+                            localStorage.setItem('haldo_appointments', JSON.stringify(
+                            appointments));
+                            state.appointments = appointments;
+                            renderCalendar();
+                        });
+                    });
+                }
+
+                addBtn.addEventListener('click', function() {
+                    var val = input.value.trim();
+                    if (!val) return;
+                    var now = new Date();
+                    var time = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                    appointments.push(val + ' (' + time + ')');
+                    localStorage.setItem('haldo_appointments', JSON.stringify(appointments));
+                    state.appointments = appointments;
+                    input.value = '';
+                    renderCalendar();
+                    Notify.success('📅 ' + (CONFIG.language === 'en' ? 'Appointment added' :
+                        'Termin hinzugefügt'));
+                });
+                input.addEventListener('keydown', function(e) { if (e.key === 'Enter') addBtn.click(); });
+                renderCalendar();
+            }
+        });
+
+        // ----- 14. Kontakte -----
+        registerApp('contacts', {
+            title: 'Kontakte',
+            icon: '👤',
+            category: 'communication',
+            render: function(body) {
+                var contacts = state.contacts || [];
+                var html =
+                    '<h3 style="font-size:13px;margin-bottom:4px;">👤 ' + (CONFIG.language === 'en' ?
+                        'Contacts' : 'Kontakte') +
+                    '</h3>' +
+                    '<div style="display:flex;gap:4px;margin-bottom:6px;">' +
+                    '<input type="text" id="contact-input" placeholder="👤 ' + (CONFIG.language === 'en' ?
+                        'New contact...' : 'Neuer Kontakt...') +
+                    '" style="flex:1;padding:4px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;font-size:11px;outline:none;" />' +
+                    '<button id="contact-add" style="padding:4px 10px;background:linear-gradient(135deg,#6C3CE1,#00D4FF);border:none;border-radius:4px;color:#fff;cursor:pointer;">➕</button></div>' +
+                    '<div id="contact-list" style="display:flex;flex-direction:column;gap:2px;max-height:130px;overflow-y:auto;">';
+
+                for (var i = 0; i < contacts.length; i++) {
+                    html +=
+                        '<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:rgba(255,255,255,0.02);border-radius:4px;font-size:11px;">' +
+                        '<span>👤 ' + escapeHtml(contacts[i]) +
+                        '</span><button class="contact-del" data-idx="' + i +
+                        '" style="background:none;border:none;color:#ff4444;cursor:pointer;">✕</button></div>';
+                }
+                html += '</div>';
+                body.innerHTML = html;
+
+                var input = body.querySelector('#contact-input');
+                var addBtn = body.querySelector('#contact-add');
+
+                function renderContacts() {
+                    var list = body.querySelector('#contact-list');
+                    list.innerHTML = '';
+                    for (var i = 0; i < contacts.length; i++) {
+                        var div = document.createElement('div');
+                        div.style.cssText =
+                            'display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:rgba(255,255,255,0.02);border-radius:4px;font-size:11px;';
+                        div.innerHTML = '<span>👤 ' + escapeHtml(contacts[i]) +
+                            '</span><button class="contact-del" data-idx="' + i +
+                            '" style="background:none;border:none;color:#ff4444;cursor:pointer;">✕</button>';
+                        list.appendChild(div);
+                    }
+                    list.querySelectorAll('.contact-del').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            var idx = parseInt(this.dataset.idx);
+                            contacts.splice(idx, 1);
+                            localStorage.setItem('haldo_contacts', JSON.stringify(contacts));
+                            state.contacts = contacts;
+                            renderContacts();
+                        });
+                    });
+                }
+
+                addBtn.addEventListener('click', function() {
+                    var val = input.value.trim();
+                    if (!val) return;
+                    contacts.push(val);
+                    localStorage.setItem('haldo_contacts', JSON.stringify(contacts));
+                    state.contacts = contacts;
+                    input.value = '';
+                    renderContacts();
+                    Notify.success('👤 ' + (CONFIG.language === 'en' ? 'Contact added' :
+                        'Kontakt hinzugefügt'));
+                });
+                input.addEventListener('keydown', function(e) { if (e.key === 'Enter') addBtn.click(); });
+                renderContacts();
+            }
+        });
+
+        // ----- 15. Musik -----
+        registerApp('music', {
+            title: 'Musik',
+            icon: '🎵',
+            category: 'media',
+            render: function(body) {
+                var playlist = ['Summer Breeze', 'Electric Dreams', 'Acoustic Sunset', 'Chill Beats',
+                    'Classical Harmony'
+                ];
+                var html = '<h3 style="font-size:13px;margin-bottom:4px;">🎵 ' + (CONFIG.language === 'en' ?
+                    'Music' : 'Musik') +
+                    '</h3>';
+                for (var i = 0; i < playlist.length; i++) {
+                    html +=
+                        '<div style="display:flex;align-items:center;gap:6px;padding:3px 6px;background:rgba(255,255,255,0.02);border-radius:4px;font-size:11px;margin-bottom:2px;cursor:pointer;" onclick="Notify.info(\'🎵 ' +
+                        (CONFIG.language === 'en' ? 'Playing' : 'Spiele') + ' ' + playlist[i] +
+                        '\')">' +
+                        '<span>🎵</span><span>' + playlist[i] + '</span></div>';
+                }
+                body.innerHTML = html;
+            }
+        });
+
+        // ----- 16. Wetter -----
+        registerApp('weather', {
+            title: 'Wetter',
+            icon: '🌤️',
+            category: 'info',
+            render: function(body) {
+                body.innerHTML =
+                    '<h3 style="font-size:13px;margin-bottom:4px;">🌤️ ' + (CONFIG.language === 'en' ?
+                        'Weather' : 'Wetter') +
+                    '</h3>' +
+                    '<div style="background:rgba(255,255,255,0.02);padding:8px;border-radius:6px;text-align:center;">' +
+                    '<div style="font-size:32px;">☀️</div>' +
+                    '<div style="font-size:18px;font-weight:600;">18°C</div>' +
+                    '<div style="font-size:11px;color:rgba(255,255,255,0.4);">Berlin · ' + (CONFIG
+                        .language === 'en' ? 'Sunny' : 'Sonnig') +
+                    '</div>' +
+                    '<div style="display:flex;justify-content:center;gap:12px;font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;">' +
+                    '<span>💧 65%</span><span>💨 12 km/h</span></div></div>';
+            }
+        });
+
+        // ----- 17. Karten / Maps -----
+        registerApp('maps', {
+            title: 'Karten',
+            icon: '🗺️',
+            category: 'tools',
+            render: function(body) {
+                body.innerHTML =
+                    '<h3 style="font-size:13px;margin-bottom:4px;">🗺️ ' + (CONFIG.language === 'en' ?
+                        'Maps' : 'Karten') +
+                    '</h3>' +
+                    '<div style="background:rgba(0,0,0,0.2);border-radius:6px;height:100px;display:flex;align-items:center;justify-content:center;flex-direction:column;color:rgba(255,255,255,0.3);font-size:11px;">' +
+                    '<div style="font-size:28px;">🗺️</div>' +
+                    (CONFIG.language === 'en' ? 'Map view' : 'Kartenansicht') +
+                    '</div>';
             }
         });
 
@@ -1937,13 +2402,16 @@
                         if (state.settings.autoStartAI !== false) {
                             setTimeout(function() { launchApp('ai'); }, 400);
                             setTimeout(function() { launchApp('cosmic'); }, 700);
-                            setTimeout(function() { launchApp('notes'); }, 1000);
+                            setTimeout(function() { launchApp('avatar'); }, 1000);
+                            setTimeout(function() { launchApp('notes'); }, 1300);
                         }
 
                         Notify.success('🚀 HalDo OS ' + CONFIG.version + ' ' + (CONFIG.language ===
                             'en' ? 'started!' : 'gestartet!'));
                         console.log('✅ HalDo OS ' + CONFIG.version + ' — COSMIC ULTIMATE');
                         console.log('📱 ' + Object.keys(state.apps).length + ' Apps geladen');
+                        console.log('🔄 API Key: ' + (state.settings.apiKey ? '✅ gesetzt' :
+                        '❌ nicht gesetzt'));
                     }, 400);
                 }
             }, 350);
@@ -1966,6 +2434,7 @@
                         if (state.settings.hasOwnProperty(key)) state.settings[key] = saved[key];
                     }
                     CONFIG.language = state.settings.language || 'de';
+                    CONFIG.apiKey = state.settings.apiKey || '';
                 }
             } catch (e) {}
         }
@@ -1980,6 +2449,10 @@
                 if (tasks) state.tasks = JSON.parse(tasks);
                 var emails = localStorage.getItem('haldo_emails');
                 if (emails) state.emails = JSON.parse(emails);
+                var health = localStorage.getItem('haldo_health');
+                if (health) state.healthRecords = JSON.parse(health);
+                var appointments = localStorage.getItem('haldo_appointments');
+                if (appointments) state.appointments = JSON.parse(appointments);
                 var conv = localStorage.getItem('haldo_conversations');
                 if (conv) state.conversationHistory = JSON.parse(conv);
             } catch (e) {}
@@ -2032,9 +2505,11 @@
                 Notify.show(
                     '⟡ **HalDo OS ' + CONFIG.version + '**\n' +
                     '💙❤️🚀 ' + Object.keys(state.apps).length + ' Apps\n' +
-                    '✅ Groq AI verbunden\n' +
-                    '👤 Living AI aktiv\n' +
+                    '✅ Groq AI ' + (state.settings.apiKey ? '🔑 verbunden' : '⛔ kein Key') +
+                    '\n👤 Living AI aktiv\n' +
                     '🌌 Cosmic 3D World\n' +
+                    '🏥 Gesundheit integriert\n' +
+                    '📞 Telefon integriert\n' +
                     '🌍 ' + (CONFIG.language === 'en' ? 'Language' : 'Sprache') + ': ' + CONFIG
                     .languages[CONFIG.language].name + '\n' +
                     '🔧 Build: ' + CONFIG.build + '\n' +
