@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌 HalDo AI OS — Dashboard</title>
+    <style>
+        /* ============================================================
+           HALDO AI OS — DASHBOARD STYLES
+           ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0a0a12;
+            --bg-secondary: #12121f;
+            --bg-card: rgba(255,255,255,0.02);
+            --bg-hover: rgba(255,255,255,0.04);
+            --border-color: rgba(255,255,255,0.03);
+            --text-primary: #e0e0e0;
+            --text-secondary: rgba(255,255,255,0.3);
+            --text-muted: rgba(255,255,255,0.05);
+            --accent-1: #f6d365;
+            --accent-2: #fda085;
+            --accent-3: #f093fb;
+            --accent-4: #4facfe;
+            --accent-5: #43e97b;
+            --accent-6: #ff6b6b;
+            --radius: 16px;
+            --transition: 0.3s ease;
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        html, body {
+            height: 100%;
+            font-family: var(--font);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 4px; }
+
+        /* ============================================================
+           LAYOUT
+           ============================================================ */
+        .haldo-dashboard {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ============================================================
+           HEADER
+           ============================================================ */
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            height: 56px;
+            background: rgba(10,10,18,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .dashboard-header .logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.5px;
+        }
+        .dashboard-header .logo span { -webkit-text-fill-color: rgba(255,255,255,0.05); }
+        .dashboard-header .time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.5px;
+        }
+        .dashboard-header .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-5);
+            margin-right: 8px;
+        }
+
+        /* ============================================================
+           MAIN CONTENT
+           ============================================================ */
+        .dashboard-main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            padding: 16px 20px;
+            gap: 16px;
+        }
+
+        /* ============================================================
+           SIDEBAR
+           ============================================================ */
+        .dashboard-sidebar {
+            width: 220px;
+            min-width: 180px;
+            background: rgba(18,18,31,0.4);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 12px 8px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .dashboard-sidebar .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-family: var(--font);
+        }
+        .dashboard-sidebar .nav-item:hover {
+            background: var(--bg-hover);
+            color: #fff;
+        }
+        .dashboard-sidebar .nav-item.active {
+            background: rgba(79,172,254,0.06);
+            color: var(--accent-4);
+        }
+        .dashboard-sidebar .nav-item .emoji { font-size: 1.1rem; }
+        .dashboard-sidebar .nav-item .count {
+            margin-left: auto;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.02);
+            padding: 0 8px;
+            border-radius: 10px;
+        }
+        .dashboard-sidebar .nav-divider {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 6px 8px;
+        }
+        .dashboard-sidebar .nav-section-title {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            padding: 8px 12px 4px;
+        }
+
+        /* ============================================================
+           CONTENT AREA
+           ============================================================ */
+        .dashboard-content {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* ============================================================
+           STATS CARDS
+           ============================================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+        .stat-card:hover {
+            background: var(--bg-hover);
+        }
+        .stat-card .stat-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 4px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-card .stat-value.blue { background: linear-gradient(135deg, var(--accent-4), var(--accent-3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .stat-card .stat-value.green { background: linear-gradient(135deg, var(--accent-5), var(--accent-4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .stat-card .stat-value.pink { background: linear-gradient(135deg, var(--accent-3), var(--accent-6)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .stat-card .stat-desc { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* ============================================================
+           APP SECTIONS
+           ============================================================ */
+        .app-section {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            border: 1px solid var(--border-color);
+        }
+        .app-section .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .app-section .section-header .title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .app-section .section-header .title .emoji { margin-right: 6px; }
+        .app-section .section-header .view-all {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            background: none;
+            border: none;
+            font-family: var(--font);
+        }
+        .app-section .section-header .view-all:hover { color: var(--text-secondary); }
+
+        /* ============================================================
+           APP GRID (Klein)
+           ============================================================ */
+        .app-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+        }
+        .app-mini-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 6px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.01);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+        .app-mini-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-color);
+            transform: translateY(-2px);
+        }
+        .app-mini-item .emoji { font-size: 1.6rem; display: block; }
+        .app-mini-item .name { font-size: 0.6rem; color: var(--text-secondary); margin-top: 2px; }
+
+        /* ============================================================
+           SYSTEM STATUS
+           ============================================================ */
+        .system-status {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 16px;
+            background: rgba(10,10,18,0.6);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            height: 28px;
+            align-items: center;
+        }
+        .system-status .highlight { color: rgba(255,255,255,0.08); }
+
+        /* ============================================================
+           MODAL
+           ============================================================ */
+        .haldo-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .haldo-modal.active { display: flex; }
+        .haldo-modal .modal-content {
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+        .haldo-modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .haldo-modal .modal-header .title { font-weight: 600; color: var(--text-secondary); }
+        .haldo-modal .modal-header .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+        }
+        .haldo-modal .modal-header .close-btn:hover { color: var(--accent-6); }
+        .haldo-modal .modal-body { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .dashboard-sidebar { width: 50px; min-width: 50px; padding: 8px 4px; }
+            .dashboard-sidebar .nav-item .nav-text { display: none; }
+            .dashboard-sidebar .nav-item .count { display: none; }
+            .dashboard-sidebar .nav-item { justify-content: center; padding: 8px; }
+            .dashboard-sidebar .nav-section-title { display: none; }
+            .dashboard-main { padding: 10px; flex-direction: column; }
+            .app-mini-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .dashboard-header .time { font-size: 0.65rem; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .app-mini-grid { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
+            .dashboard-header { padding: 8px 12px; }
+            .dashboard-header .logo { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="haldo-dashboard">
+
+        <!-- ============================================================
+           HEADER
+           ============================================================ -->
+        <div class="dashboard-header">
+            <div class="logo">✦ HalDo<span>AI</span> OS</div>
+            <div class="time">
+                <span class="status-dot"></span>
+                <span id="dashboardTime">--:--</span>
+                <span style="margin-left:12px;color:var(--text-muted);font-size:0.65rem;">v26.0</span>
+            </div>
+        </div>
+
+        <!-- ============================================================
+           MAIN CONTENT
+           ============================================================ -->
+        <div class="dashboard-main">
+
+            <!-- SIDEBAR -->
+            <div class="dashboard-sidebar" id="dashboardSidebar">
+                <div class="nav-section-title">📊 Übersicht</div>
+                <button class="nav-item active" data-view="overview">
+                    <span class="emoji">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </button>
+                <button class="nav-item" data-view="apps">
+                    <span class="emoji">📱</span>
+                    <span class="nav-text">Alle Apps</span>
+                    <span class="count" id="totalAppsCount">388</span>
+                </button>
+                <button class="nav-item" data-view="categories">
+                    <span class="emoji">📂</span>
+                    <span class="nav-text">Kategorien</span>
+                    <span class="count">26</span>
+                </button>
+                <hr class="nav-divider">
+                <div class="nav-section-title">⚙️ System</div>
+                <button class="nav-item" data-view="system">
+                    <span class="emoji">⚙️</span>
+                    <span class="nav-text">System</span>
+                </button>
+                <button class="nav-item" data-view="updates">
+                    <span class="emoji">🔄</span>
+                    <span class="nav-text">Updates</span>
+                </button>
+                <button class="nav-item" data-view="security">
+                    <span class="emoji">🛡️</span>
+                    <span class="nav-text">Sicherheit</span>
+                </button>
+                <hr class="nav-divider">
+                <div class="nav-section-title">🌌 Kosmos</div>
+                <button class="nav-item" data-view="cosmic">
+                    <span class="emoji">🪐</span>
+                    <span class="nav-text">Sonnensystem</span>
+                </button>
+                <button class="nav-item" data-view="stars">
+                    <span class="emoji">⭐</span>
+                    <span class="nav-text">Sterne</span>
+                </button>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="dashboard-content" id="dashboardContent">
+                <!-- Wird dynamisch geladen -->
+            </div>
+
+        </div>
+
+        <!-- ============================================================
+           SYSTEM STATUS
+           ============================================================ -->
+        <div class="system-status">
+            <span>🟢 System läuft · <span class="highlight" id="statusRuntime">0d 0h</span></span>
+            <span><span class="highlight" id="statusAppCount">388</span> Apps · <span class="highlight" id="statusMemory">197</span> MB · AI: <span class="highlight" id="statusAI">Aktiv</span></span>
+        </div>
+
+        <!-- ============================================================
+           MODAL
+           ============================================================ -->
+        <div class="haldo-modal" id="haldoModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="title" id="modalTitle">Info</span>
+                    <button class="close-btn" onclick="closeModal()">✕</button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        // HALDO AI OS — DASHBOARD ENGINE
+        // ============================================================
+
+        // ---- APP REGISTRY (388 Apps) ----
+        const APP_REGISTRY = {};
+
+        // ---- KATEGORIEN ----
+        const CATEGORIES = {
+            '🌌 AI & Alltag': 17,
+            '📚 Bildung': 38,
+            '🚗 Fahrschule': 22,
+            '💚 Gesundheit': 24,
+            '💼 Arbeit': 18,
+            '💰 Finanzen': 13,
+            '🏠 Zuhause': 13,
+            '🌌 Kosmos': 27,
+            '🧠 Wissen': 17,
+            '🕌 Kultur': 9,
+            '⌨️ Tastatur': 11,
+            '📚 Lernen': 11,
+            '🎵 Medien': 12,
+            '📝 Notizen': 11,
+            '🛒 Online': 9,
+            '🎨 Kreativität': 11,
+            '🧮 Wissenschaft': 11,
+            '🛡️ Sicherheit': 10,
+            '⚙️ System': 20,
+            '🌐 Reisen': 14,
+            '🎓 Universität': 18,
+            '🎙️ Voice': 9,
+            '🪟 Windows': 8,
+            '🌎 Explorer': 7,
+            '🌟 Dein Leben': 12,
+            '🔧 Entwicklung': 15
+        };
+
+        // ---- APPS NACH KATEGORIE ----
+        const APPS_BY_CATEGORY = {
+            '🌌 AI & Alltag': [
+                { id: 'haldo-ai', name: 'HalDo AI', emoji: '🧠' },
+                { id: 'ai-chat', name: 'AI Chat', emoji: '💬' },
+                { id: 'ai-voice', name: 'AI Voice', emoji: '🎤' },
+                { id: 'ai-vision', name: 'AI Vision', emoji: '👁️' },
+                { id: 'ai-memory', name: 'AI Memory', emoji: '🧠' },
+                { id: 'ai-knowledge', name: 'AI Knowledge', emoji: '📚' },
+                { id: 'ai-agents', name: 'AI Agents', emoji: '🤖' },
+                { id: 'ai-tools', name: 'AI Tools', emoji: '🛠️' },
+                { id: 'ai-models', name: 'AI Models', emoji: '🧮' },
+                { id: 'ai-automation', name: 'AI Automation', emoji: '⚡' },
+                { id: 'ai-translator', name: 'AI Translator', emoji: '🌍' },
+                { id: 'ai-writer', name: 'AI Writer', emoji: '✍️' },
+                { id: 'ai-research', name: 'AI Research', emoji: '🔍' },
+                { id: 'ai-coding', name: 'AI Coding', emoji: '💻' },
+                { id: 'ai-tutor', name: 'AI Tutor', emoji: '🧑‍🏫' },
+                { id: 'ai-coach', name: 'AI Coach', emoji: '💪' },
+                { id: 'ai-planner', name: 'AI Planner', emoji: '📋' }
+            ],
+            '📚 Bildung': [
+                { id: 'schule', name: 'Schule', emoji: '🏫' },
+                { id: 'grundschule', name: 'Grundschule', emoji: '📚' },
+                { id: 'mittelschule', name: 'Mittelschule', emoji: '📖' },
+                { id: 'gymnasium', name: 'Gymnasium', emoji: '🎓' },
+                { id: 'berufsschule', name: 'Berufsschule', emoji: '🔧' },
+                { id: 'universitaet', name: 'Universität', emoji: '🏛️' },
+                { id: 'hochschule', name: 'Hochschule', emoji: '📜' },
+                { id: 'ausbildung', name: 'Ausbildung', emoji: '👷' },
+                { id: 'weiterbildung', name: 'Weiterbildung', emoji: '📈' },
+                { id: 'nachhilfe', name: 'Nachhilfe', emoji: '🧑‍🏫' },
+                { id: 'lernzentrum', name: 'Lernzentrum', emoji: '📚' },
+                { id: 'kurse', name: 'Kurse', emoji: '📋' },
+                { id: 'pruefungstrainer', name: 'Prüfungstrainer', emoji: '✅' },
+                { id: 'hausaufgaben', name: 'Hausaufgaben', emoji: '📝' },
+                { id: 'lernplan', name: 'Lernplan', emoji: '📅' },
+                { id: 'karteikarten', name: 'Karteikarten', emoji: '🃏' },
+                { id: 'quiz', name: 'Quiz', emoji: '🧠' },
+                { id: 'mathe-lernen', name: 'Mathematik-Lernen', emoji: '🔢' },
+                { id: 'physik-lernen', name: 'Physik-Lernen', emoji: '⚡' },
+                { id: 'chemie-lernen', name: 'Chemie-Lernen', emoji: '🧪' },
+                { id: 'biologie-lernen', name: 'Biologie-Lernen', emoji: '🧬' },
+                { id: 'geschichte-lernen', name: 'Geschichte-Lernen', emoji: '📜' },
+                { id: 'geografie-lernen', name: 'Geografie-Lernen', emoji: '🌍' },
+                { id: 'deutsch-lernen', name: 'Deutsch-Lernen', emoji: '🇩🇪' },
+                { id: 'englisch-lernen', name: 'Englisch-Lernen', emoji: '🇬🇧' },
+                { id: 'sprachen-lernen', name: 'Sprachen-Lernen', emoji: '🌐' },
+                { id: 'informatik-lernen', name: 'Informatik-Lernen', emoji: '💻' },
+                { id: 'programmieren-lernen', name: 'Programmieren-Lernen', emoji: '⌨️' },
+                { id: 'ai-lernen', name: 'AI-Lernen', emoji: '🧠' },
+                { id: 'wissensdatenbank', name: 'Wissensdatenbank', emoji: '📚' },
+                { id: 'bibliothek', name: 'Bibliothek', emoji: '📖' },
+                { id: 'digitales-klassenzimmer', name: 'Digitales Klassenzimmer', emoji: '💻' },
+                { id: 'studentenportal', name: 'Studentenportal', emoji: '👨‍🎓' },
+                { id: 'lehrerportal', name: 'Lehrerportal', emoji: '👨‍🏫' },
+                { id: 'dozentenportal', name: 'Dozentenportal', emoji: '👩‍🏫' },
+                { id: 'kursverwaltung', name: 'Kursverwaltung', emoji: '📋' },
+                { id: 'notenverwaltung', name: 'Notenverwaltung', emoji: '📊' },
+                { id: 'schulkalender', name: 'Schulkalender', emoji: '📅' }
+            ],
+            '🌌 Kosmos': [
+                { id: 'haldo-portal', name: 'HalDo Portal', emoji: '🌌' },
+                { id: 'cosmic-world', name: 'Cosmic World', emoji: '🌠' },
+                { id: 'sonnensystem', name: 'Sonnensystem', emoji: '🪐' },
+                { id: 'sonne', name: 'Sonne', emoji: '☀️' },
+                { id: 'merkur', name: 'Merkur', emoji: '☿' },
+                { id: 'venus', name: 'Venus', emoji: '♀' },
+                { id: 'erde', name: 'Erde', emoji: '🌍' },
+                { id: 'mond', name: 'Mond', emoji: '🌙' },
+                { id: 'mars', name: 'Mars', emoji: '🔴' },
+                { id: 'jupiter', name: 'Jupiter', emoji: '🟠' },
+                { id: 'saturn', name: 'Saturn', emoji: '🪐' },
+                { id: 'uranus', name: 'Uranus', emoji: '🔵' },
+                { id: 'neptun', name: 'Neptun', emoji: '🔷' },
+                { id: 'pluto', name: 'Pluto', emoji: '⚪' },
+                { id: 'sterne', name: 'Sterne', emoji: '⭐' },
+                { id: 'milchstrasse', name: 'Milchstraße', emoji: '🌌' },
+                { id: 'andromeda', name: 'Andromeda', emoji: '🌀' },
+                { id: 'galaxien-explorer', name: 'Galaxien-Explorer', emoji: '🔭' },
+                { id: 'sternbilder', name: 'Sternbilder', emoji: '🌟' },
+                { id: 'tierkreiszeichen', name: 'Tierkreiszeichen', emoji: '♈' },
+                { id: 'himmelsfarben', name: 'Himmelsfarben', emoji: '🌈' },
+                { id: 'sonnenuntergang', name: 'Sonnenuntergang', emoji: '🌅' },
+                { id: 'sonnenaufgang', name: 'Sonnenaufgang', emoji: '🌄' },
+                { id: 'polarlicht', name: 'Polarlicht', emoji: '✨' },
+                { id: 'regenbogen', name: 'Regenbogen', emoji: '🌈' },
+                { id: 'welt-3d', name: '3D-Welt', emoji: '🌍' },
+                { id: 'raum-explorer', name: 'Raum-Explorer', emoji: '🚀' },
+                { id: 'planeten-viewer', name: 'Planeten-Viewer', emoji: '🔭' }
+            ]
+        };
+
+        // ---- ALLE APPS ZUSAMMENFÜHREN ----
+        const ALL_APPS = [];
+        for (let cat in APPS_BY_CATEGORY) {
+            APPS_BY_CATEGORY[cat].forEach(app => {
+                app.category = cat;
+                ALL_APPS.push(app);
+                APP_REGISTRY[app.id] = app;
+            });
+        }
+
+        // ---- DOM REFS ----
+        const content = document.getElementById('dashboardContent');
+        const sidebarBtns = document.querySelectorAll('.nav-item');
+        const modal = document.getElementById('haldoModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+
+        // ---- MODAL ----
+        function openModal(title, html) {
+            modalTitle.textContent = title;
+            modalBody.innerHTML = html;
+            modal.classList.add('active');
+        }
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+        window.closeModal = closeModal;
+
+        // ---- UHR ----
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('dashboardTime').textContent =
+                now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ---- STATS ----
+        function getStats() {
+            const totalApps = ALL_APPS.length;
+            const totalCategories = Object.keys(APPS_BY_CATEGORY).length;
+            const totalCosmic = APPS_BY_CATEGORY['🌌 Kosmos']?.length || 0;
+            const totalAI = APPS_BY_CATEGORY['🌌 AI & Alltag']?.length || 0;
+            return { totalApps, totalCategories, totalCosmic, totalAI };
+        }
+
+        // ---- RENDER FUNCTIONS ----
+        function renderOverview() {
+            const stats = getStats();
+            const now = new Date();
+            const startTime = new Date(now);
+            startTime.setHours(0, 0, 0, 0);
+            const runtime = Math.floor((now - startTime) / 1000 / 60 / 60);
+
+            content.innerHTML = `
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">📱 Apps</div>
+                        <div class="stat-value">${stats.totalApps}</div>
+                        <div class="stat-desc">26 Kategorien</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">🧠 AI-Module</div>
+                        <div class="stat-value blue">${stats.totalAI}</div>
+                        <div class="stat-desc">Intelligente Assistenz</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">🌌 Kosmos</div>
+                        <div class="stat-value green">${stats.totalCosmic}</div>
+                        <div class="stat-desc">Planeten & Sterne</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">⚡ System</div>
+                        <div class="stat-value pink">v26.0</div>
+                        <div class="stat-desc">${runtime}h Laufzeit</div>
+                    </div>
+                </div>
+
+                <!-- Kategorien -->
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">📂</span>Kategorien</div>
+                        <button class="view-all" onclick="switchView('categories')">Alle anzeigen →</button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;">
+                        ${Object.keys(APPS_BY_CATEGORY).map(cat => `
+                            <div style="background:var(--bg-card);border-radius:8px;padding:8px 12px;border:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;font-size:0.7rem;color:var(--text-secondary);">
+                                <span>${cat}</span>
+                                <span style="color:var(--text-muted);font-size:0.6rem;">${APPS_BY_CATEGORY[cat].length}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Kosmische Apps -->
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">🌌</span>Kosmische Apps</div>
+                        <button class="view-all" onclick="switchView('cosmic')">Alle anzeigen →</button>
+                    </div>
+                    <div class="app-mini-grid">
+                        ${APPS_BY_CATEGORY['🌌 Kosmos']?.slice(0, 12).map(app => `
+                            <div class="app-mini-item" onclick="showAppInfo('${app.id}')">
+                                <span class="emoji">${app.emoji}</span>
+                                <span class="name">${app.name}</span>
+                            </div>
+                        `).join('')}
+                        ${APPS_BY_CATEGORY['🌌 Kosmos']?.length > 12 ? `
+                            <div class="app-mini-item" onclick="switchView('cosmic')" style="border-color:var(--border-color);">
+                                <span class="emoji">➕</span>
+                                <span class="name">+${APPS_BY_CATEGORY['🌌 Kosmos'].length - 12} mehr</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <!-- AI & Alltag -->
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">🧠</span>AI & Alltag</div>
+                        <button class="view-all" onclick="switchView('apps')">Alle anzeigen →</button>
+                    </div>
+                    <div class="app-mini-grid">
+                        ${APPS_BY_CATEGORY['🌌 AI & Alltag']?.slice(0, 8).map(app => `
+                            <div class="app-mini-item" onclick="showAppInfo('${app.id}')">
+                                <span class="emoji">${app.emoji}</span>
+                                <span class="name">${app.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Bildung -->
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">📚</span>Bildung</div>
+                        <button class="view-all" onclick="switchView('apps')">Alle anzeigen →</button>
+                    </div>
+                    <div class="app-mini-grid">
+                        ${APPS_BY_CATEGORY['📚 Bildung']?.slice(0, 8).map(app => `
+                            <div class="app-mini-item" onclick="showAppInfo('${app.id}')">
+                                <span class="emoji">${app.emoji}</span>
+                                <span class="name">${app.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAllApps() {
+            content.innerHTML = `
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">📱</span>Alle Apps (${ALL_APPS.length})</div>
+                        <div style="display:flex;gap:6px;">
+                            <input type="text" id="searchApps" placeholder="🔍 Suchen..." style="padding:4px 10px;border-radius:8px;border:1px solid var(--border-color);background:rgba(0,0,0,0.3);color:var(--text-secondary);font-size:0.7rem;outline:none;width:140px;font-family:var(--font);">
+                        </div>
+                    </div>
+                    <div class="app-mini-grid" id="allAppsGrid">
+                        ${ALL_APPS.map(app => `
+                            <div class="app-mini-item" data-id="${app.id}" data-name="${app.name}" data-category="${app.category}" onclick="showAppInfo('${app.id}')">
+                                <span class="emoji">${app.emoji}</span>
+                                <span class="name">${app.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            // Suche
+            document.getElementById('searchApps')?.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                document.querySelectorAll('#allAppsGrid .app-mini-item').forEach(el => {
+                    const name = el.dataset.name?.toLowerCase() || '';
+                    const category = el.dataset.category?.toLowerCase() || '';
+                    el.style.display = (name.includes(query) || category.includes(query)) ? '' : 'none';
+                });
+            });
+        }
+
+        function renderCategories() {
+            content.innerHTML = `
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">📂</span>Kategorien (${Object.keys(APPS_BY_CATEGORY).length})</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+                        ${Object.keys(APPS_BY_CATEGORY).map(cat => `
+                            <div style="background:var(--bg-card);border-radius:var(--radius);padding:14px 16px;border:1px solid var(--border-color);cursor:pointer;" onclick="filterByCategory('${cat}')">
+                                <div style="font-size:0.8rem;color:var(--text-secondary);font-weight:500;">${cat}</div>
+                                <div style="font-size:0.6rem;color:var(--text-muted);margin-top:2px;">${APPS_BY_CATEGORY[cat].length} Apps</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCosmic() {
+            const cosmicApps = APPS_BY_CATEGORY['🌌 Kosmos'] || [];
+            content.innerHTML = `
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">🪐</span>Sonnensystem & Kosmos (${cosmicApps.length})</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;">
+                        ${cosmicApps.map(app => `
+                            <div style="background:var(--bg-card);border-radius:var(--radius);padding:14px 12px;border:1px solid var(--border-color);text-align:center;cursor:pointer;" onclick="showAppInfo('${app.id}')">
+                                <span style="font-size:2rem;display:block;">${app.emoji}</span>
+                                <span style="font-size:0.7rem;color:var(--text-secondary);">${app.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSystem() {
+            content.innerHTML = `
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">⚙️</span>System-Informationen</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.8rem;color:var(--text-secondary);">
+                        <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border-color);">
+                            <div style="color:var(--text-muted);font-size:0.6rem;">Version</div>
+                            <div style="font-weight:600;">HalDo AI OS v26.0</div>
+                        </div>
+                        <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border-color);">
+                            <div style="color:var(--text-muted);font-size:0.6rem;">Apps</div>
+                            <div style="font-weight:600;">${ALL_APPS.length} Apps · 26 Kategorien</div>
+                        </div>
+                        <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border-color);">
+                            <div style="color:var(--text-muted);font-size:0.6rem;">AI-Modell</div>
+                            <div style="font-weight:600;">🧠 HalDo AI · Lokal</div>
+                        </div>
+                        <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border-color);">
+                            <div style="color:var(--text-muted);font-size:0.6rem;">Speicher</div>
+                            <div style="font-weight:600;">💾 197 MB · Lokal</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">🔗</span>System-Verbindungen</div>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        ${['AI Layer', 'Voice Layer', 'Language Layer', 'Memory Layer', 'Storage Layer', 'Security Layer', 'Notification Layer', 'Update Layer', 'Backup/Recovery'].map(layer => `
+                            <span style="padding:4px 14px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border-color);font-size:0.65rem;color:var(--text-secondary);">${layer}</span>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderUpdates() {
+            content.innerHTML = `
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">🔄</span>Updates</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-weight:600;color:var(--text-secondary);">HalDo AI OS v26.0</div>
+                                <div style="font-size:0.6rem;color:var(--text-muted);">Aktuell · Kein Update verfügbar</div>
+                            </div>
+                            <span style="padding:2px 12px;border-radius:10px;background:rgba(67,233,123,0.1);color:var(--accent-5);font-size:0.6rem;">✅ Aktuell</span>
+                        </div>
+                        <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-weight:600;color:var(--text-secondary);">App-Registry</div>
+                                <div style="font-size:0.6rem;color:var(--text-muted);">388 Apps registriert</div>
+                            </div>
+                            <span style="padding:2px 12px;border-radius:10px;background:rgba(79,172,254,0.1);color:var(--accent-4);font-size:0.6rem;">✅ Synchron</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSecurity() {
+            content.innerHTML = `
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">🛡️</span>Sicherheit</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.8rem;color:var(--text-secondary);">
+                        <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border-color);">
+                            <div style="color:var(--text-muted);font-size:0.6rem;">Datenschutz</div>
+                            <div style="font-weight:600;color:var(--accent-5);">🔒 Aktiv</div>
+                        </div>
+                        <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border-color);">
+                            <div style="color:var(--text-muted);font-size:0.6rem;">Berechtigungen</div>
+                            <div style="font-weight:600;color:var(--accent-5);">✅ Alle erteilt</div>
+                        </div>
+                        <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border-color);">
+                            <div style="color:var(--text-muted);font-size:0.6rem;">Verschlüsselung</div>
+                            <div style="font-weight:600;color:var(--accent-4);">🔑 Aktiv</div>
+                        </div>
+                        <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border-color);">
+                            <div style="color:var(--text-muted);font-size:0.6rem;">Backup</div>
+                            <div style="font-weight:600;color:var(--accent-5);">💾 Bereit</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStars() {
+            const stars = [
+                { name: 'Sonne', emoji: '☀️', desc: 'Zentralstern' },
+                { name: 'Sirius', emoji: '⭐', desc: 'Hellster Stern' },
+                { name: 'Polaris', emoji: '🌟', desc: 'Nordstern' },
+                { name: 'Vega', emoji: '✨', desc: 'Sommerstern' },
+                { name: 'Betelgeuse', emoji: '🔴', desc: 'Roter Riese' },
+                { name: 'Rigel', emoji: '🔵', desc: 'Blauer Riese' },
+                { name: 'Andromeda', emoji: '🌀', desc: 'Nachbargalaxie' },
+                { name: 'Milchstraße', emoji: '🌌', desc: 'Unsere Galaxie' }
+            ];
+            content.innerHTML = `
+                <div class="app-section">
+                    <div class="section-header">
+                        <div class="title"><span class="emoji">⭐</span>Sterne & Galaxien</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">
+                        ${stars.map(star => `
+                            <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px;border:1px solid var(--border-color);text-align:center;" onclick="openModal('${star.name}','<div style=\\'text-align:center;\\'><span style=\\'font-size:4rem;display:block;\\'>${star.emoji}</span><div style=\\'font-weight:600;\\'>${star.name}</div><div style=\\'color:var(--text-muted);font-size:0.8rem;\\'>${star.desc}</div></div>')">
+                                <span style="font-size:2.4rem;display:block;">${star.emoji}</span>
+                                <span style="font-size:0.7rem;color:var(--text-secondary);">${star.name}</span>
+                                <span style="font-size:0.55rem;color:var(--text-muted);display:block;">${star.desc}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ---- VIEW SWITCHER ----
+        function switchView(view) {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.nav-item[data-view="${view}"]`)?.classList.add('active');
+
+            switch(view) {
+                case 'overview': renderOverview(); break;
+                case 'apps': renderAllApps(); break;
+                case 'categories': renderCategories(); break;
+                case 'cosmic': renderCosmic(); break;
+                case 'stars': renderStars(); break;
+                case 'system': renderSystem(); break;
+                case 'updates': renderUpdates(); break;
+                case 'security': renderSecurity(); break;
+                default: renderOverview();
+            }
+        }
+        window.switchView = switchView;
+
+        function filterByCategory(category) {
+            switchView('apps');
+            setTimeout(() => {
+                const search = document.getElementById('searchApps');
+                if (search) {
+                    const catShort = category.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                    search.value = catShort;
+                    search.dispatchEvent(new Event('input'));
+                }
+            }, 100);
+        }
+        window.filterByCategory = filterByCategory;
+
+        function showAppInfo(appId) {
+            const app = APP_REGISTRY[appId];
+            if (!app) return;
+            openModal(`ℹ️ ${app.name}`, `
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="font-size:3rem;">${app.emoji}</span>
+                        <div>
+                            <div style="font-weight:600;color:var(--text-primary);">${app.name}</div>
+                            <div style="color:var(--text-muted);font-size:0.8rem;">${app.category || 'App'}</div>
+                        </div>
+                    </div>
+                    <div style="color:var(--text-secondary);font-size:0.85rem;">ID: ${app.id}</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                        <span style="padding:2px 12px;border-radius:6px;background:rgba(255,255,255,0.02);border:1px solid var(--border-color);font-size:0.6rem;color:var(--text-muted);">Version: 26.0</span>
+                        <span style="padding:2px 12px;border-radius:6px;background:rgba(255,255,255,0.02);border:1px solid var(--border-color);font-size:0.6rem;color:var(--text-muted);">🔗 AI · Voice · Storage</span>
+                    </div>
+                </div>
+            `);
+        }
+        window.showAppInfo = showAppInfo;
+
+        // ---- SIDEBAR EVENTS ----
+        sidebarBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const view = btn.dataset.view;
+                if (view) switchView(view);
+            });
+        });
+
+        // ---- STATUS UPDATES ----
+        document.getElementById('statusAppCount').textContent = ALL_APPS.length;
+        document.getElementById('statusMemory').textContent = '197';
+
+        // ---- INIT ----
+        renderOverview();
+
+        console.log('✅ HalDo AI OS — Dashboard geladen!');
+        console.log(`📱 ${ALL_APPS.length} Apps · 26 Kategorien · v26.0`);
+        console.log('🌌 Kosmische Dimension aktiviert!');
+    </script>
+</body>
+</html>
