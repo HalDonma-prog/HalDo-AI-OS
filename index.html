@@ -438,6 +438,13 @@
         // ---- APP REGISTRY (Alle 388 Apps) ----
         const APP_REGISTRY = {};
 
+        // ---- HILFSFUNKTION: APPS REGISTRIEREN ----
+        function registerApps(apps) {
+            apps.forEach(app => {
+                APP_REGISTRY[app.id] = app;
+            });
+        }
+
         // ============================================================
         // 🌌 A — AI & Alltag (17 Apps)
         // ============================================================
@@ -629,6 +636,7 @@
         // 🌌 H — HalDo World / Kosmos (27 Apps)
         // ============================================================
         const WORLD_APPS = [
+            // Sonnensystem
             { id: 'haldo-portal', name: 'HalDo Portal', emoji: '🌌', desc: 'Zentrale HalDo-Welt', category: '🌌 Kosmos' },
             { id: 'cosmic-world', name: 'Cosmic World', emoji: '🌠', desc: 'Kosmische Welt', category: '🌌 Kosmos' },
             { id: 'sonnensystem', name: 'Sonnensystem', emoji: '🪐', desc: 'Unser komplettes Sonnensystem', category: '🌌 Kosmos' },
@@ -643,17 +651,20 @@
             { id: 'uranus', name: 'Uranus', emoji: '🔵', desc: 'Der eisige Riese', category: '🌌 Kosmos' },
             { id: 'neptun', name: 'Neptun', emoji: '🔷', desc: 'Der äußerste Planet', category: '🌌 Kosmos' },
             { id: 'pluto', name: 'Pluto', emoji: '⚪', desc: 'Der Zwergplanet', category: '🌌 Kosmos' },
+            // Sterne & Galaxien
             { id: 'sterne', name: 'Sterne', emoji: '⭐', desc: 'Unendliche Weiten der Sterne', category: '🌌 Kosmos' },
             { id: 'milchstrasse', name: 'Milchstraße', emoji: '🌌', desc: 'Unsere Heimatgalaxie', category: '🌌 Kosmos' },
             { id: 'andromeda', name: 'Andromeda', emoji: '🌀', desc: 'Die Nachbargalaxie', category: '🌌 Kosmos' },
             { id: 'galaxien-explorer', name: 'Galaxien-Explorer', emoji: '🔭', desc: 'Entdecke ferne Galaxien', category: '🌌 Kosmos' },
             { id: 'sternbilder', name: 'Sternbilder', emoji: '🌟', desc: 'Alle 88 Sternbilder', category: '🌌 Kosmos' },
             { id: 'tierkreiszeichen', name: 'Tierkreiszeichen', emoji: '♈', desc: 'Die 12 Sternzeichen', category: '🌌 Kosmos' },
+            // Himmelsfarben
             { id: 'himmelsfarben', name: 'Himmelsfarben', emoji: '🌈', desc: 'Die Farben des Himmels', category: '🌌 Kosmos' },
             { id: 'sonnenuntergang', name: 'Sonnenuntergang', emoji: '🌅', desc: 'Der tägliche Farbzauber', category: '🌌 Kosmos' },
             { id: 'sonnenaufgang', name: 'Sonnenaufgang', emoji: '🌄', desc: 'Der Beginn eines neuen Tages', category: '🌌 Kosmos' },
             { id: 'polarlicht', name: 'Polarlicht', emoji: '✨', desc: 'Das Nord- und Südlicht', category: '🌌 Kosmos' },
             { id: 'regenbogen', name: 'Regenbogen', emoji: '🌈', desc: 'Das Farbenspektrum', category: '🌌 Kosmos' },
+            // 3D & Explorer
             { id: 'welt-3d', name: '3D-Welt', emoji: '🌍', desc: 'Die Erde in 3D', category: '🌌 Kosmos' },
             { id: 'raum-explorer', name: 'Raum-Explorer', emoji: '🚀', desc: 'Reise durch das Universum', category: '🌌 Kosmos' },
             { id: 'planeten-viewer', name: 'Planeten-Viewer', emoji: '🔭', desc: 'Betrachte alle Planeten', category: '🌌 Kosmos' }
@@ -1131,6 +1142,64 @@
                 </div>
             `;
 
+            // Kosmische Daten für Planeten
+            if (appId === 'sonne') {
+                html += `
+                    <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px;border:1px solid var(--border-color);">
+                        <div style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:8px;">☀️ Sonnendaten</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:0.65rem;color:var(--text-muted);">
+                            <div>🌡️ Oberflächentemperatur: <span style="color:var(--text-secondary);">5.500 °C</span></div>
+                            <div>📏 Durchmesser: <span style="color:var(--text-secondary);">1.391.000 km</span></div>
+                            <div>⚡ Masse: <span style="color:var(--text-secondary);">1,989 × 10³⁰ kg</span></div>
+                            <div>🌍 Alter: <span style="color:var(--text-secondary);">4,6 Mrd. Jahre</span></div>
+                        </div>
+                    </div>
+                `;
+            } else if (appId === 'erde') {
+                html += `
+                    <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px;border:1px solid var(--border-color);">
+                        <div style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:8px;">🌍 Erd-Daten</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:0.65rem;color:var(--text-muted);">
+                            <div>🌡️ Durchschnittstemp.: <span style="color:var(--text-secondary);">15 °C</span></div>
+                            <div>📏 Durchmesser: <span style="color:var(--text-secondary);">12.742 km</span></div>
+                            <div>🌍 Entfernung zur Sonne: <span style="color:var(--text-secondary);">149,6 Mio. km</span></div>
+                            <div>🌙 Mond: <span style="color:var(--text-secondary);">1 (Der Mond)</span></div>
+                        </div>
+                    </div>
+                `;
+            } else if (appId === 'mond') {
+                html += `
+                    <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px;border:1px solid var(--border-color);">
+                        <div style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:8px;">🌙 Mond-Daten</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:0.65rem;color:var(--text-muted);">
+                            <div>📏 Durchmesser: <span style="color:var(--text-secondary);">3.474 km</span></div>
+                            <div>📏 Entfernung zur Erde: <span style="color:var(--text-secondary);">384.400 km</span></div>
+                            <div>⏱️ Umlaufzeit: <span style="color:var(--text-secondary);">27,3 Tage</span></div>
+                            <div>🌡️ Temperatur: <span style="color:var(--text-secondary);">-233 bis 123 °C</span></div>
+                        </div>
+                    </div>
+                `;
+            } else if (appId === 'sonnensystem') {
+                html += `
+                    <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px;border:1px solid var(--border-color);">
+                        <div style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:8px;">🪐 Unser Sonnensystem</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;text-align:center;">
+                            <div><span style="font-size:1.4rem;display:block;">☀️</span><span style="font-size:0.55rem;color:var(--text-muted);">Sonne</span></div>
+                            <div><span style="font-size:1.4rem;display:block;">☿</span><span style="font-size:0.55rem;color:var(--text-muted);">Merkur</span></div>
+                            <div><span style="font-size:1.4rem;display:block;">♀</span><span style="font-size:0.55rem;color:var(--text-muted);">Venus</span></div>
+                            <div><span style="font-size:1.4rem;display:block;">🌍</span><span style="font-size:0.55rem;color:var(--text-muted);">Erde</span></div>
+                            <div><span style="font-size:1.4rem;display:block;">🌙</span><span style="font-size:0.55rem;color:var(--text-muted);">Mond</span></div>
+                            <div><span style="font-size:1.4rem;display:block;">🔴</span><span style="font-size:0.55rem;color:var(--text-muted);">Mars</span></div>
+                            <div><span style="font-size:1.4rem;display:block;">🟠</span><span style="font-size:0.55rem;color:var(--text-muted);">Jupiter</span></div>
+                            <div><span style="font-size:1.4rem;display:block;">🪐</span><span style="font-size:0.55rem;color:var(--text-muted);">Saturn</span></div>
+                            <div><span style="font-size:1.4rem;display:block;">🔵</span><span style="font-size:0.55rem;color:var(--text-muted);">Uranus</span></div>
+                            <div><span style="font-size:1.4rem;display:block;">🔷</span><span style="font-size:0.55rem;color:var(--text-muted);">Neptun</span></div>
+                            <div><span style="font-size:1.4rem;display:block;">⚪</span><span style="font-size:0.55rem;color:var(--text-muted);">Pluto</span></div>
+                        </div>
+                    </div>
+                `;
+            }
+
             // Features
             const features = getAppFeatures(appId);
             if (features.length > 0) {
@@ -1202,10 +1271,10 @@
                     { name: 'Zusammenfassen', emoji: '📝', desc: 'Lange Texte komprimieren' },
                     { name: 'Übersetzen', emoji: '🌍', desc: 'In beliebige Sprache übersetzen' }
                 ],
-                'sonnensystem': [
-                    { name: 'Planeten', emoji: '🪐', desc: 'Alle Planeten anzeigen' },
-                    { name: 'Orbit', emoji: '🌀', desc: 'Umlaufbahnen simulieren' },
-                    { name: 'Daten', emoji: '📊', desc: 'Astronomische Daten' },
+                'sonne': [
+                    { name: 'Daten', emoji: '📊', desc: 'Sonnendaten anzeigen' },
+                    { name: 'Animation', emoji: '🌀', desc: 'Rotation simulieren' },
+                    { name: 'Fakten', emoji: '📖', desc: 'Wissenswertes' },
                     { name: '3D-Ansicht', emoji: '🌍', desc: '3D-Darstellung' }
                 ],
                 'erde': [
@@ -1213,6 +1282,12 @@
                     { name: 'Atmosphäre', emoji: '🌤️', desc: 'Wetter und Klima' },
                     { name: 'Kontinente', emoji: '🌍', desc: 'Alle Kontinente' },
                     { name: 'Ozeane', emoji: '🌊', desc: 'Meere und Ozeane' }
+                ],
+                'sonnensystem': [
+                    { name: 'Planeten', emoji: '🪐', desc: 'Alle Planeten anzeigen' },
+                    { name: 'Orbit', emoji: '🌀', desc: 'Umlaufbahnen simulieren' },
+                    { name: 'Daten', emoji: '📊', desc: 'Astronomische Daten' },
+                    { name: '3D-Ansicht', emoji: '🌍', desc: '3D-Darstellung' }
                 ],
                 'gesundheit': [
                     { name: 'Krankheiten', emoji: '🩺', desc: 'Krankheiten A–Z' },
