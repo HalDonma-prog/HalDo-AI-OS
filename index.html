@@ -1296,4 +1296,193 @@
                     <div style="display:flex;align-items:center;gap:12px;">
                         <span style="font-size:3rem;">${app.emoji}</span>
                         <div>
-                            <div style
+                            <div style="font-weight:600;color:var(--text-primary);">${app.name}</div>
+                            <div style="color:var(--text-muted);font-size:0.8rem;">${app.category}</div>
+                        </div>
+                    </div>
+                    <div style="color:var(--text-secondary);font-size:0.9rem;">${app.desc}</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                        <span style="padding:2px 12px;border-radius:6px;background:rgba(255,255,255,0.02);border:1px solid var(--border-color);font-size:0.6rem;color:var(--text-muted);">ID: ${app.id}</span>
+                        <span style="padding:2px 12px;border-radius:6px;background:rgba(255,255,255,0.02);border:1px solid var(--border-color);font-size:0.6rem;color:var(--text-muted);">Version: 26.0</span>
+                    </div>
+                    <div style="margin-top:6px;border-top:1px solid var(--border-color);padding-top:8px;color:var(--text-muted);font-size:0.6rem;">
+                        🔗 Verbindungen: AI · Voice · Storage · Files · Security · Updates
+                    </div>
+                </div>
+            `);
+        }
+        window.showAppInfo = showAppInfo;
+
+        // ---- App Settings ----
+        function openAppSettings(appId) {
+            const app = APP_REGISTRY[appId];
+            if (!app) return;
+            openModal(`⚙️ Einstellungen — ${app.name}`, `
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
+                        <span style="color:var(--text-secondary);font-size:0.8rem;">Sprache</span>
+                        <span style="color:var(--text-muted);font-size:0.8rem;">Deutsch (DE)</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
+                        <span style="color:var(--text-secondary);font-size:0.8rem;">AI-Provider</span>
+                        <span style="color:var(--text-muted);font-size:0.8rem;">Lokal · Offline</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
+                        <span style="color:var(--text-secondary);font-size:0.8rem;">Speicher</span>
+                        <span style="color:var(--text-muted);font-size:0.8rem;">Lokal (Cache)</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
+                        <span style="color:var(--text-secondary);font-size:0.8rem;">Datenschutz</span>
+                        <span style="color:var(--text-muted);font-size:0.8rem;">🔒 Aktiv</span>
+                    </div>
+                    <div style="margin-top:8px;display:flex;gap:6px;">
+                        <button onclick="closeModal();openModal('✅ Gespeichert','Die Einstellungen wurden übernommen.')" style="padding:8px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--accent-4),var(--accent-5));color:#0a0a12;font-weight:600;cursor:pointer;font-family:var(--font);">Übernehmen</button>
+                        <button onclick="closeModal()" style="padding:8px 20px;border:none;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--text-secondary);cursor:pointer;font-family:var(--font);">Abbrechen</button>
+                    </div>
+                </div>
+            `);
+        }
+        window.openAppSettings = openAppSettings;
+
+        // ---- Export ----
+        function exportAppData(appId) {
+            const app = APP_REGISTRY[appId];
+            if (!app) return;
+            const data = { app: appId, name: app.name, data: { example: 'Daten', timestamp: Date.now() }, version: '26.0' };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${appId}_data_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            openModal('📤 Export', `✅ Daten von "${app.name}" wurden exportiert.`);
+        }
+        window.exportAppData = exportAppData;
+
+        // ---- Import ----
+        function importAppData(appId) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        openModal('📥 Import', `
+                            ✅ Daten für "${data.name || appId}" importiert.
+                            <br><br>
+                            📊 ${Object.keys(data.data || {}).length} Einträge geladen.
+                            <br>
+                            🕐 ${new Date(data.timestamp).toLocaleString()}
+                        `);
+                    } catch (err) {
+                        openModal('❌ Fehler', `Import fehlgeschlagen: ${err.message}`);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+        window.importAppData = importAppData;
+
+        // ---- AI Actions ----
+        function aiAction(appId, action) {
+            const app = APP_REGISTRY[appId];
+            if (!app) return;
+            const messages = {
+                'zusammenfassen': `🧠 KI fasst den Inhalt von "${app.name}" zusammen ...`,
+                'übersetzen': `🌍 KI übersetzt den Inhalt von "${app.name}" ...`,
+                'analysieren': `🔍 KI analysiert den Inhalt von "${app.name}" ...`,
+                'generieren': `✨ KI generiert neuen Inhalt für "${app.name}" ...`
+            };
+            openModal(`🧠 AI-Aktion — ${app.name}`, `
+                <div style="padding:12px;background:rgba(79,172,254,0.02);border-radius:8px;border:1px solid rgba(79,172,254,0.05);">
+                    ${messages[action] || '🧠 AI verarbeitet ...'}
+                </div>
+                <button onclick="closeModal()" style="margin-top:8px;padding:6px 16px;border:none;border-radius:6px;background:rgba(255,255,255,0.02);color:var(--text-secondary);cursor:pointer;font-family:var(--font);">Schließen</button>
+            `);
+        }
+        window.aiAction = aiAction;
+
+        // ---- Voice Actions ----
+        function voiceAction(appId, action) {
+            const app = APP_REGISTRY[appId];
+            if (!app) return;
+            const status = {
+                'start': '🎤 Sprachaufnahme gestartet ...',
+                'stop': '⏹️ Sprachaufnahme beendet.',
+                'status': '📊 Voice-Status: Bereit · Mikrofon: 🟢 Aktiv'
+            };
+            openModal(`🎤 Voice — ${app.name}`, `
+                <div style="padding:12px;background:rgba(43,233,123,0.02);border-radius:8px;border:1px solid rgba(43,233,123,0.05);">
+                    ${status[action] || '🎤 Voice-Aktion ausgeführt.'}
+                </div>
+                <button onclick="closeModal()" style="margin-top:8px;padding:6px 16px;border:none;border-radius:6px;background:rgba(255,255,255,0.02);color:var(--text-secondary);cursor:pointer;font-family:var(--font);">Schließen</button>
+            `);
+        }
+        window.voiceAction = voiceAction;
+
+        // ---- Keyboard Shortcuts ----
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const search = prompt('🔍 App suchen:', '');
+                if (search) {
+                    const found = APP_IDS.filter(id =>
+                        APP_REGISTRY[id].name.toLowerCase().includes(search.toLowerCase()) ||
+                        APP_REGISTRY[id].desc.toLowerCase().includes(search.toLowerCase())
+                    );
+                    if (found.length > 0) {
+                        switchApp(found[0]);
+                    } else {
+                        openModal('🔍 Suche', `Keine App gefunden für: "${search}"`);
+                    }
+                }
+            }
+        });
+
+        // ---- System-Initialisierung ----
+        function initSystem() {
+            updateSidebar();
+            renderApp('haldo-ai');
+            updateTaskbar();
+            updateStatus();
+
+            setInterval(() => {
+                const appId = currentApp;
+                const storageEl = document.getElementById(`storageStatus-${appId}`);
+                if (storageEl) {
+                    const size = Math.round(Math.random() * 100 + 10);
+                    storageEl.textContent = size + ' KB';
+                }
+                const dataEl = document.getElementById(`dataStatus-${appId}`);
+                if (dataEl) {
+                    const count = Math.round(Math.random() * 50 + 5);
+                    dataEl.textContent = count + ' Einträge';
+                }
+                const activityEl = document.getElementById(`activityStatus-${appId}`);
+                if (activityEl) {
+                    activityEl.textContent = 'Jetzt';
+                }
+            }, 5000);
+
+            console.log('🚀 HalDo AI OS v26.0 gestartet!');
+            console.log(`📱 ${APP_IDS.length} Apps geladen.`);
+            console.log('🌌 Kosmische Dimension aktiviert!');
+            console.log('✨ System bereit.');
+        }
+
+        document.addEventListener('DOMContentLoaded', initSystem);
+
+        console.log('✅ HalDo AI OS — Vollständige App-Welt mit Kosmos geladen!');
+        console.log(`🏆 ${APP_IDS.length} Apps · Kosmische Kategorie integriert · v26.0`);
+        console.log('🌞 Sonne · 🌍 Erde · 🌙 Mond · ⭐ Sterne · 🌈 Himmelsfarben');
+    </script>
+</body>
+</html>
