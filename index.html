@@ -718,15 +718,6 @@
         (function boot() {
             const progress = document.getElementById('bootProgress');
             let p = 0;
-            const steps = [
-                'Kernel initialisieren',
-                'App Registry laden',
-                'System-Dienste starten',
-                'AI-Modul aktivieren',
-                'Voice-Modul aktivieren',
-                'Cosmic World generieren',
-                'Desktop bereit'
-            ];
             const bootScreen = document.getElementById('bootScreen');
 
             function updateBoot() {
@@ -745,7 +736,7 @@
         })();
 
         // ============================================================
-        // APP REGISTRY (388 Apps)
+        // APP REGISTRY — ALLE 200+ APPS
         // ============================================================
         const APP_REGISTRY = {};
 
@@ -755,11 +746,506 @@
             });
         }
 
-        // ---- ALLE 388 APPS (gekürzt für Lesbarkeit, aber vollständig im Code enthalten) ----
-        // Die vollständige Liste aller 388 Apps ist hier integriert.
-        // Siehe die vorherige Antwort für die komplette Liste.
-        // Aus Platzgründen wird hier eine Zusammenfassung gezeigt, aber die tatsächliche
-        // index.html enthält alle 388 Apps mit vollständigen Daten.
+        // ---- ALLE 200+ APPS ----
+        const ALL_APPS = [
+            // ============================================================
+            // 🌌 A — AI & Alltag
+            // ============================================================
+            { id: 'haldo-ai', name: 'HalDo AI', emoji: '🧠', desc: 'Zentrale intelligente Assistenz', category: '🌌 AI & Alltag' },
+            { id: 'ai-chat', name: 'AI Chat', emoji: '💬', desc: 'Vollständiger Chat', category: '🌌 AI & Alltag' },
+            { id: 'ai-voice', name: 'AI Voice', emoji: '🎤', desc: 'Sprechen und zuhören', category: '🌌 AI & Alltag' },
+            { id: 'ai-vision', name: 'AI Vision', emoji: '👁️', desc: 'Bilder/Kamera verstehen', category: '🌌 AI & Alltag' },
+            { id: 'ai-memory', name: 'AI Memory', emoji: '🧠', desc: 'Persönliches Gedächtnis', category: '🌌 AI & Alltag' },
+            { id: 'ai-knowledge', name: 'AI Knowledge', emoji: '📚', desc: 'Wissenssystem', category: '🌌 AI & Alltag' },
+            { id: 'ai-agents', name: 'AI Agents', emoji: '🤖', desc: 'Spezialisierte AI-Agenten', category: '🌌 AI & Alltag' },
+            { id: 'ai-tools', name: 'AI Tools', emoji: '🛠️', desc: 'Werkzeuge für die AI', category: '🌌 AI & Alltag' },
+            { id: 'ai-models', name: 'AI Models', emoji: '🧮', desc: 'Modellverwaltung', category: '🌌 AI & Alltag' },
+            { id: 'ai-automation', name: 'AI Automation', emoji: '⚡', desc: 'Automatische Workflows', category: '🌌 AI & Alltag' },
+            { id: 'ai-translator', name: 'AI Translator', emoji: '🌍', desc: 'Intelligente Übersetzung', category: '🌌 AI & Alltag' },
+            { id: 'ai-writer', name: 'AI Writer', emoji: '✍️', desc: 'Schreiben', category: '🌌 AI & Alltag' },
+            { id: 'ai-research', name: 'AI Research', emoji: '🔍', desc: 'Recherche', category: '🌌 AI & Alltag' },
+            { id: 'ai-coding', name: 'AI Coding', emoji: '💻', desc: 'Programmieren', category: '🌌 AI & Alltag' },
+            { id: 'ai-tutor', name: 'AI Tutor', emoji: '🧑‍🏫', desc: 'Persönlicher Lehrer', category: '🌌 AI & Alltag' },
+            { id: 'ai-coach', name: 'AI Coach', emoji: '💪', desc: 'Persönlicher Coach', category: '🌌 AI & Alltag' },
+            { id: 'ai-planner', name: 'AI Planner', emoji: '📋', desc: 'Intelligente Planung', category: '🌌 AI & Alltag' },
+
+            // ============================================================
+            // 📚 B — Bildung
+            // ============================================================
+            { id: 'schule', name: 'Schule', emoji: '🏫', desc: 'Zentrale Schulverwaltung', category: '📚 Bildung' },
+            { id: 'grundschule', name: 'Grundschule', emoji: '📚', desc: 'Grundschul-Lernbereich', category: '📚 Bildung' },
+            { id: 'mittelschule', name: 'Mittelschule', emoji: '📖', desc: 'Mittelschul-Lernbereich', category: '📚 Bildung' },
+            { id: 'gymnasium', name: 'Gymnasium', emoji: '🎓', desc: 'Gymnasialer Lernbereich', category: '📚 Bildung' },
+            { id: 'berufsschule', name: 'Berufsschule', emoji: '🔧', desc: 'Berufliche Bildung', category: '📚 Bildung' },
+            { id: 'universitaet', name: 'Universität', emoji: '🏛️', desc: 'Hochschulbereich', category: '📚 Bildung' },
+            { id: 'hochschule', name: 'Hochschule', emoji: '📜', desc: 'Hochschul-Lernbereich', category: '📚 Bildung' },
+            { id: 'ausbildung', name: 'Ausbildung', emoji: '👷', desc: 'Ausbildungsverwaltung', category: '📚 Bildung' },
+            { id: 'weiterbildung', name: 'Weiterbildung', emoji: '📈', desc: 'Weiterbildungsangebote', category: '📚 Bildung' },
+            { id: 'nachhilfe', name: 'Nachhilfe', emoji: '🧑‍🏫', desc: 'Nachhilfeverwaltung', category: '📚 Bildung' },
+            { id: 'lernzentrum', name: 'Lernzentrum', emoji: '📚', desc: 'Zentrale Lernplattform', category: '📚 Bildung' },
+            { id: 'kurse', name: 'Kurse', emoji: '📋', desc: 'Kursverwaltung', category: '📚 Bildung' },
+            { id: 'pruefungstrainer', name: 'Prüfungstrainer', emoji: '✅', desc: 'Prüfungsvorbereitung', category: '📚 Bildung' },
+            { id: 'hausaufgaben', name: 'Hausaufgaben', emoji: '📝', desc: 'Hausaufgabenverwaltung', category: '📚 Bildung' },
+            { id: 'lernplan', name: 'Lernplan', emoji: '📅', desc: 'Lernplanung', category: '📚 Bildung' },
+            { id: 'karteikarten', name: 'Karteikarten', emoji: '🃏', desc: 'Karteikarten-Lernen', category: '📚 Bildung' },
+            { id: 'quiz', name: 'Quiz', emoji: '🧠', desc: 'Wissen testen', category: '📚 Bildung' },
+            { id: 'mathe-lernen', name: 'Mathematik-Lernen', emoji: '🔢', desc: 'Mathe lernen', category: '📚 Bildung' },
+            { id: 'physik-lernen', name: 'Physik-Lernen', emoji: '⚡', desc: 'Physik lernen', category: '📚 Bildung' },
+            { id: 'chemie-lernen', name: 'Chemie-Lernen', emoji: '🧪', desc: 'Chemie lernen', category: '📚 Bildung' },
+            { id: 'biologie-lernen', name: 'Biologie-Lernen', emoji: '🧬', desc: 'Biologie lernen', category: '📚 Bildung' },
+            { id: 'geschichte-lernen', name: 'Geschichte-Lernen', emoji: '📜', desc: 'Geschichte lernen', category: '📚 Bildung' },
+            { id: 'geografie-lernen', name: 'Geografie-Lernen', emoji: '🌍', desc: 'Geografie lernen', category: '📚 Bildung' },
+            { id: 'deutsch-lernen', name: 'Deutsch-Lernen', emoji: '🇩🇪', desc: 'Deutsch lernen', category: '📚 Bildung' },
+            { id: 'englisch-lernen', name: 'Englisch-Lernen', emoji: '🇬🇧', desc: 'Englisch lernen', category: '📚 Bildung' },
+            { id: 'sprachen-lernen', name: 'Sprachen-Lernen', emoji: '🌐', desc: 'Mehrere Sprachen lernen', category: '📚 Bildung' },
+            { id: 'informatik-lernen', name: 'Informatik-Lernen', emoji: '💻', desc: 'Informatik lernen', category: '📚 Bildung' },
+            { id: 'programmieren-lernen', name: 'Programmieren-Lernen', emoji: '⌨️', desc: 'Programmieren lernen', category: '📚 Bildung' },
+            { id: 'ai-lernen', name: 'AI-Lernen', emoji: '🧠', desc: 'Künstliche Intelligenz lernen', category: '📚 Bildung' },
+            { id: 'wissensdatenbank', name: 'Wissensdatenbank', emoji: '📚', desc: 'Zentrale Wissenssammlung', category: '📚 Bildung' },
+            { id: 'bibliothek', name: 'Bibliothek', emoji: '📖', desc: 'Digitale Bibliothek', category: '📚 Bildung' },
+            { id: 'digitales-klassenzimmer', name: 'Digitales Klassenzimmer', emoji: '💻', desc: 'Digitale Lernumgebung', category: '📚 Bildung' },
+            { id: 'studentenportal', name: 'Studentenportal', emoji: '👨‍🎓', desc: 'Studentenverwaltung', category: '📚 Bildung' },
+            { id: 'lehrerportal', name: 'Lehrerportal', emoji: '👨‍🏫', desc: 'Lehrerverwaltung', category: '📚 Bildung' },
+            { id: 'dozentenportal', name: 'Dozentenportal', emoji: '👩‍🏫', desc: 'Dozentenverwaltung', category: '📚 Bildung' },
+            { id: 'kursverwaltung', name: 'Kursverwaltung', emoji: '📋', desc: 'Kurse verwalten', category: '📚 Bildung' },
+            { id: 'notenverwaltung', name: 'Notenverwaltung', emoji: '📊', desc: 'Noten verwalten', category: '📚 Bildung' },
+            { id: 'schulkalender', name: 'Schulkalender', emoji: '📅', desc: 'Schulkalender', category: '📚 Bildung' },
+
+            // ============================================================
+            // 🚗 C — Fahrschule & Verkehr
+            // ============================================================
+            { id: 'fahrschule', name: 'Fahrschule', emoji: '🚗', desc: 'Zentrale Fahrschulverwaltung', category: '🚗 Fahrschule' },
+            { id: 'fuehrerschein-lernen', name: 'Führerschein-Lernen', emoji: '📘', desc: 'Theorie lernen', category: '🚗 Fahrschule' },
+            { id: 'theoriepruefung', name: 'Theorieprüfung', emoji: '📝', desc: 'Theorieprüfung simulieren', category: '🚗 Fahrschule' },
+            { id: 'fahrpruefung', name: 'Fahrprüfung', emoji: '🚦', desc: 'Fahrprüfung simulieren', category: '🚗 Fahrschule' },
+            { id: 'verkehrszeichen', name: 'Verkehrszeichen', emoji: '🛑', desc: 'Verkehrszeichen lernen', category: '🚗 Fahrschule' },
+            { id: 'verkehrsregeln', name: 'Verkehrsregeln', emoji: '📋', desc: 'Verkehrsregeln lernen', category: '🚗 Fahrschule' },
+            { id: 'gefahrenlehre', name: 'Gefahrenlehre', emoji: '⚠️', desc: 'Gefahren erkennen', category: '🚗 Fahrschule' },
+            { id: 'fahrzeugkunde', name: 'Fahrzeugkunde', emoji: '🔧', desc: 'Fahrzeugtechnik lernen', category: '🚗 Fahrschule' },
+            { id: 'erste-hilfe-fahrschule', name: 'Erste-Hilfe-Fahrschule', emoji: '🩹', desc: 'Erste Hilfe für Fahrschüler', category: '🚗 Fahrschule' },
+            { id: 'fahrstunden', name: 'Fahrstunden', emoji: '🚗', desc: 'Fahrstunden verwalten', category: '🚗 Fahrschule' },
+            { id: 'fahrlehrer', name: 'Fahrlehrer', emoji: '👨‍🏫', desc: 'Fahrlehrer verwalten', category: '🚗 Fahrschule' },
+            { id: 'fahrschueler', name: 'Fahrschüler', emoji: '👨‍🎓', desc: 'Fahrschüler verwalten', category: '🚗 Fahrschule' },
+            { id: 'fahrplan', name: 'Fahrplan', emoji: '📅', desc: 'Fahrstunden planen', category: '🚗 Fahrschule' },
+            { id: 'fahrtenbuch', name: 'Fahrtenbuch', emoji: '📖', desc: 'Fahrten aufzeichnen', category: '🚗 Fahrschule' },
+            { id: 'fahrstunden-kalender', name: 'Fahrstunden-Kalender', emoji: '📅', desc: 'Kalender für Fahrstunden', category: '🚗 Fahrschule' },
+            { id: 'fahrzeugverwaltung', name: 'Fahrzeugverwaltung', emoji: '🚙', desc: 'Fahrzeuge verwalten', category: '🚗 Fahrschule' },
+            { id: 'fahrschulverwaltung', name: 'Fahrschulverwaltung', emoji: '🏫', desc: 'Fahrschule verwalten', category: '🚗 Fahrschule' },
+            { id: 'fahrfortschritt', name: 'Fahrfortschritt', emoji: '📈', desc: 'Fortschritt verfolgen', category: '🚗 Fahrschule' },
+            { id: 'pruefungssimulation', name: 'Prüfungssimulation', emoji: '🎯', desc: 'Prüfungen simulieren', category: '🚗 Fahrschule' },
+            { id: 'ai-fahrlehrer', name: 'AI-Fahrlehrer', emoji: '🤖', desc: 'Intelligenter Fahrlehrer', category: '🚗 Fahrschule' },
+            { id: 'driving-tutor', name: 'Driving Tutor', emoji: '🧑‍🏫', desc: 'Persönlicher Fahr-Tutor', category: '🚗 Fahrschule' },
+            { id: 'verkehrs-simulator', name: 'Verkehrs-Simulator', emoji: '🚦', desc: 'Verkehrssituationen simulieren', category: '🚗 Fahrschule' },
+
+            // ============================================================
+            // 💚 D — Gesundheit
+            // ============================================================
+            { id: 'gesundheit', name: 'Gesundheit', emoji: '💚', desc: 'Zentrale Gesundheitsverwaltung', category: '💚 Gesundheit' },
+            { id: 'gesundheitsakte', name: 'Gesundheitsakte', emoji: '📋', desc: 'Persönliche Gesundheitsakte', category: '💚 Gesundheit' },
+            { id: 'arzttermine', name: 'Arzttermine', emoji: '🏥', desc: 'Arzttermine verwalten', category: '💚 Gesundheit' },
+            { id: 'medikamente', name: 'Medikamente', emoji: '💊', desc: 'Medikamente verwalten', category: '💚 Gesundheit' },
+            { id: 'medikamentenerinnerung', name: 'Medikamentenerinnerung', emoji: '🔔', desc: 'Erinnerungen für Medikamente', category: '💚 Gesundheit' },
+            { id: 'vitalwerte', name: 'Vitalwerte', emoji: '❤️', desc: 'Vitalwerte verfolgen', category: '💚 Gesundheit' },
+            { id: 'fitness', name: 'Fitness', emoji: '💪', desc: 'Fitness verfolgen', category: '💚 Gesundheit' },
+            { id: 'training', name: 'Training', emoji: '🏋️', desc: 'Training planen', category: '💚 Gesundheit' },
+            { id: 'schlaf', name: 'Schlaf', emoji: '😴', desc: 'Schlaf verfolgen', category: '💚 Gesundheit' },
+            { id: 'ernaehrung', name: 'Ernährung', emoji: '🥗', desc: 'Ernährung verfolgen', category: '💚 Gesundheit' },
+            { id: 'wasser', name: 'Wasser', emoji: '💧', desc: 'Wasseraufnahme verfolgen', category: '💚 Gesundheit' },
+            { id: 'gewicht', name: 'Gewicht', emoji: '⚖️', desc: 'Gewicht verfolgen', category: '💚 Gesundheit' },
+            { id: 'blutdruck', name: 'Blutdruck', emoji: '🩸', desc: 'Blutdruck verfolgen', category: '💚 Gesundheit' },
+            { id: 'herzfrequenz', name: 'Herzfrequenz', emoji: '❤️', desc: 'Herzfrequenz verfolgen', category: '💚 Gesundheit' },
+            { id: 'gesundheitsziele', name: 'Gesundheitsziele', emoji: '🎯', desc: 'Gesundheitsziele setzen', category: '💚 Gesundheit' },
+            { id: 'symptom-tagebuch', name: 'Symptom-Tagebuch', emoji: '📓', desc: 'Symptome aufzeichnen', category: '💚 Gesundheit' },
+            { id: 'mental-health', name: 'Mental Health', emoji: '🧠', desc: 'Psychische Gesundheit', category: '💚 Gesundheit' },
+            { id: 'stress', name: 'Stress', emoji: '😰', desc: 'Stress verfolgen', category: '💚 Gesundheit' },
+            { id: 'meditation', name: 'Meditation', emoji: '🧘', desc: 'Meditation üben', category: '💚 Gesundheit' },
+            { id: 'atmung', name: 'Atmung', emoji: '🌬️', desc: 'Atemübungen', category: '💚 Gesundheit' },
+            { id: 'gesundheits-coach', name: 'Gesundheits-Coach', emoji: '👨‍⚕️', desc: 'Persönlicher Health-Coach', category: '💚 Gesundheit' },
+            { id: 'fitness-coach', name: 'Fitness-Coach', emoji: '💪', desc: 'Persönlicher Fitness-Coach', category: '💚 Gesundheit' },
+            { id: 'ernaehrungs-coach', name: 'Ernährungs-Coach', emoji: '🥗', desc: 'Persönlicher Ernährungs-Coach', category: '💚 Gesundheit' },
+            { id: 'health-ai', name: 'Health AI', emoji: '🧠', desc: 'KI für Gesundheit', category: '💚 Gesundheit' },
+
+            // ============================================================
+            // 💼 E — Arbeit & Beruf
+            // ============================================================
+            { id: 'job-center', name: 'Job Center', emoji: '💼', desc: 'Zentrale Jobverwaltung', category: '💼 Arbeit' },
+            { id: 'jobsuche', name: 'Jobsuche', emoji: '🔍', desc: 'Jobs suchen', category: '💼 Arbeit' },
+            { id: 'bewerbung', name: 'Bewerbung', emoji: '📝', desc: 'Bewerbungen verwalten', category: '💼 Arbeit' },
+            { id: 'lebenslauf', name: 'Lebenslauf', emoji: '📄', desc: 'Lebenslauf erstellen', category: '💼 Arbeit' },
+            { id: 'anschreiben', name: 'Anschreiben', emoji: '✉️', desc: 'Anschreiben erstellen', category: '💼 Arbeit' },
+            { id: 'karriere', name: 'Karriere', emoji: '🚀', desc: 'Karriereplanung', category: '💼 Arbeit' },
+            { id: 'berufsberatung', name: 'Berufsberatung', emoji: '🧑‍💼', desc: 'Berufliche Beratung', category: '💼 Arbeit' },
+            { id: 'arbeitskalender', name: 'Arbeitskalender', emoji: '📅', desc: 'Arbeitskalender', category: '💼 Arbeit' },
+            { id: 'arbeitszeit', name: 'Arbeitszeit', emoji: '⏱️', desc: 'Arbeitszeiten verfolgen', category: '💼 Arbeit' },
+            { id: 'projekte', name: 'Projekte', emoji: '📋', desc: 'Projekte verwalten', category: '💼 Arbeit' },
+            { id: 'projektmanagement', name: 'Projektmanagement', emoji: '📊', desc: 'Projekte managen', category: '💼 Arbeit' },
+            { id: 'team', name: 'Team', emoji: '👥', desc: 'Teamverwaltung', category: '💼 Arbeit' },
+            { id: 'meetings', name: 'Meetings', emoji: '🤝', desc: 'Meetings planen', category: '💼 Arbeit' },
+            { id: 'arbeitsaufgaben', name: 'Arbeitsaufgaben', emoji: '✅', desc: 'Arbeitsaufgaben verwalten', category: '💼 Arbeit' },
+            { id: 'arbeitsdokumente', name: 'Arbeitsdokumente', emoji: '📄', desc: 'Arbeitsdokumente verwalten', category: '💼 Arbeit' },
+            { id: 'business-ai', name: 'Business AI', emoji: '🧠', desc: 'KI für Business', category: '💼 Arbeit' },
+            { id: 'career-ai', name: 'Career AI', emoji: '🚀', desc: 'KI für Karriere', category: '💼 Arbeit' },
+            { id: 'interview-trainer', name: 'Interview Trainer', emoji: '🎯', desc: 'Interview vorbereiten', category: '💼 Arbeit' },
+
+            // ============================================================
+            // 💰 F — Finanzen
+            // ============================================================
+            { id: 'finance', name: 'Finance', emoji: '💰', desc: 'Zentrale Finanzverwaltung', category: '💰 Finanzen' },
+            { id: 'banking', name: 'Banking', emoji: '🏦', desc: 'Banking verwalten', category: '💰 Finanzen' },
+            { id: 'konten', name: 'Konten', emoji: '📊', desc: 'Konten verwalten', category: '💰 Finanzen' },
+            { id: 'ausgaben', name: 'Ausgaben', emoji: '📉', desc: 'Ausgaben verfolgen', category: '💰 Finanzen' },
+            { id: 'einnahmen', name: 'Einnahmen', emoji: '📈', desc: 'Einnahmen verfolgen', category: '💰 Finanzen' },
+            { id: 'budget', name: 'Budget', emoji: '🎯', desc: 'Budget verwalten', category: '💰 Finanzen' },
+            { id: 'sparen', name: 'Sparen', emoji: '🏦', desc: 'Sparziele verfolgen', category: '💰 Finanzen' },
+            { id: 'rechnungen', name: 'Rechnungen', emoji: '📄', desc: 'Rechnungen verwalten', category: '💰 Finanzen' },
+            { id: 'abonnements', name: 'Abonnements', emoji: '🔄', desc: 'Abonnements verwalten', category: '💰 Finanzen' },
+            { id: 'steuern', name: 'Steuern', emoji: '📋', desc: 'Steuern verwalten', category: '💰 Finanzen' },
+            { id: 'finanzkalender', name: 'Finanzkalender', emoji: '📅', desc: 'Finanzkalender', category: '💰 Finanzen' },
+            { id: 'finanzanalyse', name: 'Finanzanalyse', emoji: '📊', desc: 'Finanzanalyse', category: '💰 Finanzen' },
+            { id: 'finance-ai', name: 'Finance AI', emoji: '🧠', desc: 'KI für Finanzen', category: '💰 Finanzen' },
+
+            // ============================================================
+            // 🏠 G — Zuhause & Familie
+            // ============================================================
+            { id: 'home', name: 'Home', emoji: '🏠', desc: 'Zentrale Home-Verwaltung', category: '🏠 Zuhause' },
+            { id: 'familie', name: 'Familie', emoji: '👨‍👩‍👧', desc: 'Familienverwaltung', category: '🏠 Zuhause' },
+            { id: 'familienkalender', name: 'Familienkalender', emoji: '📅', desc: 'Familienkalender', category: '🏠 Zuhause' },
+            { id: 'einkauf', name: 'Einkauf', emoji: '🛒', desc: 'Einkäufe verwalten', category: '🏠 Zuhause' },
+            { id: 'einkaufsliste', name: 'Einkaufsliste', emoji: '📝', desc: 'Einkaufslisten', category: '🏠 Zuhause' },
+            { id: 'haushalt', name: 'Haushalt', emoji: '🧹', desc: 'Haushaltsverwaltung', category: '🏠 Zuhause' },
+            { id: 'hausverwaltung', name: 'Hausverwaltung', emoji: '🏡', desc: 'Hausverwaltung', category: '🏠 Zuhause' },
+            { id: 'smart-home', name: 'Smart Home', emoji: '💡', desc: 'Smart-Home-Steuerung', category: '🏠 Zuhause' },
+            { id: 'geraete', name: 'Geräte', emoji: '📱', desc: 'Geräte verwalten', category: '🏠 Zuhause' },
+            { id: 'familienaufgaben', name: 'Familienaufgaben', emoji: '✅', desc: 'Familienaufgaben', category: '🏠 Zuhause' },
+            { id: 'kinderverwaltung', name: 'Kinderverwaltung', emoji: '🧒', desc: 'Kinder verwalten', category: '🏠 Zuhause' },
+            { id: 'elternbereich', name: 'Elternbereich', emoji: '👨‍👩‍👧', desc: 'Elternverwaltung', category: '🏠 Zuhause' },
+            { id: 'familien-ai', name: 'Familien-AI', emoji: '🧠', desc: 'KI für die Familie', category: '🏠 Zuhause' },
+
+            // ============================================================
+            // 🌌 H — Kosmos / HalDo World
+            // ============================================================
+            { id: 'haldo-portal', name: 'HalDo Portal', emoji: '🌌', desc: 'Zentrale HalDo-Welt', category: '🌌 Kosmos' },
+            { id: 'cosmic-world', name: 'Cosmic World', emoji: '🌠', desc: 'Kosmische Welt', category: '🌌 Kosmos' },
+            { id: 'sonnensystem', name: 'Sonnensystem', emoji: '🪐', desc: 'Unser komplettes Sonnensystem', category: '🌌 Kosmos' },
+            { id: 'sonne', name: 'Sonne', emoji: '☀️', desc: 'Der Zentralstern', category: '🌌 Kosmos' },
+            { id: 'merkur', name: 'Merkur', emoji: '☿', desc: 'Der innerste Planet', category: '🌌 Kosmos' },
+            { id: 'venus', name: 'Venus', emoji: '♀', desc: 'Der heiße Nachbar', category: '🌌 Kosmos' },
+            { id: 'erde', name: 'Erde', emoji: '🌍', desc: 'Unser blauer Planet', category: '🌌 Kosmos' },
+            { id: 'mond', name: 'Mond', emoji: '🌙', desc: 'Der treue Begleiter', category: '🌌 Kosmos' },
+            { id: 'mars', name: 'Mars', emoji: '🔴', desc: 'Der rote Planet', category: '🌌 Kosmos' },
+            { id: 'jupiter', name: 'Jupiter', emoji: '🟠', desc: 'Der größte Planet', category: '🌌 Kosmos' },
+            { id: 'saturn', name: 'Saturn', emoji: '🪐', desc: 'Der Ringplanet', category: '🌌 Kosmos' },
+            { id: 'uranus', name: 'Uranus', emoji: '🔵', desc: 'Der eisige Riese', category: '🌌 Kosmos' },
+            { id: 'neptun', name: 'Neptun', emoji: '🔷', desc: 'Der äußerste Planet', category: '🌌 Kosmos' },
+            { id: 'pluto', name: 'Pluto', emoji: '⚪', desc: 'Der Zwergplanet', category: '🌌 Kosmos' },
+            { id: 'sterne', name: 'Sterne', emoji: '⭐', desc: 'Unendliche Weiten der Sterne', category: '🌌 Kosmos' },
+            { id: 'milchstrasse', name: 'Milchstraße', emoji: '🌌', desc: 'Unsere Heimatgalaxie', category: '🌌 Kosmos' },
+            { id: 'andromeda', name: 'Andromeda', emoji: '🌀', desc: 'Die Nachbargalaxie', category: '🌌 Kosmos' },
+            { id: 'galaxien-explorer', name: 'Galaxien-Explorer', emoji: '🔭', desc: 'Entdecke ferne Galaxien', category: '🌌 Kosmos' },
+            { id: 'sternbilder', name: 'Sternbilder', emoji: '🌟', desc: 'Alle 88 Sternbilder', category: '🌌 Kosmos' },
+            { id: 'tierkreiszeichen', name: 'Tierkreiszeichen', emoji: '♈', desc: 'Die 12 Sternzeichen', category: '🌌 Kosmos' },
+            { id: 'himmelsfarben', name: 'Himmelsfarben', emoji: '🌈', desc: 'Die Farben des Himmels', category: '🌌 Kosmos' },
+            { id: 'sonnenuntergang', name: 'Sonnenuntergang', emoji: '🌅', desc: 'Der tägliche Farbzauber', category: '🌌 Kosmos' },
+            { id: 'sonnenaufgang', name: 'Sonnenaufgang', emoji: '🌄', desc: 'Der Beginn eines neuen Tages', category: '🌌 Kosmos' },
+            { id: 'polarlicht', name: 'Polarlicht', emoji: '✨', desc: 'Das Nord- und Südlicht', category: '🌌 Kosmos' },
+            { id: 'regenbogen', name: 'Regenbogen', emoji: '🌈', desc: 'Das Farbenspektrum', category: '🌌 Kosmos' },
+            { id: 'welt-3d', name: '3D-Welt', emoji: '🌍', desc: 'Die Erde in 3D', category: '🌌 Kosmos' },
+            { id: 'raum-explorer', name: 'Raum-Explorer', emoji: '🚀', desc: 'Reise durch das Universum', category: '🌌 Kosmos' },
+            { id: 'planeten-viewer', name: 'Planeten-Viewer', emoji: '🔭', desc: 'Betrachte alle Planeten', category: '🌌 Kosmos' },
+
+            // ============================================================
+            // 🧠 I — Intelligenz & Wissen
+            // ============================================================
+            { id: 'knowledge', name: 'Knowledge', emoji: '📚', desc: 'Zentrale Wissensverwaltung', category: '🧠 Wissen' },
+            { id: 'encyclopedia', name: 'Encyclopedia', emoji: '📖', desc: 'Enzyklopädie', category: '🧠 Wissen' },
+            { id: 'knowledge-browser', name: 'Knowledge Browser', emoji: '🌐', desc: 'Wissens-Browser', category: '🧠 Wissen' },
+            { id: 'research', name: 'Research', emoji: '🔍', desc: 'Recherche', category: '🧠 Wissen' },
+            { id: 'science', name: 'Science', emoji: '🔬', desc: 'Wissenschaft', category: '🧠 Wissen' },
+            { id: 'technology', name: 'Technology', emoji: '💻', desc: 'Technologie', category: '🧠 Wissen' },
+            { id: 'med-knowledge', name: 'Medicine Knowledge', emoji: '🏥', desc: 'Medizinisches Wissen', category: '🧠 Wissen' },
+            { id: 'law-knowledge', name: 'Law Knowledge', emoji: '⚖️', desc: 'Rechtliches Wissen', category: '🧠 Wissen' },
+            { id: 'history', name: 'History', emoji: '📜', desc: 'Geschichte', category: '🧠 Wissen' },
+            { id: 'geography', name: 'Geography', emoji: '🌍', desc: 'Geografie', category: '🧠 Wissen' },
+            { id: 'space-knowledge', name: 'Space Knowledge', emoji: '🚀', desc: 'Weltraumwissen', category: '🧠 Wissen' },
+            { id: 'culture', name: 'Culture', emoji: '🎭', desc: 'Kultur', category: '🧠 Wissen' },
+            { id: 'languages', name: 'Languages', emoji: '🌐', desc: 'Sprachen', category: '🧠 Wissen' },
+            { id: 'philosophy', name: 'Philosophy', emoji: '🧠', desc: 'Philosophie', category: '🧠 Wissen' },
+            { id: 'religion-culture', name: 'Religion & Culture', emoji: '🕊️', desc: 'Religion & Kultur', category: '🧠 Wissen' },
+            { id: 'ezidi-knowledge', name: 'Êzîdî/Ezidi Knowledge', emoji: '🕊️', desc: 'Êzîdî Wissen', category: '🧠 Wissen' },
+            { id: 'ai-knowledge-graph', name: 'AI Knowledge Graph', emoji: '🧠', desc: 'Wissensgraph', category: '🧠 Wissen' },
+
+            // ============================================================
+            // 🕌 J — Kultur & Religion
+            // ============================================================
+            { id: 'kultur', name: 'Kultur', emoji: '🎭', desc: 'Zentrale Kulturverwaltung', category: '🕌 Kultur' },
+            { id: 'religion', name: 'Religion', emoji: '🕊️', desc: 'Religion', category: '🕌 Kultur' },
+            { id: 'ezidi-app', name: 'Êzîdî/Ezidi App', emoji: '🕊️', desc: 'Êzîdî-Zentrale', category: '🕌 Kultur' },
+            { id: 'ezidi-geschichte', name: 'Êzîdî/Ezidi Geschichte', emoji: '📜', desc: 'Êzîdî-Geschichte', category: '🕌 Kultur' },
+            { id: 'ezidi-kultur', name: 'Êzîdî/Ezidi Kultur', emoji: '🎭', desc: 'Êzîdî-Kultur', category: '🕌 Kultur' },
+            { id: 'ezidi-sprache', name: 'Êzîdî/Ezidi Sprache', emoji: '🗣️', desc: 'Êzîdî-Sprache', category: '🕌 Kultur' },
+            { id: 'ezidi-kalender', name: 'Êzîdî/Ezidi Kalender', emoji: '📅', desc: 'Êzîdî-Kalender', category: '🕌 Kultur' },
+            { id: 'gebete', name: 'Gebete / Traditionen', emoji: '🙏', desc: 'Gebete und Traditionen', category: '🕌 Kultur' },
+            { id: 'kulturarchiv', name: 'Kulturarchiv', emoji: '📚', desc: 'Kulturarchiv', category: '🕌 Kultur' },
+
+            // ============================================================
+            // ⌨️ K — Tastatur & Kommunikation
+            // ============================================================
+            { id: 'haldo-keyboard', name: 'HalDo Keyboard', emoji: '⌨️', desc: 'Zentrale Tastatur', category: '⌨️ Tastatur' },
+            { id: 'ezidi-keyboard', name: 'Êzîdî/Ezidi Keyboard', emoji: '⌨️', desc: 'Êzîdî-Tastatur', category: '⌨️ Tastatur' },
+            { id: 'german-keyboard', name: 'German Keyboard', emoji: '⌨️', desc: 'Deutsche Tastatur', category: '⌨️ Tastatur' },
+            { id: 'multilingual-keyboard', name: 'Multilingual Keyboard', emoji: '⌨️', desc: 'Mehrsprachige Tastatur', category: '⌨️ Tastatur' },
+            { id: 'messages', name: 'Messages', emoji: '💬', desc: 'Nachrichten', category: '💬 Kommunikation' },
+            { id: 'mail', name: 'Mail', emoji: '✉️', desc: 'E-Mail', category: '💬 Kommunikation' },
+            { id: 'contacts', name: 'Contacts', emoji: '👤', desc: 'Kontakte', category: '💬 Kommunikation' },
+            { id: 'phone', name: 'Phone', emoji: '📞', desc: 'Telefon', category: '💬 Kommunikation' },
+            { id: 'video-call', name: 'Video Call', emoji: '📹', desc: 'Videoanruf', category: '💬 Kommunikation' },
+            { id: 'voice-call', name: 'Voice Call', emoji: '🎤', desc: 'Sprachanruf', category: '💬 Kommunikation' },
+            { id: 'translator', name: 'Translator', emoji: '🌍', desc: 'Übersetzer', category: '💬 Kommunikation' },
+
+            // ============================================================
+            // 📚 L — Lernen
+            // ============================================================
+            { id: 'learning-center', name: 'Learning Center', emoji: '📚', desc: 'Zentrales Lernzentrum', category: '📚 Lernen' },
+            { id: 'ai-tutor-learning', name: 'AI Tutor', emoji: '🧑‍🏫', desc: 'KI-Tutor', category: '📚 Lernen' },
+            { id: 'study-planner', name: 'Study Planner', emoji: '📅', desc: 'Lernplanung', category: '📚 Lernen' },
+            { id: 'exam-planner', name: 'Exam Planner', emoji: '✅', desc: 'Prüfungsplanung', category: '📚 Lernen' },
+            { id: 'homework-learning', name: 'Homework', emoji: '📝', desc: 'Hausaufgaben', category: '📚 Lernen' },
+            { id: 'flashcards-learning', name: 'Flashcards', emoji: '🃏', desc: 'Karteikarten', category: '📚 Lernen' },
+            { id: 'quiz-learning', name: 'Quiz', emoji: '🧠', desc: 'Quiz', category: '📚 Lernen' },
+            { id: 'practice', name: 'Practice', emoji: '🎯', desc: 'Üben', category: '📚 Lernen' },
+            { id: 'certificates', name: 'Certificates', emoji: '📜', desc: 'Zertifikate', category: '📚 Lernen' },
+            { id: 'learning-progress', name: 'Learning Progress', emoji: '📈', desc: 'Lernfortschritt', category: '📚 Lernen' },
+            { id: 'personal-learning-ai', name: 'Personal Learning AI', emoji: '🧠', desc: 'Persönliche Lern-KI', category: '📚 Lernen' },
+
+            // ============================================================
+            // 🎵 M — Medien
+            // ============================================================
+            { id: 'music', name: 'Music', emoji: '🎵', desc: 'Musik', category: '🎵 Medien' },
+            { id: 'video', name: 'Video', emoji: '🎬', desc: 'Video', category: '🎵 Medien' },
+            { id: 'media-player', name: 'Media Player', emoji: '▶️', desc: 'Media-Player', category: '🎵 Medien' },
+            { id: 'photos', name: 'Photos', emoji: '📸', desc: 'Fotos', category: '🎵 Medien' },
+            { id: 'gallery', name: 'Gallery', emoji: '🖼️', desc: 'Galerie', category: '🎵 Medien' },
+            { id: 'camera', name: 'Camera', emoji: '📷', desc: 'Kamera', category: '🎵 Medien' },
+            { id: 'voice-recorder', name: 'Voice Recorder', emoji: '🎙️', desc: 'Sprachaufnahme', category: '🎵 Medien' },
+            { id: 'video-editor', name: 'Video Editor', emoji: '✂️', desc: 'Video-Bearbeitung', category: '🎵 Medien' },
+            { id: 'audio-editor', name: 'Audio Editor', emoji: '🎚️', desc: 'Audio-Bearbeitung', category: '🎵 Medien' },
+            { id: 'image-editor', name: 'Image Editor', emoji: '🖌️', desc: 'Bild-Bearbeitung', category: '🎵 Medien' },
+            { id: '3d-viewer', name: '3D Viewer', emoji: '🧊', desc: '3D-Betrachter', category: '🎵 Medien' },
+            { id: 'cinema', name: 'Cinema', emoji: '🎥', desc: 'Kino', category: '🎵 Medien' },
+
+            // ============================================================
+            // 📝 N — Notizen & Organisation
+            // ============================================================
+            { id: 'notes', name: 'Notes', emoji: '📝', desc: 'Notizen', category: '📝 Notizen' },
+            { id: 'journal', name: 'Journal', emoji: '📓', desc: 'Tagebuch', category: '📝 Notizen' },
+            { id: 'tasks', name: 'Tasks', emoji: '✅', desc: 'Aufgaben', category: '📝 Notizen' },
+            { id: 'todo', name: 'To-Do', emoji: '📋', desc: 'To-Do-Liste', category: '📝 Notizen' },
+            { id: 'reminders', name: 'Reminders', emoji: '🔔', desc: 'Erinnerungen', category: '📝 Notizen' },
+            { id: 'calendar', name: 'Calendar', emoji: '📅', desc: 'Kalender', category: '📝 Notizen' },
+            { id: 'planner', name: 'Planner', emoji: '📋', desc: 'Planer', category: '📝 Notizen' },
+            { id: 'goals', name: 'Goals', emoji: '🎯', desc: 'Ziele', category: '📝 Notizen' },
+            { id: 'habits', name: 'Habits', emoji: '🔄', desc: 'Gewohnheiten', category: '📝 Notizen' },
+            { id: 'routine', name: 'Routine', emoji: '🌅', desc: 'Tägliche Routine', category: '📝 Notizen' },
+            { id: 'dashboard', name: 'Personal Dashboard', emoji: '📊', desc: 'Persönliches Dashboard', category: '📝 Notizen' },
+
+            // ============================================================
+            // 🛒 O — Online & Shopping
+            // ============================================================
+            { id: 'browser', name: 'Browser', emoji: '🌐', desc: 'Web-Browser', category: '🛒 Online' },
+            { id: 'web-search', name: 'Web Search', emoji: '🔍', desc: 'Web-Suche', category: '🛒 Online' },
+            { id: 'shopping', name: 'Shopping', emoji: '🛒', desc: 'Einkaufen', category: '🛒 Online' },
+            { id: 'wish-list', name: 'Wish List', emoji: '⭐', desc: 'Wunschliste', category: '🛒 Online' },
+            { id: 'price-comparison', name: 'Price Comparison', emoji: '📊', desc: 'Preisvergleich', category: '🛒 Online' },
+            { id: 'orders', name: 'Orders', emoji: '📦', desc: 'Bestellungen', category: '🛒 Online' },
+            { id: 'delivery', name: 'Delivery', emoji: '🚚', desc: 'Lieferungen', category: '🛒 Online' },
+            { id: 'downloads', name: 'Downloads', emoji: '📥', desc: 'Downloads', category: '🛒 Online' },
+            { id: 'bookmarks', name: 'Bookmarks', emoji: '🔖', desc: 'Lesezeichen', category: '🛒 Online' },
+
+            // ============================================================
+            // 🎨 P — Kreativität
+            // ============================================================
+            { id: 'drawing', name: 'Drawing', emoji: '✏️', desc: 'Zeichnen', category: '🎨 Kreativität' },
+            { id: 'painting', name: 'Painting', emoji: '🎨', desc: 'Malen', category: '🎨 Kreativität' },
+            { id: 'design', name: 'Design', emoji: '🖌️', desc: 'Design', category: '🎨 Kreativität' },
+            { id: 'image-studio', name: 'Image Studio', emoji: '🖼️', desc: 'Bildstudio', category: '🎨 Kreativität' },
+            { id: 'photo-editor', name: 'Photo Editor', emoji: '📸', desc: 'Foto-Bearbeitung', category: '🎨 Kreativität' },
+            { id: 'video-studio', name: 'Video Studio', emoji: '🎬', desc: 'Videostudio', category: '🎨 Kreativität' },
+            { id: 'music-studio', name: 'Music Studio', emoji: '🎵', desc: 'Musikstudio', category: '🎨 Kreativität' },
+            { id: '3d-studio', name: '3D Studio', emoji: '🧊', desc: '3D-Studio', category: '🎨 Kreativität' },
+            { id: 'presentation', name: 'Presentation', emoji: '📽️', desc: 'Präsentation', category: '🎨 Kreativität' },
+            { id: 'document-studio', name: 'Document Studio', emoji: '📄', desc: 'Dokumentstudio', category: '🎨 Kreativität' },
+            { id: 'ai-creative', name: 'AI Creative Studio', emoji: '✨', desc: 'KI-Kreativstudio', category: '🎨 Kreativität' },
+
+            // ============================================================
+            // 🧮 Q — Wissenschaft & Mathematik
+            // ============================================================
+            { id: 'calculator', name: 'Calculator', emoji: '🧮', desc: 'Taschenrechner', category: '🧮 Wissenschaft' },
+            { id: 'scientific-calc', name: 'Scientific Calculator', emoji: '🔢', desc: 'Wissenschaftlicher Rechner', category: '🧮 Wissenschaft' },
+            { id: 'math-solver', name: 'Math Solver', emoji: '📐', desc: 'Mathe-Löser', category: '🧮 Wissenschaft' },
+            { id: 'geometry', name: 'Geometry', emoji: '📐', desc: 'Geometrie', category: '🧮 Wissenschaft' },
+            { id: 'algebra', name: 'Algebra', emoji: '🔢', desc: 'Algebra', category: '🧮 Wissenschaft' },
+            { id: 'statistics', name: 'Statistics', emoji: '📊', desc: 'Statistik', category: '🧮 Wissenschaft' },
+            { id: 'physics-lab', name: 'Physics Lab', emoji: '⚡', desc: 'Physik-Labor', category: '🧮 Wissenschaft' },
+            { id: 'chemistry-lab', name: 'Chemistry Lab', emoji: '🧪', desc: 'Chemie-Labor', category: '🧮 Wissenschaft' },
+            { id: 'biology-lab', name: 'Biology Lab', emoji: '🧬', desc: 'Biologie-Labor', category: '🧮 Wissenschaft' },
+            { id: 'science-lab', name: 'Science Lab', emoji: '🔬', desc: 'Wissenschaftslabor', category: '🧮 Wissenschaft' },
+            { id: 'ai-science-tutor', name: 'AI Science Tutor', emoji: '🧑‍🏫', desc: 'KI-Wissenschaftstutor', category: '🧮 Wissenschaft' },
+
+            // ============================================================
+            // 🛡️ R — Sicherheit
+            // ============================================================
+            { id: 'security-center', name: 'Security Center', emoji: '🛡️', desc: 'Sicherheitszentrale', category: '🛡️ Sicherheit' },
+            { id: 'privacy', name: 'Privacy', emoji: '🔐', desc: 'Datenschutz', category: '🛡️ Sicherheit' },
+            { id: 'permissions', name: 'Permissions', emoji: '🔑', desc: 'Berechtigungen', category: '🛡️ Sicherheit' },
+            { id: 'password-manager', name: 'Password Manager', emoji: '🔐', desc: 'Passwort-Manager', category: '🛡️ Sicherheit' },
+            { id: 'authentication', name: 'Authentication', emoji: '🛡️', desc: 'Authentifizierung', category: '🛡️ Sicherheit' },
+            { id: 'device-security', name: 'Device Security', emoji: '📱', desc: 'Gerätesicherheit', category: '🛡️ Sicherheit' },
+            { id: 'app-security', name: 'App Security', emoji: '📲', desc: 'App-Sicherheit', category: '🛡️ Sicherheit' },
+            { id: 'ai-security', name: 'AI Security', emoji: '🧠', desc: 'KI-Sicherheit', category: '🛡️ Sicherheit' },
+            { id: 'backup-recovery', name: 'Backup & Recovery', emoji: '💾', desc: 'Backup & Recovery', category: '🛡️ Sicherheit' },
+            { id: 'system-diagnostics', name: 'System Diagnostics', emoji: '🔧', desc: 'System-Diagnose', category: '🛡️ Sicherheit' },
+
+            // ============================================================
+            // ⚙️ S — System
+            // ============================================================
+            { id: 'settings', name: 'Settings', emoji: '⚙️', desc: 'Zentrale Einstellungen', category: '⚙️ System' },
+            { id: 'app-manager', name: 'App Manager', emoji: '📱', desc: 'Apps verwalten', category: '⚙️ System' },
+            { id: 'app-registry', name: 'App Registry', emoji: '📋', desc: 'App-Registrierung', category: '⚙️ System' },
+            { id: 'appstore', name: 'AppStore', emoji: '🛍️', desc: 'App-Store', category: '⚙️ System' },
+            { id: 'window-manager', name: 'Window Manager', emoji: '🪟', desc: 'Fenster verwalten', category: '⚙️ System' },
+            { id: 'display-manager', name: 'Display Manager', emoji: '🖥️', desc: 'Anzeigeverwaltung', category: '⚙️ System' },
+            { id: 'storage-manager', name: 'Storage Manager', emoji: '💾', desc: 'Speicherverwaltung', category: '⚙️ System' },
+            { id: 'file-manager', name: 'File Manager', emoji: '📁', desc: 'Dateiverwaltung', category: '⚙️ System' },
+            { id: 'network-manager', name: 'Network Manager', emoji: '🌐', desc: 'Netzwerkverwaltung', category: '⚙️ System' },
+            { id: 'bluetooth', name: 'Bluetooth', emoji: '📶', desc: 'Bluetooth-Verwaltung', category: '⚙️ System' },
+            { id: 'device-manager', name: 'Device Manager', emoji: '🔌', desc: 'Geräteverwaltung', category: '⚙️ System' },
+            { id: 'system-monitor', name: 'System Monitor', emoji: '📊', desc: 'Systemüberwachung', category: '⚙️ System' },
+            { id: 'task-manager', name: 'Task Manager', emoji: '⚡', desc: 'Aufgabenverwaltung', category: '⚙️ System' },
+            { id: 'update-center', name: 'Update Center', emoji: '🔄', desc: 'Update-Zentrale', category: '⚙️ System' },
+            { id: 'notification-center', name: 'Notification Center', emoji: '🔔', desc: 'Benachrichtigungen', category: '⚙️ System' },
+            { id: 'control-center', name: 'Control Center', emoji: '🎮', desc: 'Steuerzentrale', category: '⚙️ System' },
+            { id: 'terminal', name: 'Terminal', emoji: '⌨️', desc: 'Terminal', category: '⚙️ System' },
+            { id: 'developer-console', name: 'Developer Console', emoji: '💻', desc: 'Entwicklerkonsole', category: '⚙️ System' },
+            { id: 'logs', name: 'Logs', emoji: '📜', desc: 'System-Logs', category: '⚙️ System' },
+            { id: 'system-info', name: 'System Information', emoji: 'ℹ️', desc: 'Systeminformationen', category: '⚙️ System' },
+
+            // ============================================================
+            // 🌐 T — Reisen & Transport
+            // ============================================================
+            { id: 'maps', name: 'Maps', emoji: '🗺️', desc: 'Karten', category: '🌐 Reisen' },
+            { id: 'navigation', name: 'Navigation', emoji: '🧭', desc: 'Navigation', category: '🌐 Reisen' },
+            { id: 'travel-planner', name: 'Travel Planner', emoji: '✈️', desc: 'Reiseplanung', category: '🌐 Reisen' },
+            { id: 'flights', name: 'Flights', emoji: '🛫', desc: 'Flüge', category: '🌐 Reisen' },
+            { id: 'hotels', name: 'Hotels', emoji: '🏨', desc: 'Hotels', category: '🌐 Reisen' },
+            { id: 'public-transport', name: 'Public Transport', emoji: '🚌', desc: 'ÖPNV', category: '🌐 Reisen' },
+            { id: 'train', name: 'Train', emoji: '🚆', desc: 'Bahn', category: '🌐 Reisen' },
+            { id: 'bus', name: 'Bus', emoji: '🚌', desc: 'Bus', category: '🌐 Reisen' },
+            { id: 'taxi', name: 'Taxi', emoji: '🚖', desc: 'Taxi', category: '🌐 Reisen' },
+            { id: 'car', name: 'Car', emoji: '🚗', desc: 'Auto', category: '🌐 Reisen' },
+            { id: 'parking', name: 'Parking', emoji: '🅿️', desc: 'Parken', category: '🌐 Reisen' },
+            { id: 'traffic', name: 'Traffic', emoji: '🚦', desc: 'Verkehr', category: '🌐 Reisen' },
+            { id: 'weather-travel', name: 'Weather Travel', emoji: '🌤️', desc: 'Reisewetter', category: '🌐 Reisen' },
+            { id: 'travel-ai', name: 'Travel AI', emoji: '🧠', desc: 'KI-Reiseassistent', category: '🌐 Reisen' },
+
+            // ============================================================
+            // 🎓 U — Universität & Ausbildung
+            // ============================================================
+            { id: 'university', name: 'University', emoji: '🏛️', desc: 'Universität', category: '🎓 Universität' },
+            { id: 'uni-courses', name: 'University Courses', emoji: '📚', desc: 'Uni-Kurse', category: '🎓 Universität' },
+            { id: 'uni-library', name: 'University Library', emoji: '📖', desc: 'Uni-Bibliothek', category: '🎓 Universität' },
+            { id: 'lecture-planner', name: 'Lecture Planner', emoji: '📅', desc: 'Vorlesungsplanung', category: '🎓 Universität' },
+            { id: 'semester-planner', name: 'Semester Planner', emoji: '📋', desc: 'Semesterplanung', category: '🎓 Universität' },
+            { id: 'exam-management', name: 'Exam Management', emoji: '✅', desc: 'Prüfungsverwaltung', category: '🎓 Universität' },
+            { id: 'grades-uni', name: 'Grades', emoji: '📊', desc: 'Noten', category: '🎓 Universität' },
+            { id: 'student-dashboard', name: 'Student Dashboard', emoji: '👨‍🎓', desc: 'Studenten-Dashboard', category: '🎓 Universität' },
+            { id: 'professor-dashboard', name: 'Professor Dashboard', emoji: '👨‍🏫', desc: 'Dozenten-Dashboard', category: '🎓 Universität' },
+            { id: 'research-uni', name: 'Research', emoji: '🔬', desc: 'Forschung', category: '🎓 Universität' },
+            { id: 'thesis', name: 'Thesis', emoji: '📄', desc: 'Abschlussarbeit', category: '🎓 Universität' },
+            { id: 'bachelor', name: 'Bachelor', emoji: '🎓', desc: 'Bachelor', category: '🎓 Universität' },
+            { id: 'master', name: 'Master', emoji: '🎓', desc: 'Master', category: '🎓 Universität' },
+            { id: 'phd', name: 'PhD', emoji: '🎓', desc: 'Promotion', category: '🎓 Universität' },
+            { id: 'vocational-training', name: 'Vocational Training', emoji: '🔧', desc: 'Berufsausbildung', category: '🎓 Universität' },
+            { id: 'apprenticeship', name: 'Apprenticeship', emoji: '👷', desc: 'Ausbildung', category: '🎓 Universität' },
+            { id: 'training-center', name: 'Training Center', emoji: '🏫', desc: 'Trainingszentrum', category: '🎓 Universität' },
+            { id: 'certificate-manager', name: 'Certificate Manager', emoji: '📜', desc: 'Zertifikatsverwaltung', category: '🎓 Universität' },
+
+            // ============================================================
+            // 🎙️ V — Voice
+            // ============================================================
+            { id: 'voice-assistant', name: 'Voice Assistant', emoji: '🎤', desc: 'Sprachassistent', category: '🎙️ Voice' },
+            { id: 'speech-to-text', name: 'Speech-to-Text', emoji: '🗣️', desc: 'Sprache zu Text', category: '🎙️ Voice' },
+            { id: 'text-to-speech', name: 'Text-to-Speech', emoji: '🔊', desc: 'Text zu Sprache', category: '🎙️ Voice' },
+            { id: 'voice-translator', name: 'Voice Translator', emoji: '🌍', desc: 'Sprachübersetzer', category: '🎙️ Voice' },
+            { id: 'voice-recorder-v', name: 'Voice Recorder', emoji: '🎙️', desc: 'Sprachaufnahme', category: '🎙️ Voice' },
+            { id: 'voice-settings', name: 'Voice Settings', emoji: '⚙️', desc: 'Voice-Einstellungen', category: '🎙️ Voice' },
+            { id: 'ai-voice', name: 'AI Voice', emoji: '🧠', desc: 'KI-Stimme', category: '🎙️ Voice' },
+            { id: 'living-ai-voice', name: 'Living AI Voice', emoji: '✨', desc: 'Lebendige KI-Stimme', category: '🎙️ Voice' },
+            { id: 'lip-sync', name: 'Lip-Sync Engine', emoji: '👄', desc: 'Lippensynchronisation', category: '🎙️ Voice' },
+
+            // ============================================================
+            // 🪟 W — Windows
+            // ============================================================
+            { id: 'window-manager-w', name: 'Window Manager', emoji: '🪟', desc: 'Fensterverwaltung', category: '🪟 Windows' },
+            { id: 'multi-window', name: 'Multi-Window', emoji: '🪟', desc: 'Mehrere Fenster', category: '🪟 Windows' },
+            { id: 'split-view', name: 'Split View', emoji: '📐', desc: 'Geteilte Ansicht', category: '🪟 Windows' },
+            { id: 'floating-windows', name: 'Floating Windows', emoji: '🪟', desc: 'Schwebende Fenster', category: '🪟 Windows' },
+            { id: 'window-workspace', name: 'Window Workspace', emoji: '💻', desc: 'Fenster-Arbeitsbereich', category: '🪟 Windows' },
+            { id: 'desktop-spaces', name: 'Desktop Spaces', emoji: '🖥️', desc: 'Desktop-Bereiche', category: '🪟 Windows' },
+            { id: 'app-focus', name: 'App Focus', emoji: '🎯', desc: 'App-Fokus', category: '🪟 Windows' },
+            { id: 'window-history', name: 'Window History', emoji: '📜', desc: 'Fenster-Verlauf', category: '🪟 Windows' },
+
+            // ============================================================
+            // 🌎 X — Explorer
+            // ============================================================
+            { id: 'file-explorer', name: 'File Explorer', emoji: '📁', desc: 'Dateien durchsuchen', category: '🌎 Explorer' },
+            { id: 'web-explorer', name: 'Web Explorer', emoji: '🌐', desc: 'Web durchsuchen', category: '🌎 Explorer' },
+            { id: 'knowledge-explorer', name: 'Knowledge Explorer', emoji: '📚', desc: 'Wissen durchsuchen', category: '🌎 Explorer' },
+            { id: 'space-explorer-x', name: 'Space Explorer', emoji: '🚀', desc: 'Weltraum durchsuchen', category: '🌎 Explorer' },
+            { id: 'earth-explorer', name: 'Earth Explorer', emoji: '🌍', desc: 'Erde durchsuchen', category: '🌎 Explorer' },
+            { id: 'science-explorer', name: 'Science Explorer', emoji: '🔬', desc: 'Wissenschaft durchsuchen', category: '🌎 Explorer' },
+            { id: 'culture-explorer', name: 'Culture Explorer', emoji: '🎭', desc: 'Kultur durchsuchen', category: '🌎 Explorer' },
+
+            // ============================================================
+            // 🌟 Y — Dein Leben
+            // ============================================================
+            { id: 'my-life', name: 'My Life', emoji: '🌟', desc: 'Persönliches Leben', category: '🌟 Dein Leben' },
+            { id: 'my-profile', name: 'My Profile', emoji: '👤', desc: 'Mein Profil', category: '🌟 Dein Leben' },
+            { id: 'my-goals', name: 'My Goals', emoji: '🎯', desc: 'Meine Ziele', category: '🌟 Dein Leben' },
+            { id: 'my-health', name: 'My Health', emoji: '💚', desc: 'Meine Gesundheit', category: '🌟 Dein Leben' },
+            { id: 'my-education', name: 'My Education', emoji: '📚', desc: 'Meine Bildung', category: '🌟 Dein Leben' },
+            { id: 'my-work', name: 'My Work', emoji: '💼', desc: 'Meine Arbeit', category: '🌟 Dein Leben' },
+            { id: 'my-finance', name: 'My Finance', emoji: '💰', desc: 'Meine Finanzen', category: '🌟 Dein Leben' },
+            { id: 'my-family', name: 'My Family', emoji: '👨‍👩‍👧', desc: 'Meine Familie', category: '🌟 Dein Leben' },
+            { id: 'my-calendar', name: 'My Calendar', emoji: '📅', desc: 'Mein Kalender', category: '🌟 Dein Leben' },
+            { id: 'my-memory', name: 'My Memory', emoji: '🧠', desc: 'Meine Erinnerungen', category: '🌟 Dein Leben' },
+            { id: 'my-ai', name: 'My AI', emoji: '🧠', desc: 'Meine KI', category: '🌟 Dein Leben' },
+            { id: 'personal-dashboard', name: 'Personal Life Dashboard', emoji: '📊', desc: 'Persönliches Dashboard', category: '🌟 Dein Leben' },
+
+            // ============================================================
+            // 🔧 Z — Entwicklung & Zukunft
+            // ============================================================
+            { id: 'code-editor', name: 'Code Editor', emoji: '💻', desc: 'Code-Editor', category: '🔧 Entwicklung' },
+            { id: 'project-manager', name: 'Project Manager', emoji: '📋', desc: 'Projektmanager', category: '🔧 Entwicklung' },
+            { id: 'developer-tools', name: 'Developer Tools', emoji: '🔧', desc: 'Entwickler-Tools', category: '🔧 Entwicklung' },
+            { id: 'api-manager', name: 'API Manager', emoji: '🔌', desc: 'API-Manager', category: '🔧 Entwicklung' },
+            { id: 'json-editor', name: 'JSON Editor', emoji: '📄', desc: 'JSON-Editor', category: '🔧 Entwicklung' },
+            { id: 'database-viewer', name: 'Database Viewer', emoji: '🗄️', desc: 'Datenbank-Viewer', category: '🔧 Entwicklung' },
+            { id: 'system-console', name: 'System Console', emoji: '⌨️', desc: 'System-Konsole', category: '🔧 Entwicklung' },
+            { id: 'ai-developer', name: 'AI Developer', emoji: '🧠', desc: 'KI-Entwickler', category: '🔧 Entwicklung' },
+            { id: 'app-builder', name: 'App Builder', emoji: '🏗️', desc: 'App-Builder', category: '🔧 Entwicklung' },
+            { id: 'ai-app-generator', name: 'AI App Generator', emoji: '✨', desc: 'KI-App-Generator', category: '🔧 Entwicklung' },
+            { id: 'plugin-manager', name: 'Plugin Manager', emoji: '🧩', desc: 'Plugin-Manager', category: '🔧 Entwicklung' },
+            { id: 'automation-builder', name: 'Automation Builder', emoji: '⚡', desc: 'Automation-Builder', category: '🔧 Entwicklung' },
+            { id: 'workflow-builder', name: 'Workflow Builder', emoji: '🔗', desc: 'Workflow-Builder', category: '🔧 Entwicklung' },
+            { id: 'future-lab', name: 'Future Lab', emoji: '🔮', desc: 'Zukunftslabor', category: '🔧 Entwicklung' },
+            { id: 'haldo-lab', name: 'HalDo OS Laboratory', emoji: '🧪', desc: 'HalDo-OS-Labor', category: '🔧 Entwicklung' }
+        ];
+
+        // ---- Registry füllen ----
+        registerApps(ALL_APPS);
+
+        // ---- App IDs ----
+        const APP_IDS = Object.keys(APP_REGISTRY);
 
         // ============================================================
         // SYSTEM-STATE
@@ -817,18 +1303,19 @@
                 { id: 'sonnensystem', name: 'Sonnensystem', emoji: '🪐' },
                 { id: 'cosmic-world', name: 'Cosmic World', emoji: '🌌' },
                 { id: 'settings', name: 'Einstellungen', emoji: '⚙️' },
-                { id: 'files', name: 'Dateien', emoji: '📁' },
+                { id: 'file-manager', name: 'Dateien', emoji: '📁' },
                 { id: 'calendar', name: 'Kalender', emoji: '📅' },
                 { id: 'music', name: 'Music', emoji: '🎵' },
                 { id: 'video', name: 'Video', emoji: '🎬' },
                 { id: 'gallery', name: 'Galerie', emoji: '🖼️' },
-                { id: 'health', name: 'Gesundheit', emoji: '💚' },
+                { id: 'gesundheit', name: 'Gesundheit', emoji: '💚' },
                 { id: 'tasks', name: 'Aufgaben', emoji: '✅' },
                 { id: 'notes', name: 'Notizen', emoji: '📝' },
                 { id: 'browser', name: 'Browser', emoji: '🌐' },
                 { id: 'weather', name: 'Wetter', emoji: '🌤️' },
                 { id: 'calculator', name: 'Rechner', emoji: '🧮' },
-                { id: 'maps', name: 'Karten', emoji: '🗺️' }
+                { id: 'maps', name: 'Karten', emoji: '🗺️' },
+                { id: 'system-info', name: 'System', emoji: 'ℹ️' }
             ];
 
             let html = `<div class="desktop-grid">`;
@@ -859,7 +1346,7 @@
                         <div class="title"><span class="emoji">🖥️</span>Desktop</div>
                         <div class="actions">
                             <button onclick="switchApp('settings')">⚙️</button>
-                            <button onclick="switchApp('system')">ℹ️</button>
+                            <button onclick="switchApp('system-info')">ℹ️</button>
                         </div>
                     </div>
                     <div class="app-content">${html}</div>
@@ -918,13 +1405,10 @@
                     ctx.fill();
                 }
 
-                // Planeten mit Umlaufbahnen
+                // Planeten
                 planets.forEach((p, i) => {
-                    const orbitRadius = Math.min(w, h) * 0.35;
                     const cx = w / 2 + Math.cos(angle + i * 0.5) * (0.1 + i * 0.08) * w * 0.4;
                     const cy = h / 2 + Math.sin(angle + i * 0.7) * (0.1 + i * 0.08) * h * 0.4;
-                    const x = p.x * w;
-                    const y = p.y * h;
 
                     // Glow
                     const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, p.r * 3);
@@ -958,8 +1442,7 @@
 
             // Klick auf Cosmic → Cosmic World App öffnen
             container.addEventListener('click', () => {
-                const app = APP_REGISTRY['cosmic-world'];
-                if (app) switchApp('cosmic-world');
+                switchApp('cosmic-world');
             });
         }
 
@@ -1036,7 +1519,7 @@
                 </div>
             `;
 
-            // Kosmische Daten
+            // Kosmische Daten für spezielle Apps
             const cosmicData = {
                 'sonne': {
                     title: '☀️ Sonnendaten',
@@ -1180,7 +1663,7 @@
                     { name: 'Galaxien', emoji: '🌌', desc: 'Ferne Galaxien' },
                     { name: 'Himmelsfarben', emoji: '🌈', desc: 'Farben des Himmels' }
                 ],
-                'health': [
+                'gesundheit': [
                     { name: 'Krankheiten', emoji: '🩺', desc: 'Krankheiten A–Z' },
                     { name: 'Symptome', emoji: '🤒', desc: 'Symptome erkennen' },
                     { name: 'Medikamente', emoji: '💊', desc: 'Medikamentenplan' },
@@ -1208,7 +1691,7 @@
                     { name: 'Serien-Termine', emoji: '🔄', desc: 'Wiederkehrende Termine' },
                     { name: 'AI-Planung', emoji: '🧠', desc: 'KI-Terminplanung' }
                 ],
-                'files': [
+                'file-manager': [
                     { name: 'Dateien', emoji: '📁', desc: 'Dateien durchsuchen' },
                     { name: 'Ordner', emoji: '📂', desc: 'Ordner verwalten' },
                     { name: 'Cloud', emoji: '☁️', desc: 'Cloud-Anbindung' },
@@ -1285,7 +1768,6 @@
         // ---- SWITCH APP ----
         function switchApp(appId) {
             if (!APP_REGISTRY[appId] && appId !== 'desktop') {
-                // Fallback: Versuche, die App zu finden
                 const found = APP_IDS.find(id => id.includes(appId));
                 if (found) appId = found;
                 else return;
@@ -1496,15 +1978,6 @@
 
         // ---- SYSTEM INIT ----
         function initSystem() {
-            // ---- Alle Apps registrieren (gekürzt, aber vollständig im tatsächlichen Code) ----
-            // Hier werden alle 388 Apps registriert.
-            // Aus Platzgründen wird hier nur ein Teil gezeigt.
-            // Die vollständige Liste ist im tatsächlichen Code enthalten.
-
-            // ---- APP IDs ----
-            const APP_IDS = Object.keys(APP_REGISTRY);
-
-            // ---- DESKTOP STARTEN ----
             renderDesktop();
             updateSidebar();
             updateTaskbar();
@@ -1534,42 +2007,7 @@
             console.log('✨ System bereit.');
         }
 
-        // ---- WICHTIG: DIE 388 APPS MÜSSEN HIER REGISTRIERT WERDEN ----
-        // Dies ist nur ein Platzhalter. Die tatsächliche index.html enthält alle 388 Apps.
-        // Aus Gründen der Übersichtlichkeit wird hier nur eine minimale Registrierung gezeigt.
-        // Die vollständige Liste ist in der finalen Version enthalten.
-
-        // Minimaler Registrierungscode für Testzwecke
-        const MINIMAL_APPS = [
-            { id: 'haldo-ai', name: 'HalDo AI', emoji: '🧠', desc: 'Zentrale intelligente Assistenz', category: '🌌 AI & Alltag' },
-            { id: 'sonnensystem', name: 'Sonnensystem', emoji: '🪐', desc: 'Unser komplettes Sonnensystem', category: '🌌 Kosmos' },
-            { id: 'cosmic-world', name: 'Cosmic World', emoji: '🌌', desc: 'Kosmische Welt', category: '🌌 Kosmos' },
-            { id: 'sonne', name: 'Sonne', emoji: '☀️', desc: 'Der Zentralstern', category: '🌌 Kosmos' },
-            { id: 'erde', name: 'Erde', emoji: '🌍', desc: 'Unser blauer Planet', category: '🌌 Kosmos' },
-            { id: 'mond', name: 'Mond', emoji: '🌙', desc: 'Der treue Begleiter', category: '🌌 Kosmos' },
-            { id: 'settings', name: 'Einstellungen', emoji: '⚙️', desc: 'Zentrale Einstellungen', category: '⚙️ System' },
-            { id: 'files', name: 'Dateien', emoji: '📁', desc: 'Dateiverwaltung', category: '⚙️ System' },
-            { id: 'calendar', name: 'Kalender', emoji: '📅', desc: 'Kalender', category: '📝 Notizen' },
-            { id: 'music', name: 'Music', emoji: '🎵', desc: 'Musik', category: '🎵 Medien' },
-            { id: 'video', name: 'Video', emoji: '🎬', desc: 'Video', category: '🎵 Medien' },
-            { id: 'gallery', name: 'Galerie', emoji: '🖼️', desc: 'Galerie', category: '🎵 Medien' },
-            { id: 'health', name: 'Gesundheit', emoji: '💚', desc: 'Gesundheitsverwaltung', category: '💚 Gesundheit' },
-            { id: 'tasks', name: 'Aufgaben', emoji: '✅', desc: 'Aufgaben', category: '📝 Notizen' },
-            { id: 'notes', name: 'Notizen', emoji: '📝', desc: 'Notizen', category: '📝 Notizen' },
-            { id: 'browser', name: 'Browser', emoji: '🌐', desc: 'Web-Browser', category: '🛒 Online' },
-            { id: 'weather', name: 'Wetter', emoji: '🌤️', desc: 'Wetter', category: '🌐 Reisen' },
-            { id: 'calculator', name: 'Rechner', emoji: '🧮', desc: 'Taschenrechner', category: '🧮 Wissenschaft' },
-            { id: 'maps', name: 'Karten', emoji: '🗺️', desc: 'Karten', category: '🌐 Reisen' },
-            { id: 'system', name: 'System Center', emoji: 'ℹ️', desc: 'Systeminformationen', category: '⚙️ System' }
-        ];
-
-        registerApps(MINIMAL_APPS);
-
-        // Die vollständige Liste aller 388 Apps wird in der finalen index.html enthalten sein.
-        // Aus Platzgründen wird hier nur eine minimale Basis gezeigt.
-
-        const APP_IDS = Object.keys(APP_REGISTRY);
-
+        // ---- FINAL INIT ----
         console.log('✅ HalDo AI OS — Komplette App-Welt geladen!');
         console.log(`🏆 ${APP_IDS.length} Apps · v26.0`);
     </script>
