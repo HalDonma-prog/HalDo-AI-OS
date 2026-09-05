@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌌 HalDo AI OS — Komplette App-Welt v26.0</title>
+    <link rel="icon" href="logo.png" type="image/png">
     <style>
         /* ============================================================
            HALDO AI OS — GLOBAL STYLES
@@ -62,7 +63,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 4px 16px;
-            height: 48px;
+            height: 52px;
             background: rgba(10,10,18,0.85);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border-color);
@@ -75,15 +76,25 @@
             gap: 12px;
         }
         .taskbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-weight: 800;
             font-size: 1rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+        .taskbar-logo img {
+            height: 28px;
+            width: auto;
+            border-radius: 6px;
+        }
+        .taskbar-logo .gradient-text {
             background: linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-3));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: 0.5px;
         }
-        .taskbar-logo span { -webkit-text-fill-color: rgba(255,255,255,0.05); }
         .taskbar-center {
             display: flex;
             align-items: center;
@@ -147,7 +158,7 @@
            SIDEBAR
            ============================================================ */
         .sidebar {
-            width: 56px;
+            width: 60px;
             background: rgba(18,18,31,0.6);
             backdrop-filter: blur(10px);
             border-right: 1px solid var(--border-color);
@@ -161,8 +172,8 @@
             z-index: 10;
         }
         .sidebar .app-btn {
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border-radius: 10px;
             border: none;
             background: transparent;
@@ -186,7 +197,7 @@
         }
         .sidebar .app-btn .tooltip {
             position: absolute;
-            left: 52px;
+            left: 54px;
             top: 50%;
             transform: translateY(-50%);
             background: rgba(10,10,18,0.92);
@@ -208,7 +219,7 @@
            ============================================================ */
         .app-container {
             flex: 1;
-            padding: 16px;
+            padding: 16px 20px;
             overflow-y: auto;
             position: relative;
             background: var(--bg-primary);
@@ -340,7 +351,7 @@
         }
         .haldo-modal.active { display: flex; }
         .haldo-modal .modal-content {
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
             max-height: 85vh;
             overflow-y: auto;
@@ -370,14 +381,76 @@
         .haldo-modal .modal-body { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; }
 
         /* ============================================================
+           EINSTELLUNGEN MENÜ
+           ============================================================ */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .settings-item {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+        .settings-item:hover {
+            background: var(--bg-hover);
+        }
+        .settings-item .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .settings-item .value {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.02);
+            padding: 2px 12px;
+            border-radius: 10px;
+        }
+        .settings-item .toggle {
+            width: 40px;
+            height: 22px;
+            border-radius: 11px;
+            background: rgba(255,255,255,0.05);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+        .settings-item .toggle.active {
+            background: var(--accent-5);
+        }
+        .settings-item .toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            transition: var(--transition);
+        }
+        .settings-item .toggle.active::after {
+            left: 20px;
+        }
+
+        /* ============================================================
            RESPONSIVE
            ============================================================ */
         @media (max-width: 768px) {
-            .sidebar { width: 48px; }
-            .sidebar .app-btn { width: 36px; height: 36px; font-size: 1rem; }
+            .sidebar { width: 50px; }
+            .sidebar .app-btn { width: 38px; height: 38px; font-size: 1rem; }
             .taskbar-center { max-width: 200px; }
-            .taskbar-logo { font-size: 0.75rem; }
+            .taskbar-logo { font-size: 0.7rem; }
+            .taskbar-logo img { height: 22px; }
             .app-grid-view { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+            .settings-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 480px) {
             .taskbar-center { display: none; }
@@ -391,10 +464,15 @@
 
     <div class="haldo-desktop">
 
-        <!-- TASKBAR -->
+        <!-- ============================================================
+           TASKBAR
+           ============================================================ -->
         <div class="taskbar">
             <div class="taskbar-left">
-                <span class="taskbar-logo">✦ HalDo<span>AI</span> OS</span>
+                <div class="taskbar-logo">
+                    <img src="logo.png" alt="HalDo AI OS" onerror="this.style.display='none'">
+                    <span class="gradient-text">HalDo AI OS</span>
+                </div>
             </div>
             <div class="taskbar-center" id="taskbarApps"></div>
             <div class="taskbar-right">
@@ -403,7 +481,9 @@
             </div>
         </div>
 
-        <!-- WORKSPACE -->
+        <!-- ============================================================
+           WORKSPACE
+           ============================================================ -->
         <div class="workspace">
             <div class="sidebar" id="sidebar"></div>
             <div class="app-container" id="appContainer">
@@ -411,13 +491,17 @@
             </div>
         </div>
 
-        <!-- SYSTEM STATUS -->
+        <!-- ============================================================
+           SYSTEM STATUS
+           ============================================================ -->
         <div class="system-status">
             <span>🟢 HalDo AI OS v26.0 · System läuft</span>
             <span><span class="highlight" id="statusAppCount">0</span> Apps · <span class="highlight" id="statusMemory">0</span> MB · AI: <span class="highlight" id="statusAI">Aktiv</span></span>
         </div>
 
-        <!-- MODAL -->
+        <!-- ============================================================
+           MODAL
+           ============================================================ -->
         <div class="haldo-modal" id="haldoModal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1142,7 +1226,7 @@
                 </div>
             `;
 
-            // Kosmische Daten für Planeten
+            // Kosmische Daten
             if (appId === 'sonne') {
                 html += `
                     <div style="background:var(--bg-card);border-radius:var(--radius);padding:12px;border:1px solid var(--border-color);">
@@ -1388,34 +1472,56 @@
         }
         window.showAppInfo = showAppInfo;
 
-        // ---- App Settings ----
+        // ---- App Settings (Einstellungen) ----
         function openAppSettings(appId) {
             const app = APP_REGISTRY[appId];
             if (!app) return;
-            openModal(`⚙️ Einstellungen — ${app.name}`, `
-                <div style="display:flex;flex-direction:column;gap:10px;">
-                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
-                        <span style="color:var(--text-secondary);font-size:0.8rem;">Sprache</span>
-                        <span style="color:var(--text-muted);font-size:0.8rem;">Deutsch (DE)</span>
+
+            const settingsHTML = `
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px;">⚙️ Einstellungen für <strong style="color:var(--text-primary);">${app.name}</strong></div>
+                    <div class="settings-grid">
+                        <div class="settings-item">
+                            <span class="label">🌐 Sprache</span>
+                            <span class="value">Deutsch</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="label">🧠 AI-Provider</span>
+                            <span class="value">Lokal</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="label">💾 Speicher</span>
+                            <span class="value">Lokal</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="label">🔒 Datenschutz</span>
+                            <span class="value">Aktiv</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="label">🎤 Voice</span>
+                            <button class="toggle active" onclick="this.classList.toggle('active')"></button>
+                        </div>
+                        <div class="settings-item">
+                            <span class="label">🔔 Benachrichtigungen</span>
+                            <button class="toggle active" onclick="this.classList.toggle('active')"></button>
+                        </div>
+                        <div class="settings-item" style="grid-column:1/-1;">
+                            <span class="label">📊 Daten exportieren</span>
+                            <button onclick="exportAppData('${appId}')" style="padding:4px 16px;border:none;border-radius:6px;background:rgba(79,172,254,0.1);color:var(--accent-4);cursor:pointer;font-family:var(--font);font-size:0.7rem;">📤 Export</button>
+                        </div>
+                        <div class="settings-item" style="grid-column:1/-1;">
+                            <span class="label">📥 Daten importieren</span>
+                            <button onclick="importAppData('${appId}')" style="padding:4px 16px;border:none;border-radius:6px;background:rgba(67,233,123,0.1);color:var(--accent-5);cursor:pointer;font-family:var(--font);font-size:0.7rem;">📥 Import</button>
+                        </div>
                     </div>
-                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
-                        <span style="color:var(--text-secondary);font-size:0.8rem;">AI-Provider</span>
-                        <span style="color:var(--text-muted);font-size:0.8rem;">Lokal · Offline</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
-                        <span style="color:var(--text-secondary);font-size:0.8rem;">Speicher</span>
-                        <span style="color:var(--text-muted);font-size:0.8rem;">Lokal (Cache)</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
-                        <span style="color:var(--text-secondary);font-size:0.8rem;">Datenschutz</span>
-                        <span style="color:var(--text-muted);font-size:0.8rem;">🔒 Aktiv</span>
-                    </div>
-                    <div style="margin-top:8px;display:flex;gap:6px;">
+                    <div style="display:flex;gap:6px;margin-top:4px;">
                         <button onclick="closeModal();openModal('✅ Gespeichert','Die Einstellungen wurden übernommen.')" style="padding:8px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--accent-4),var(--accent-5));color:#0a0a12;font-weight:600;cursor:pointer;font-family:var(--font);">Übernehmen</button>
                         <button onclick="closeModal()" style="padding:8px 20px;border:none;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--text-secondary);cursor:pointer;font-family:var(--font);">Abbrechen</button>
                     </div>
                 </div>
-            `);
+            `;
+
+            openModal(`⚙️ Einstellungen — ${app.name}`, settingsHTML);
         }
         window.openAppSettings = openAppSettings;
 
